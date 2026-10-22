@@ -70,11 +70,15 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #mini canvas{width:150px;height:150px;border-radius:6px}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));
   font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 14px;z-index:4;white-space:nowrap}
-#joyL,#joyR{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;
+#joyL{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;
   border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.14);z-index:6;display:none;touch-action:none;opacity:.5}
-#joyL{left:24px}#joyR{right:24px}
+#joyL{left:24px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#bRun,#bJump{position:fixed;display:none;z-index:6;border-radius:50%;border:2px solid rgba(255,255,255,.65);background:rgba(0,0,0,.28);color:#fff;font-weight:800;font-size:20px;touch-action:none;user-select:none;-webkit-user-select:none;padding:0;opacity:.7}
+#bRun{left:24px;bottom:calc(244px + env(safe-area-inset-bottom,0px));width:64px;height:64px}
+#bJump{right:24px;bottom:calc(130px + env(safe-area-inset-bottom,0px));width:88px;height:88px;font-size:24px}
+#bRun.on{background:rgba(232,116,26,.85);opacity:.95}#bJump:active{background:rgba(232,116,26,.85);opacity:.95}
 .knob{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.75);border:2px solid rgba(0,0,0,.45);box-sizing:border-box}
-.touch #joyL,.touch #joyR{display:block}.touch #hint{display:none}
+.touch #joyL{display:block}.touch #bRun,.touch #bJump{display:block}.touch #hint{display:none}
 .touch #floors{bottom:auto;top:calc(110px + env(safe-area-inset-top,0px))}
 #intro{z-index:12;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(400px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border-radius:18px;background:rgba(18,25,21,.82);color:#eef3ee;border-color:rgba(255,255,255,.12);backdrop-filter:blur(10px);display:none}
 #intro.show{display:block}
@@ -91,7 +95,7 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #intro .go button.pri{background:#ffd24a;color:#241b05;border-color:#ffd24a}
 #intro dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);font-size:12.5px;color:#cfd9d1;align-items:center}
 #intro dt{font:700 11px var(--font-num);letter-spacing:.08em;background:rgba(255,255,255,.12);border-radius:5px;padding:2px 8px;text-align:center}#intro dd{margin:0}
-body.intro #joyL,body.intro #joyR,body.intro #hint{display:none!important}
+body.intro #joyL,body.intro #bRun,body.intro #bJump,body.intro #hint{display:none!important}
 @media (max-width:640px){#intro{left:12px;right:12px;width:auto;padding:18px;max-height:calc(100vh - 90px);overflow:auto}#intro h2{font-size:25px}}
 #info{background:rgba(24,31,38,.66);color:#f1f4f2;border-color:rgba(255,255,255,.12);border-radius:999px;padding:6px 18px 6px 6px;max-width:calc(100vw - 96px)}
 #info .logo{gap:10px}#info .logo .lg{width:44px;height:44px;border:2px solid rgba(255,255,255,.7)}
@@ -105,7 +109,7 @@ body.intro #joyL,body.intro #joyR,body.intro #hint{display:none!important}
 #intro dt{background:rgba(79,177,143,.28);color:#c9f3d6}
 #intro dl{border-top-color:rgba(143,217,168,.28)}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:20;font-size:15px;color:var(--muted)}
-@media (max-width:900px){#modes{max-width:calc(100vw - 32px);top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:16px;right:auto;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 8px}#modes::-webkit-scrollbar{display:none}#modes button{flex:none;white-space:nowrap;padding:6px 10px;font-size:13px}#joyL,#joyR{bottom:calc(88px + env(safe-area-inset-bottom,0px))}#dqd{bottom:calc(210px + env(safe-area-inset-bottom,0px))}
+@media (max-width:900px){#modes{max-width:calc(100vw - 32px);top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:16px;right:auto;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 8px}#modes::-webkit-scrollbar{display:none}#modes button{flex:none;white-space:nowrap;padding:6px 10px;font-size:13px}#joyL{bottom:calc(88px + env(safe-area-inset-bottom,0px))}#bRun{bottom:calc(212px + env(safe-area-inset-bottom,0px))}#bJump{bottom:calc(98px + env(safe-area-inset-bottom,0px))}#dqd{bottom:calc(210px + env(safe-area-inset-bottom,0px))}
   #floors{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 @media (max-width:640px){#mini{display:none}}
 .touch #mini{display:none}
@@ -166,7 +170,7 @@ button[hidden]{display:none!important}
 #place{z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;border-radius:999px;padding:8px 18px;background:rgba(24,31,38,.85);color:#fff}
 #place button{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}#place button.pri{background:#ffd24a;color:#241b05;border-color:#ffd24a;font-weight:700}
 #intro .sv{font-size:12px;color:#9fc9ae;margin:6px 0 0}
-body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
+body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@700&text=%E5%90%8C%E6%A8%82%E5%9C%8B%E6%B0%91%E5%B0%8F%E5%AD%B8&display=block">
@@ -187,6 +191,8 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
   <button id="bOnline" type="button" hidden title="登入 Google 後，和同學一起上線（最多 25 人）">多人：關</button>
   <button id="bEd" type="button" title="切換一般版／萬聖節限定版">版本：一般</button>
   <button id="bHw" type="button" hidden title="校園妖怪地圖">妖怪地圖</button>
+  <button id="bXm" type="button" hidden title="聖誕任務">聖誕任務</button>
+  <button id="bLn" type="button" hidden title="新春任務">新春任務</button>
   <button id="bMenu" type="button">傳送選單</button>
 </div>
 <div class="panel" id="search"><div class="sbox"><button type="button" id="sBtn" aria-label="找教室或地點"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><input id="q" type="search" placeholder="找教室或地點：電腦教室、操場…" autocomplete="off"></div><div id="sres"></div></div>
@@ -221,11 +227,16 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
 <div id="shop" class="panel big" hidden><div class="ph"><b>同樂小舖</b><span class="pc"><i class="coin"></i><b id="shopCoin">0</b></span><button type="button" class="px" id="shopX">關閉</button></div><div class="tabs"><button type="button" id="shopBuy" class="on">購買</button><button type="button" id="shopSell">賣出</button></div><div class="grid" id="shopList"></div></div>
 <div id="bag" class="panel big" hidden><div class="ph"><b>背包</b><span class="pc"><i class="coin"></i><b id="bagCoin">0</b></span><button type="button" class="px" id="bagX">關閉</button></div><div class="grid" id="bagList"></div><p class="sm">家具與植物可「擺放」到星球上；其他物品到小舖賣出換同樂幣。</p></div>
 <div id="hwp" class="panel big" hidden><div class="ph"><b>萬聖節限定 · 校園妖怪地圖</b><button type="button" class="px" id="hwpX">關閉</button></div><div id="hwpList"></div></div>
+<div id="xmp" class="panel big" hidden><div class="ph"><b>聖誕節限定 · 聖誕任務</b><button type="button" class="px" id="xmpX">關閉</button></div><div id="xmpList"></div></div>
+<div id="xmg" class="panel big" hidden><div class="ph"><b>聖誕 · 接禮物</b><button type="button" class="px" id="xmgX">關閉</button></div><div style="text-align:center"><canvas id="xmgC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="xmgS"></p><button type="button" class="go" id="xmgGo">開始</button></div></div>
+<div id="lnp" class="panel big" hidden><div class="ph"><b>農曆年限定 · 新春任務</b><button type="button" class="px" id="lnpX">關閉</button></div><div id="lnpList"></div></div>
+<div id="lng" class="panel big" hidden><div class="ph"><b>新春 · 搶紅包</b><button type="button" class="px" id="lngX">關閉</button></div><div style="text-align:center"><canvas id="lngC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="lngS"></p><button type="button" class="go" id="lngGo">開始</button></div></div>
 <div id="edp" class="panel big" hidden><div class="ph"><b>選擇版本</b><button type="button" class="px" id="edpX">關閉</button></div><div class="grid" id="edpList"></div></div>
 <div id="qst" class="panel big" hidden><div class="ph"><b>委託</b><button type="button" class="px" id="qstX">關閉</button></div><div id="qstList"></div></div>
 <div id="place" class="panel" hidden><b id="placeN"></b><button type="button" id="pOk" class="pri">放下 (E)</button><button type="button" id="pRot">旋轉 (R)</button><button type="button" id="pNo">取消 (X)</button></div>
 <div id="joyL"><div class="knob"></div></div>
-<div id="joyR"><div class="knob"></div></div>
+<button id="bRun" type="button" aria-label="跑步（點一下開關）">跑</button>
+<button id="bJump" type="button" aria-label="跳">跳</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="config.js"></script><script>
@@ -4515,7 +4526,7 @@ function bld(o) {
   else { nR = Math.max(1, Math.round((L - BAY) / 8.4)); rw = (L - BAY) / nR; roomU0 = o.stair === 's' ? BAY : 0; }
   const VF = o.stairNS ? D - WT - 4.4 - 1.8 : 0, fv = x => x + VF;   // 南北向梯：切齊東側外牆（東西寬 4.4 m），fv 把梯間 v 座標整體平移到東側
   const colA = [su + 0.35, su + 2.0], colB = [su + 2.6, su + 4.25];
-  FOOT.push({ id: o.id, x0: o.x0, z0: o.z0, x1: o.x1, z1: o.z1, c: o.mini || '#2f7d63', tf: tf });
+  FOOT.push({ id: o.id, x0: o.x0, z0: o.z0, x1: o.x1, z1: o.z1, c: o.mini || '#2f7d63', tf: tf, fl: F });
   const info = { id: o.id, short: o.short, name: o.name, floors: F, tp: null };
   const W = { wall: true };
   const gaps = o.railGaps || [], doors = o.endDoors || [];
@@ -5610,6 +5621,8 @@ function skyTick(px, py, pz) {
   const day = Math.max(0, Math.min(1, (el + 0.12) / 0.4)), dusk = Math.max(0, 1 - Math.abs(el) / 0.28);
   SKY.cur.copy(SKY.night).lerp(SKY.day, day).lerp(SKY.dusk, dusk * 0.55 * (day > 0.02 ? 1 : 0.4));
   if (window.HW && HW.k > 0.01) SKY.cur.lerp(HW.tint, HW.k * (0.5 + 0.25 * (1 - day)));
+  if (window.XM && XM.k > 0.01) SKY.cur.lerp(XM.tint, XM.k * (0.4 + 0.3 * (1 - day)));
+  if (window.LN && LN.k > 0.01) SKY.cur.lerp(LN.tint, LN.k * (0.25 + 0.4 * (1 - day)));
   scene.background = SKY.cur; if (scene.fog) { scene.fog.color.copy(SKY.cur); }
   sph(px, py, pz, _a);
   const gl = Math.max(0, Math.min(1, (cam.curD - 30) / 70));                                                  // 拉遠成球：太陽固定照一半星球，顯示日夜交界
@@ -5618,7 +5631,7 @@ function skyTick(px, py, pz) {
   if (gl > 0) { _sp2.copy(_a).addScaledVector(_sunD, 160); sun.position.lerp(_sp2, gl); if (el <= -0.06) sun.color.lerp(_col.set(0xfff1d2), gl); sun.intensity += (0.95 - sun.intensity) * gl; }
   SKY.cur.lerp(_space.set(0x050914), gl * 0.9); if (scene.fog) scene.fog.color.copy(SKY.cur);
   sun.target.position.copy(_a); sun.target.updateMatrixWorld();
-  hemi.intensity = (0.24 + 0.5 * day) * (1 - 0.6 * gl); hemi.color.set(0xdfeaff).lerp(_col.set(0xffd9b0), dusk * 0.4); if (window.HW && HW.k > 0.01) hemi.color.lerp(_col.set(0xc9a2ff), 0.45 * HW.k);
+  hemi.intensity = (0.24 + 0.5 * day) * (1 - 0.6 * gl); hemi.color.set(0xdfeaff).lerp(_col.set(0xffd9b0), dusk * 0.4); if (window.HW && HW.k > 0.01) hemi.color.lerp(_col.set(0xc9a2ff), 0.45 * HW.k); if (window.XM && XM.k > 0.01) hemi.color.lerp(_col.set(0xcfe6ff), 0.4 * XM.k); if (window.LN && LN.k > 0.01) hemi.color.lerp(_col.set(0xffc9a0), 0.4 * LN.k);
   STARS.material.opacity = Math.max(Math.max(0, 1 - day * 1.6), gl) * 0.9; STARS.position.copy(camera.position);
   const night = day < 0.05; if (night !== GT.night) { GT.night = night; isNight = night; classLights(night); const b = document.getElementById('bTime'); if (b) b.classList.toggle('on', night); }
   return day;
@@ -5634,13 +5647,15 @@ function planetSwapIn() {
   if (DYN.length > 120) for (let i = DYN.length - 1; i >= 0; i--) if (!DYN[i].parent) DYN.splice(i, 1);
   for (const o of DYN) {
     if (!o.parent) continue;
-    _sv.push(o, o.position.x, o.position.y, o.position.z, o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w);
+    _sv.push(o, o.position.x, o.position.y, o.position.z, o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w, o.rotation.x, o.rotation.y, o.rotation.z);
     const x = o.position.x, y = o.position.y, z = o.position.z;
     frameQuat(x, z, _pq); sph(x, y, z, _pp); o.position.copy(_pp); o.quaternion.premultiply(_pq); o.updateMatrixWorld(true);
   }
 }
 function planetSwapOut() {
-  for (let i = 0; i < _sv.length; i += 8) { const o = _sv[i]; o.position.set(_sv[i + 1], _sv[i + 2], _sv[i + 3]); o.quaternion.set(_sv[i + 4], _sv[i + 5], _sv[i + 6], _sv[i + 7]); o.updateMatrixWorld(true); }
+  for (let i = 0; i < _sv.length; i += 11) { const o = _sv[i]; o.position.set(_sv[i + 1], _sv[i + 2], _sv[i + 3]); o.quaternion.set(_sv[i + 4], _sv[i + 5], _sv[i + 6], _sv[i + 7]);
+    o.rotation.set(_sv[i + 8], _sv[i + 9], _sv[i + 10]);          // 還原「原本的歐拉角」：否則四元數被拆回歐拉角時，偏航超過 ±90° 會變成 (π, y, π)，下一幀只改 rotation.y 就整個人翻面（站著不動來回翻、抖動的原因）
+    o.updateMatrixWorld(true); }
   _sv.length = 0;
 }
 
@@ -5772,14 +5787,27 @@ function stick(el, onMove) {
     const m = Math.hypot(dx, dy), lim = 40; if (m > lim) { dx *= lim / m; dy *= lim / m; }
     knob.style.transform = `translate(${dx}px,${dy}px)`; const dz = 0.2, mm = Math.hypot(dx, dy) / lim, sc = mm < dz ? 0 : (mm - dz) / (1 - dz) / (mm || 1);   // 死區 20%：手指輕放時的微小抖動不算輸入
     onMove(dx / lim * sc, dy / lim * sc); };
-  el.addEventListener('pointerdown', e => { id = e.pointerId; el.setPointerCapture(id); set(e); e.stopPropagation(); });
+  const rel = () => { if (id === null && !knob.style.transform) return; id = null; knob.style.transform = ''; onMove(0, 0); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (id !== null && el.hasPointerCapture && el.hasPointerCapture(id)) return; id = e.pointerId; try { el.setPointerCapture(id); } catch (x) { } set(e); });
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  // 保險：手指放開事件漏掉（搖桿被隱藏、對話框彈出、系統手勢、來電）時，主動歸零
+  ['pointerup', 'pointercancel'].forEach(t => addEventListener(t, e => { if (e.pointerId === id) rel(); }, true));
+  ['touchend', 'touchcancel'].forEach(t => addEventListener(t, e => { if (id !== null && !e.touches.length) rel(); }, true));
+  document.addEventListener('visibilitychange', rel); addEventListener('pagehide', rel);
+  setInterval(() => { if (id === null) return; if (!el.getClientRects().length || (el.hasPointerCapture && !el.hasPointerCapture(id))) rel(); }, 200);
   el.addEventListener('pointermove', e => { if (e.pointerId === id) set(e); });
-  const end = e => { if (e.pointerId === id) { id = null; knob.style.transform = ''; onMove(0, 0); } };
+  const end = e => { if (e.pointerId === id) rel(); };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('lostpointercapture', end);
-  addEventListener('blur', () => { id = null; knob.style.transform = ''; onMove(0, 0); });   // 切走視窗／來電：搖桿歸零，避免卡住不放
+  addEventListener('blur', rel);   // 切走視窗／來電：搖桿歸零，避免卡住不放
 }
 stick($('joyL'), (x, y) => { joy.lx = x; joy.ly = y; });
-stick($('joyR'), (x, y) => { joy.rx = x; joy.ry = y; });
+// 右側不再有搖桿：左上「跑」＝點一下開／關跑步，右下「跳」＝按住跳；轉視角用單指拖曳畫面
+{ const br = $('bRun'), bj = $('bJump');
+  br.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); joy.run = !joy.run; br.classList.toggle('on', joy.run); });
+  let jid = null; bj.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); keys.Space = true; jid = e.pointerId; try { bj.setPointerCapture(e.pointerId); } catch (x) { } });
+  setInterval(() => { if (jid !== null && keys.Space && (!bj.getClientRects().length || (bj.hasPointerCapture && !bj.hasPointerCapture(jid)))) { keys.Space = false; jid = null; } }, 200);
+  const jEnd = () => { keys.Space = false; }; bj.addEventListener('pointerup', jEnd); bj.addEventListener('pointercancel', jEnd); bj.addEventListener('lostpointercapture', jEnd);
+  addEventListener('blur', () => { keys.Space = false; }); }
 
 // 小地圖（校園範圍；校外時標記停在邊緣）
 const mc = $('miniC'), mg = mc.getContext('2d'), MX0 = -95, MZ0 = -142, MS = 300 / 165;
@@ -5863,7 +5891,7 @@ function frame(now) {
     cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + joy.ry * 1.2 * dt));
   }
   const f = AU ? AU.f : f0, s = AU ? AU.s : s0;
-  const sp = (AU ? AU.sp : keys.ShiftLeft || keys.ShiftRight ? 6.5 : 3.4) * dt, len = Math.hypot(f, s) || 1;
+  const sp = (AU ? AU.sp : keys.ShiftLeft || keys.ShiftRight || joy.run ? 6.5 : 3.4) * dt, len = Math.hypot(f, s) || 1;
   PL.want = (f || s) ? Math.min(1, len) * sp / Math.max(dt, 1e-3) : 0;
   if (f || s) moveStep(f, s, sp, len);
   const g = groundAt(PL.x, PL.y, PL.z);
@@ -6558,16 +6586,22 @@ const ITEMS = {
   candy: { n: '萬聖節糖果', k: 'hw', sell: 30, c: '#ff8a1f', d: '萬聖節限定，甜甜的南瓜口味。' },
   pumpkin: { n: '小南瓜', k: 'hw', sell: 60, c: '#f28a1c', d: '圓滾滾、笑咪咪的南瓜。' },
   skull: { n: '可愛骷髏糖', k: 'hw', sell: 100, c: '#f4efe2', d: '白白胖胖的小骷髏，一點都不可怕。' },
+  gift: { n: '聖誕禮物', k: 'hw', sell: 50, c: '#d8404f', d: '包得漂漂亮亮的小禮物，聖誕節限定。' },
+  cookie: { n: '薑餅人餅乾', k: 'hw', sell: 90, c: '#b9733a', d: '香香脆脆、笑咪咪的薑餅人。' },
+  hongbao: { n: '紅包', k: 'hw', sell: 50, c: '#e8283a', d: '紅通通的新年紅包，裡面裝滿祝福。' },
+  nian: { n: '年糕', k: 'hw', sell: 90, c: '#d9a054', d: '年年高升的甜年糕。' },
+  ingot: { n: '金元寶', k: 'hw', sell: 70, c: '#f2c230', d: '金閃閃的小元寶，招財進寶。' },
+  xcandy: { n: '聖誕拐杖糖', k: 'hw', sell: 30, c: '#e84a5f', d: '紅白相間的拐杖糖。' },
   rose: { n: '玫瑰花叢', k: 'plant', buy: 160, c: '#d8404f', d: '紅色小花。' }
 };
 const KIND_ORDER = ['fruit', 'shell', 'bug', 'fish', 'furn', 'plant', 'hw'];
-const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, pos: null, t: 0 };
+const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, pos: null, t: 0 };
 let STARTED = false;
-function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.pos = null; }
-function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
+function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.pos = null; }
+function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
 function saveGame() {
   if (!STARTED) return;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 const have = id => G.inv[id] | 0;
@@ -6582,7 +6616,7 @@ function refreshHud() {
   $('hCoin').textContent = G.coins; ['shopCoin', 'bagCoin'].forEach(i => { const e = $(i); if (e) e.textContent = G.coins; });
   const h = GT.hour, hh = Math.floor(h), mm = Math.floor((h - hh) * 60); $('hClock').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (GT.night ? '　夜晚' : '　白天');
 }
-const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp'];
+const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng'];
 function anyPanel() { return PANELS.some(p => !$(p).hidden); }
 function syncBlock() { GAME.block = anyPanel() || !STARTED; document.body.classList.toggle('gamedlg', anyPanel()); }
 function openPanel(id) { PANELS.forEach(p => { if (p !== id) $(p).hidden = true; }); $(id).hidden = false; syncBlock(); }
@@ -7197,12 +7231,16 @@ function hwBuild() {
 const hwDone = () => HWMON.filter(m => G.hw && G.hw.done[m.id]).length;
 function hwApply(ed, quiet) {
   G.edition = ed; const on = ed === 'halloween'; HW.on = on; if (on) hwBuild();
-  if (HW.root) HW.root.visible = on; $('bEd').textContent = on ? '版本：萬聖節' : '版本：一般'; $('bEd').classList.toggle('on', on); $('bHw').hidden = !on; hwBtn();
-  if (!quiet) { toast(on ? '萬聖節限定版開啟！去找三隻校園妖怪，順便撿南瓜和骷髏糖' : '已切換回一般版', 3600); saveGame(); }
+  if (HW.root) HW.root.visible = on; $('bEd').textContent = '版本：' + ({ halloween: '萬聖節', christmas: '聖誕節', lunar: '農曆年' }[ed] || '一般'); $('bEd').classList.toggle('on', ed !== 'normal'); $('bHw').hidden = !on; hwBtn();
+  if (typeof xmApply === 'function') xmApply(ed, quiet);
+  if (typeof lnApply === 'function') lnApply(ed, quiet);
+  if (!quiet) { if (on) toast('萬聖節限定版開啟！去找三隻校園妖怪，順便撿南瓜和骷髏糖', 3600); else if (ed === 'normal') toast('已切換回一般版', 3600); saveGame(); }
   if (!on) HW.k = Math.min(HW.k, 1);
 }
 function hwBtn() { $('bHw').textContent = '妖怪地圖 ' + hwDone() + '/3'; }
 function hwTick(dt) {
+  if (typeof xmTick === 'function') xmTick(dt);
+  if (typeof lnTick === 'function') lnTick(dt);
   HW.k += ((HW.on ? 1 : 0) - HW.k) * Math.min(1, dt * 1.6); if (!HW.on && HW.k < 0.01) HW.k = 0;
   if (!HW.on || !HW.built) return;
   HW.t += dt; const t = HW.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6;
@@ -7224,11 +7262,15 @@ function hwTick(dt) {
   HW.chk -= dt; if (HW.chk <= 0) { HW.chk = 0.5; const now = nowMs(); [...HW.pumps, ...HW.skulls].forEach(o => { const key = 'h' + o.kind[0] + o.id; if (!o.on && !(G.resp[key] > now)) { o.on = true; o.g.visible = true; } }); }
 }
 function hwInteract(cand, ds) {
+  if (typeof xmInteract === 'function') xmInteract(cand, ds);
+  if (typeof lnInteract === 'function') lnInteract(cand, ds);
   if (!HW.on || !HW.built) return;
   HW.mons.forEach(m => { const d = ds(m.x, m.z, m.y); if (d < 3.4) cand(d, G.hw.done[m.id] ? '和 ' + m.name + ' 聊聊' : '挑戰 ' + m.name + '（老師變成的妖怪）', () => hwTalk(m)); });
   [...HW.pumps, ...HW.skulls].forEach(o => { if (!o.on) return; const d = ds(o.x, o.z, 0); if (d < 2.2) cand(d, o.kind === 'pumpkin' ? '撿起小南瓜' : '撿起可愛骷髏糖', () => { addItem(o.kind); toast('撿到 ' + ITEMS[o.kind].n + '！'); o.on = false; o.g.visible = false; G.resp['h' + o.kind[0] + o.id] = nowMs() + (o.kind === 'pumpkin' ? 4 : 7) * 60000; saveGame(); }); });
 }
 function hwMini(g, mp) {
+  if (typeof xmMini === 'function') xmMini(g, mp);
+  if (typeof lnMini === 'function') lnMini(g, mp);
   if (!HW.on) return;
   HW.mons.forEach(m => { const p = mp(m.x, m.z); g.fillStyle = G.hw.done[m.id] ? '#46b86a' : '#a05cff'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 5, 0, 7); g.fill(); g.stroke(); });
   g.fillStyle = '#f28a1c'; HW.pumps.forEach(o => { if (!o.on) return; const p = mp(o.x, o.z); g.beginPath(); g.arc(p[0], p[1], 2.4, 0, 7); g.fill(); });
@@ -7262,7 +7304,7 @@ function hwPanel() {
 }
 function edPanel() {
   openPanel('edp'); const L = $('edpList'); L.innerHTML = '';
-  [['normal', '一般版', '平常的同樂小行星：採集、釣魚、擺設、居民委託。'], ['halloween', '萬聖節限定版', '紫色夜空、南瓜、可愛骷髏頭、小蝙蝠，還有三隻老師變成的校園妖怪。'], ['teacher', '教師節限定版', '破關解密，認識老師有多熟悉（規劃中，敬請期待）。']].forEach(([id, n, d]) => {
+  [['normal', '一般版', '平常的同樂小行星：採集、釣魚、擺設、居民委託。'], ['halloween', '萬聖節限定版', '紫色夜空、南瓜、可愛骷髏頭、小蝙蝠，還有三隻老師變成的校園妖怪。'], ['christmas', '聖誕節限定版', '飄雪的藍色夜空、聖誕樹與彩燈、禮物和薑餅人，還有雪人、聖誕老公公、小麋鹿三關問答，以及「接禮物」小遊戲。'], ['lunar', '農曆年限定版', '紅燈籠與春聯、煙火、紅包與年糕收集，還有年獸、財神爺、小福娃三關問答，以及「搶紅包」小遊戲。'], ['teacher', '教師節限定版', '破關解密，認識老師有多熟悉（規劃中，敬請期待）。']].forEach(([id, n, d]) => {
     const c = document.createElement('div'); c.className = 'it'; c.innerHTML = '<div class="nm">' + n + (G.edition === id ? '　（目前）' : '') + '</div><div class="ds">' + d + '</div>';
     c.appendChild(mkBtn(id === 'teacher' ? '規劃中' : '切換', () => { closePanels(); hwApply(id); }, true, id === 'teacher' || G.edition === id)); L.appendChild(c);
   });
@@ -7531,4 +7573,453 @@ function mpChatTick(dt) {
   addEventListener('keydown', e => { if (e.code === 'Escape' && CHAT.open) { chToggle(CHAT.open); const i = $('chIn'); if (i) i.blur(); } });
 }
 window.__chat = { CHAT, chFilter, mpChatIn, chSend };
+/* ===== 聖誕節限定版：聖誕樹與彩燈、飄雪、禮物與薑餅人、雪人／聖誕老公公／小麋鹿三關問答、接禮物小遊戲 ===== */
+window.XM = { on: false, k: 0, tint: new T.Color(0x4a78b8), root: null, built: false, mons: [], gifts: [], cookies: [], trees: [], snow: null, t: 0, chk: 0, bl: 0 };
+const XMM = {
+  green: new T.MeshLambertMaterial({ color: 0x2f8a4a }), trunk: new T.MeshLambertMaterial({ color: 0x7a4a2a }), red: new T.MeshLambertMaterial({ color: 0xd8303c }),
+  white: new T.MeshLambertMaterial({ color: 0xffffff }), gold: new T.MeshLambertMaterial({ color: 0xf2c230 }), star: new T.MeshBasicMaterial({ color: 0xffe066 }),
+  carrot: new T.MeshLambertMaterial({ color: 0xf28a1c }), dark: new T.MeshBasicMaterial({ color: 0x20243a }), brown: new T.MeshLambertMaterial({ color: 0x9a6a3c }),
+  skin: new T.MeshLambertMaterial({ color: 0xf6d2b0 }), gb: new T.MeshLambertMaterial({ color: 0xb9733a }), nose: new T.MeshBasicMaterial({ color: 0xff3b3b }),
+  belt: new T.MeshLambertMaterial({ color: 0x2a2630 }), snowcap: new T.MeshLambertMaterial({ color: 0xf6f9fd }), icing: new T.MeshBasicMaterial({ color: 0xfff6e6 }),
+  gift: [0xd8404f, 0x3a8fe0, 0x3fb86a, 0xb06ad8].map(c => new T.MeshLambertMaterial({ color: c })),
+  lt: [[0xff4d4d, 0x5a1c1c], [0xffd23a, 0x5a4a14], [0x4dd2ff, 0x163a4a], [0x7dff6b, 0x1c4a18]].map(a => new T.MeshBasicMaterial({ color: a[0] }))
+};
+const XG = {};
+function xmGeos() {
+  if (XG.tree) return;
+  const cone = (r, h, y) => [new T.ConeGeometry(r, h, 10), hwM4(0, y, 0, 1)];
+  XG.trunk = hwMerge([[new T.CylinderGeometry(0.13, 0.17, 0.55, 8), hwM4(0, 0.27, 0, 1)]]);
+  XG.tree = hwMerge([cone(1.0, 1.25, 1.05), cone(0.78, 1.1, 1.75), cone(0.55, 1.0, 2.4)]);
+  XG.star = hwMerge([[new T.IcosahedronGeometry(0.18, 0), hwM4(0, 3.0, 0, 1, 1.2, 1)]]);
+  const L = [[], [], [], []]; [[0.62, 0.62, 7], [0.5, 1.28, 6], [0.36, 1.95, 5]].forEach(([r, y, n], ti) => { for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + ti * 0.7; L[(i + ti) % 4].push([new T.SphereGeometry(0.075, 6, 4), hwM4(Math.cos(a) * r, y + 0.02, Math.sin(a) * r, 1)]); } });
+  XG.lights = L.map(a => hwMerge(a));
+  XG.gbody = new T.BoxGeometry(0.5, 0.4, 0.5); XG.gbody.translate(0, 0.2, 0);
+  XG.gribbon = hwMerge([[new T.BoxGeometry(0.54, 0.43, 0.1), hwM4(0, 0.2, 0, 1)], [new T.BoxGeometry(0.1, 0.43, 0.54), hwM4(0, 0.2, 0, 1)], [new T.SphereGeometry(0.1, 8, 6), hwM4(0, 0.46, 0, 1, 0.7, 1)]]);
+  XG.snowman = hwMerge([[new T.SphereGeometry(0.5, 16, 12), hwM4(0, 0.5, 0, 1)], [new T.SphereGeometry(0.38, 16, 12), hwM4(0, 1.1, 0, 1)], [new T.SphereGeometry(0.28, 14, 10), hwM4(0, 1.58, 0, 1)]]);
+  XG.sm = hwMerge([[new T.ConeGeometry(0.06, 0.34, 6), hwM4(0, 1.56, 0.32, 1, 1, 1, 0, Math.PI / 2)]]);
+  XG.smDark = hwMerge([[new T.SphereGeometry(0.035, 6, 4), hwM4(-0.1, 1.64, 0.25, 1)], [new T.SphereGeometry(0.035, 6, 4), hwM4(0.1, 1.64, 0.25, 1)], [new T.SphereGeometry(0.04, 6, 4), hwM4(0, 1.15, 0.37, 1)], [new T.SphereGeometry(0.04, 6, 4), hwM4(0, 0.95, 0.43, 1)], [new T.CylinderGeometry(0.2, 0.2, 0.3, 10), hwM4(0, 1.95, 0, 1)], [new T.CylinderGeometry(0.32, 0.32, 0.04, 12), hwM4(0, 1.8, 0, 1)]]);
+  XG.smRed = hwMerge([[new T.TorusGeometry(0.27, 0.07, 6, 14), hwM4(0, 1.36, 0, 1, 1, 1, 0, Math.PI / 2)], [new T.BoxGeometry(0.1, 0.3, 0.07), hwM4(0.15, 1.2, 0.27, 1, 1, 1, 0, 0, 0.2)]]);
+  XG.cookie = hwMerge([[new T.SphereGeometry(0.22, 12, 8), hwM4(0, 0.42, 0, 1, 1.25, 0.4)], [new T.SphereGeometry(0.17, 12, 8), hwM4(0, 0.78, 0, 1, 1, 0.45)], [new T.SphereGeometry(0.075, 8, 6), hwM4(-0.28, 0.5, 0, 1, 1.5, 0.5, 0, 0, 0.9)], [new T.SphereGeometry(0.075, 8, 6), hwM4(0.28, 0.5, 0, 1, 1.5, 0.5, 0, 0, -0.9)], [new T.SphereGeometry(0.08, 8, 6), hwM4(-0.1, 0.12, 0, 1, 1.6, 0.5)], [new T.SphereGeometry(0.08, 8, 6), hwM4(0.1, 0.12, 0, 1, 1.6, 0.5)]]);
+  XG.cookieDot = hwMerge([[new T.SphereGeometry(0.03, 6, 4), hwM4(-0.06, 0.82, 0.08, 1)], [new T.SphereGeometry(0.03, 6, 4), hwM4(0.06, 0.82, 0.08, 1)], [new T.SphereGeometry(0.035, 6, 4), hwM4(0, 0.5, 0.09, 1)], [new T.SphereGeometry(0.035, 6, 4), hwM4(0, 0.38, 0.09, 1)], [new T.SphereGeometry(0.035, 6, 4), hwM4(0, 0.26, 0.09, 1)]]);
+}
+function xmTree(sc) {
+  const g = new T.Group(); hwMesh(XG.trunk, XMM.trunk, g); hwMesh(XG.tree, XMM.green, g); hwMesh(XG.star, XMM.star, g); XG.lights.forEach((l, i) => hwMesh(l, XMM.lt[i], g)); g.scale.setScalar(sc); g.userData.sc = sc; return g;
+}
+function xmGift() { const g = new T.Group(); hwMesh(XG.gbody, XMM.gift[(rr() * 4) | 0], g); hwMesh(XG.gribbon, XMM.gold, g); return g; }
+function xmCookie() { const g = new T.Group(); hwMesh(XG.cookie, XMM.gb, g); hwMesh(XG.cookieDot, XMM.icing, g); return g; }
+function xmSnowman(sc) { const g = new T.Group(); hwMesh(XG.snowman, XMM.white, g); hwMesh(XG.sm, XMM.carrot, g); hwMesh(XG.smDark, XMM.dark, g); hwMesh(XG.smRed, XMM.red, g); g.userData.sc = sc; g.scale.setScalar(sc); return g; }
+// ---- 三位會說話的角色 ----
+function xmChar(kind) {
+  const g = new T.Group(), body = new T.Group(); g.add(body); g.userData.body = body;
+  if (kind === 'snow') { const s = xmSnowman(1.15); body.add(s); s.scale.setScalar(1); }
+  else if (kind === 'santa') {
+    hwMesh(hwMerge([[new T.SphereGeometry(0.56, 16, 12), hwM4(0, 0.62, 0, 1, 1.15, 1)], [new T.SphereGeometry(0.1, 8, 6), hwM4(-0.2, 0.08, 0.1, 1, 0.8, 1.3)], [new T.SphereGeometry(0.1, 8, 6), hwM4(0.2, 0.08, 0.1, 1, 0.8, 1.3)]]), XMM.red, body);
+    hwMesh(hwMerge([[new T.TorusGeometry(0.5, 0.06, 6, 18), hwM4(0, 0.6, 0, 1, 1, 1, 0, Math.PI / 2)]]), XMM.belt, body);
+    hwMesh(hwMerge([[new T.SphereGeometry(0.28, 14, 10), hwM4(0, 1.42, 0, 1)]]), XMM.skin, body);
+    hwMesh(hwMerge([[new T.SphereGeometry(0.27, 12, 8), hwM4(0, 1.2, 0.14, 1, 0.85, 0.8)], [new T.SphereGeometry(0.09, 8, 6), hwM4(0, 1.97, -0.12, 1)], [new T.TorusGeometry(0.28, 0.07, 6, 14), hwM4(0, 1.58, 0, 1, 1, 1, 0, Math.PI / 2)]]), XMM.white, body);
+    hwMesh(hwMerge([[new T.ConeGeometry(0.3, 0.55, 10), hwM4(0, 1.88, 0, 1, 1, 1, 0, 0.15)]]), XMM.red, body);
+    hwMesh(hwMerge([[new T.SphereGeometry(0.035, 6, 4), hwM4(-0.1, 1.46, 0.25, 1)], [new T.SphereGeometry(0.035, 6, 4), hwM4(0.1, 1.46, 0.25, 1)]]), XMM.dark, body);
+  } else {
+    hwMesh(hwMerge([[new T.SphereGeometry(0.5, 14, 10), hwM4(0, 0.78, 0, 1.15, 0.85, 1.4)], [new T.SphereGeometry(0.3, 12, 10), hwM4(0, 1.45, 0.6, 1)], [new T.CylinderGeometry(0.07, 0.07, 0.62, 6), hwM4(-0.28, 0.3, 0.45, 1)], [new T.CylinderGeometry(0.07, 0.07, 0.62, 6), hwM4(0.28, 0.3, 0.45, 1)], [new T.CylinderGeometry(0.07, 0.07, 0.62, 6), hwM4(-0.28, 0.3, -0.45, 1)], [new T.CylinderGeometry(0.07, 0.07, 0.62, 6), hwM4(0.28, 0.3, -0.45, 1)],
+      [new T.CylinderGeometry(0.035, 0.035, 0.5, 5), hwM4(-0.17, 1.82, 0.55, 1, 1, 1, 0, 0, 0.5)], [new T.CylinderGeometry(0.035, 0.035, 0.5, 5), hwM4(0.17, 1.82, 0.55, 1, 1, 1, 0, 0, -0.5)], [new T.SphereGeometry(0.08, 6, 4), hwM4(0, 0.86, -0.7, 1)]]), XMM.brown, body);
+    hwMesh(hwMerge([[new T.SphereGeometry(0.1, 8, 6), hwM4(0, 1.4, 0.88, 1)]]), XMM.nose, body);
+    hwMesh(hwMerge([[new T.SphereGeometry(0.04, 6, 4), hwM4(-0.12, 1.55, 0.84, 1)], [new T.SphereGeometry(0.04, 6, 4), hwM4(0.12, 1.55, 0.84, 1)]]), XMM.dark, body);
+    hwMesh(hwMerge([[new T.TorusGeometry(0.3, 0.06, 6, 14), hwM4(0, 1.2, 0.58, 1, 1, 1, 0, Math.PI / 2.2)]]), XMM.red, body);
+  }
+  return g;
+}
+const XMCH = [
+  { id: 'snow', name: '雪人小白', at: ['梅花廣場', 6, 4], col: '#9fd8ff', kind: 'snow',
+    intro: '（雪人小白搓著圓圓的手：）\n\n「好冷好冷！可是我一點也不怕冷。你呢？回答我兩個問題，我就送你聖誕拐杖糖。」',
+    steps: [{ t: '天氣很冷，出門前要怎麼穿才對？', ok: '一層一層穿，外面再加外套、圍巾和帽子', bad: ['只穿短袖，跑一跑就會熱', '全部脫掉，讓身體自己習慣'], no: '雪人皺眉：「這樣會著涼喔！再想一想。」' },
+      { t: '同學感冒、一直咳嗽，你可以怎麼做？', ok: '提醒他戴口罩、多喝水，也記得勤洗手', bad: ['靠過去跟他一起玩，不要洗手', '大聲取笑他的咳嗽聲'], no: '雪人搖搖頭：「這樣不是關心人的方法。」' }],
+    win: '雪人小白開心地轉了一圈：「對！保暖又關心別人，你就是冬天的小英雄！」', again: '雪人小白：「今天也要穿暖暖喔，不要忘了圍巾！」' },
+  { id: 'santa', name: '聖誕老公公', at: ['集合場', -5, 4], col: '#ff9a9a', kind: 'santa',
+    intro: '（聖誕老公公拍拍他的大口袋：）\n\n「呵呵呵，我的禮物袋好像少了幾個，幫我回答問題，我就知道你是不是個好孩子。」',
+    steps: [{ t: '聖誕節是每年的哪一天？', ok: '12 月 25 日', bad: ['1 月 1 日', '10 月 31 日'], no: '「呵呵，那天不是喔，再想想看。」' },
+      { t: '聖誕老公公送禮物，最重要的精神是什麼？', ok: '分享、關心別人，讓大家都開心', bad: ['比誰收到的禮物最多', '只把禮物留給自己'], no: '「呵呵呵……送禮物的重點不在這裡喔。」' }],
+    win: '聖誕老公公笑得鬍子都在抖：「分享就是最好的禮物！這袋給你，要記得也分給別人喔。」', again: '聖誕老公公：「呵呵呵，聖誕快樂！今年你是個好孩子。」' },
+  { id: 'deer', name: '小麋鹿', at: ['涼亭・遊戲區', 2, 3], col: '#e0b078', kind: 'deer',
+    intro: '（小麋鹿的紅鼻子一閃一閃：）\n\n「我是拉雪橇的小麋鹿！先考考你，答對了我就載你去撿禮物。」',
+    steps: [{ t: '聖誕老公公的雪橇是誰拉的？', ok: '麋鹿', bad: ['小綿羊', '大水牛'], no: '小麋鹿鼓著臉：「是我們啦！再猜一次。」' },
+      { t: '聖誕節常見的顏色是哪三種？', ok: '紅色、綠色、白色', bad: ['黑色、灰色、咖啡色', '紫色、粉紅色、橘色'], no: '小麋鹿搖搖耳朵：「想想聖誕樹和聖誕帽的顏色。」' }],
+    win: '小麋鹿的紅鼻子亮得像小燈泡：「答對囉！雪橇準備好了，禮物就交給你囉。」', again: '小麋鹿甩甩尾巴：「聖誕夜我會很忙，現在先讓我休息一下。」' }
+];
+const xmDone = () => XMCH.filter(m => G.xm && G.xm.done[m.id]).length;
+function xmBuild() {
+  if (XM.built) return; XM.built = true; xmGeos(); hwGeos(); const root = XM.root = new T.Group(); scene.add(root);
+  const pl = n => NPLACES.find(p => p.name === n && !p.room), put = (g, s, hy) => { const p = pl(s[0]); if (!p) return null; const q = hwFindOpen(p.x + s[1], p.z + s[2]); g.position.set(q[0], q[2] + (hy || 0), q[1]); root.add(g); dynAdd(g); return q; };
+  // 大聖誕樹 3 棵（第一棵可玩小遊戲）＋小樹 6 棵
+  [['梅花廣場', 0, -2, 1.9], ['校門', -6, -3, 1.4], ['風雨球場', 0, 9, 1.4], ['集合場', 8, 0, 0.8], ['接送區', 6, -1, 0.8], ['後門', -4, 2, 0.8], ['停車場', -6, 2, 0.8], ['操場', 4, 10, 0.8], ['涼亭・遊戲區', -5, -3, 0.8]].forEach((s, i) => {
+    const g = xmTree(s[3]), q = put(g, s); if (q) XM.trees.push({ id: i, x: q[0], z: q[1], y: q[2], g, big: i === 0 });
+  });
+  // 雪人 6 個（裝飾）
+  [['校門', 5, -3], ['集合場', 4, 5], ['涼亭・遊戲區', 6, 0], ['接送區', -3, 3], ['梅花廣場', -7, 3], ['操場', -3, 9]].forEach(s => { const g = xmSnowman(0.85 + rr() * 0.2); g.rotation.y = rr() * 6.28; put(g, s); });
+  // 禮物 14 個、薑餅人 6 個
+  [['校門', -3, -2], ['校門', 3, 1], ['接送區', 3, 1], ['梅花廣場', -5, 1], ['梅花廣場', 7, -1], ['集合場', 2, 1], ['集合場', 8, 3], ['停車場', 2, 3], ['涼亭・遊戲區', 4, 3], ['涼亭・遊戲區', -4, -2], ['穿堂樓層區', 2, 1], ['風雨球場', -8, 5], ['後門', -2, 2], ['操場', -5, 11]].forEach((s, i) => {
+    const g = xmGift(), q = put(g, s); if (q) { g.rotation.y = rr() * 6.28; g.userData.sc = 0.85 + rr() * 0.3; XM.gifts.push({ id: i, x: q[0], z: q[1], g, on: true, kind: 'gift' }); }
+  });
+  [['梅花廣場', 8, 3], ['集合場', -6, 2], ['涼亭・遊戲區', 1, -4], ['後門', 3, 1], ['停車場', -4, -2], ['接送區', -4, 2]].forEach((s, i) => {
+    const g = xmCookie(), q = put(g, s); if (q) { g.rotation.y = rr() * 6.28; g.userData.sc = 1; XM.cookies.push({ id: i, x: q[0], z: q[1], g, on: true, kind: 'cookie' }); }
+  });
+  // 三位角色
+  XMCH.forEach(m => {
+    const g = xmChar(m.kind), p = pl(m.at[0]); if (!p) return; const q = hwFindOpen(p.x + m.at[1], p.z + m.at[2]); g.position.set(q[0], q[2], q[1]); root.add(g); dynAdd(g);
+    const lab = hwSprite(m.name, m.col); lab.position.set(0, 2.5, 0); g.add(lab); m.g = g; m.lab = lab; m.x = q[0]; m.z = q[1]; m.y = q[2]; m.place = p; m.ph = rr() * 6; XM.mons.push(m);
+  });
+  // 飄雪：小白點圍著主角（本地座標，繪製時由 DYN 轉到球面）
+  const N = 700, pos = new Float32Array(N * 3), vel = new Float32Array(N * 2); for (let i = 0; i < N; i++) { pos[i * 3] = (rr() - 0.5) * 50; pos[i * 3 + 1] = rr() * 24; pos[i * 3 + 2] = (rr() - 0.5) * 50; vel[i * 2] = 0.6 + rr() * 1.4; vel[i * 2 + 1] = rr() * 6; }
+  const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+  const pts = new T.Points(geo, new T.PointsMaterial({ color: 0xffffff, size: 0.3, transparent: true, opacity: 0.9, depthWrite: false })); pts.frustumCulled = false;
+  const sg = new T.Group(); sg.add(pts); scene.add(sg); dynAdd(sg); XM.snow = { g: sg, pts, pos, vel };
+  if (window.STY && STY.on && typeof styScan === 'function') styScan();
+}
+
+// ---- 白雪覆蓋：屋頂與地面變白（改已烘焙網格材質的顏色＋星球地形頂點色），並在屋簷掛聖誕燈串 ----
+const XSM = { 0x7fa05e: 0xf3f8fd, 0x8fb26a: 0xeef5fb, 0xc2582f: 0xe9eff6, 0x3b3f43: 0xdfe6ee, 0xbdbdb6: 0xe9eff4, 0xd9d4c6: 0xeef2f6,
+  0x2f8266: 0xf6f9fd, 0x7f9fb8: 0xf6f9fd, 0xa8aba8: 0xf6f9fd, 0x93a4b8: 0xf6f9fd, 0x98a6b4: 0xf6f9fd, 0xa9c4dc: 0xeaf3fb, 0x8fd0f5: 0xf6f9fd,
+  0xb4472f: 0xf6f9fd, 0x3f7fb8: 0xf6f9fd, 0x7e9b86: 0xf6f9fd, 0x9a9187: 0xf6f9fd, 0xc8c2b6: 0xf6f9fd, 0x8aa0ad: 0xf6f9fd };
+const XSN = { sol: [], list: null, last: -1, land: null, col0: null, w: null };
+function xsInit() {
+  if (XSN.list || !PWG.children.length) return; const seen = new Set(), L = XSN.list = [];
+  scene.traverse(o => { if (!o.isMesh) return; let m = o.material; if (!m || Array.isArray(m)) return; if (m.userData && m.userData.src) m = m.userData.src; if (seen.has(m) || !m.color || m.vertexColors || m.isMeshBasicMaterial) return; if (m.map) { if (m.map === solarTex) { seen.add(m); XSN.sol.push(m); L.push({ m, c0: m.color.clone(), c1: new T.Color(0xeef4fa) }); } return; } seen.add(m); const h = m.color.getHex(); if (XSM[h] !== undefined) L.push({ m, c0: m.color.clone(), c1: new T.Color(XSM[h]) }); });
+  const land = TERR.land; if (land && land.geometry.attributes.color) { const g = land.geometry, P = g.attributes.position, n = P.count; XSN.land = g; XSN.col0 = g.attributes.color.array.slice(); XSN.w = new Float32Array(n); for (let i = 0; i < n; i++) { const th = Math.acos(Math.max(-1, Math.min(1, P.getY(i) / (Math.hypot(P.getX(i), P.getY(i), P.getZ(i)) || 1)))); XSN.w[i] = th < 2.1 ? 1 : th < 2.3 ? 1 - (th - 2.1) / 0.2 : 0; } }
+  XSN.last = -1;
+}
+function xsApply(k) {
+  if (!XSN.list) xsInit(); if (!XSN.list) return; if (Math.abs(k - XSN.last) < 0.004 && !(k === 0 && XSN.last !== 0)) return; XSN.last = k;
+  XSN.list.forEach(o => o.m.color.copy(o.c0).lerp(o.c1, k)); { const on = k > 0.5; XSN.sol.forEach(m => { const mp = on ? null : solarTex; if (m.map !== mp) { m.map = mp; m.needsUpdate = true; } }); }
+  if (XSN.land) { const a = XSN.land.attributes.color, c0 = XSN.col0, w = XSN.w, A = a.array; for (let i = 0; i < w.length; i++) { const t = w[i] * k; A[i * 3] = c0[i * 3] + (0.95 - c0[i * 3]) * t; A[i * 3 + 1] = c0[i * 3 + 1] + (0.97 - c0[i * 3 + 1]) * t; A[i * 3 + 2] = c0[i * 3 + 2] + (1 - c0[i * 3 + 2]) * t; } a.needsUpdate = true; }
+}
+function xmLights() {
+  if (XM.lg) return; const lg = XM.lg = new T.Group(); scene.add(lg); const sp = new T.SphereGeometry(0.17, 6, 4), G = [[], [], [], []]; let n = 0;
+  const strings = (f, y) => {
+    const tf = f.tf, W = (x, z) => toWorld(tf, x, z), e = 0.25, C = [W(f.x0 - e, f.z0 - e), W(f.x1 + e, f.z0 - e), W(f.x1 + e, f.z1 + e), W(f.x0 - e, f.z1 + e)];
+    for (let i = 0; i < 4; i++) { const a = C[i], b = C[(i + 1) % 4], len = Math.hypot(b[0] - a[0], b[1] - a[1]), N = Math.max(2, Math.round(len / 1.3));
+      for (let j = 0; j < N; j++) { const u = j / N, sag = 0.28 * Math.sin(Math.PI * ((u * len) % 4.5) / 4.5); G[(n++) % 4].push([sp, hwM4(a[0] + (b[0] - a[0]) * u, y - sag, a[1] + (b[1] - a[1]) * u, 1)]); } }
+  };
+  FOOT.forEach(f => { if (!f.id || f.track || f.gym || f.x0 === undefined) return; const fl = f.fl || 3; strings(f, fl * H + 0.45); strings(f, H - 0.1); });
+  { const S = [], bx = new T.BoxGeometry(1, 1, 1); FOOT.forEach(f => { if (!f.id || f.track || f.gym || f.x0 === undefined) return; const fl = f.fl || 3, tf = f.tf, c = toWorld(tf, (f.x0 + f.x1) / 2, (f.z0 + f.z1) / 2), rot = tf ? Math.atan2(tf.s, tf.c) : 0; S.push([bx, hwM4(c[0], fl * H + 0.07, c[1], Math.abs(f.x1 - f.x0) - 0.5, 0.14, Math.abs(f.z1 - f.z0) - 0.5, rot)]); });
+    if (S.length) { const geo = planetBakeGeo(hwMerge(S), null, 5), m = new T.Mesh(geo, XMM.snowcap); m.frustumCulled = false; m.userData.noOutline = true; m.matrixAutoUpdate = false; lg.add(m); } }
+  G.forEach((a, i) => { if (!a.length) return; const geo = planetBakeGeo(hwMerge(a), null, 5), m = new T.Mesh(geo, XMM.lt[i]); m.frustumCulled = false; m.userData.noOutline = true; m.matrixAutoUpdate = false; lg.add(m); });
+}
+function xmApply(ed, quiet) {
+  const on = ed === 'christmas'; XM.on = on; if (on) { xmBuild(); xmLights(); } if (XM.root) XM.root.visible = on; if (XM.lg) XM.lg.visible = on; if (XM.snow) XM.snow.g.visible = on;
+  const b = $('bXm'); if (b) { b.hidden = !on; xmBtn(); }
+  if (on && !quiet) { toast('聖誕節限定版開啟！去找雪人、聖誕老公公和小麋鹿，順便撿禮物和薑餅人', 4200); saveGame(); }
+  if (!on) XM.k = Math.min(XM.k, 1);
+}
+function xmBtn() { const b = $('bXm'); if (b) b.textContent = '聖誕任務 ' + xmDone() + '/3'; }
+function xmTick(dt) {
+  XM.k += ((XM.on ? 1 : 0) - XM.k) * Math.min(1, dt * 1.6); if (!XM.on && XM.k < 0.01) XM.k = 0; if (XM.k > 0 || XSN.last > 0) xsApply(XM.k);
+  if (!XM.on || !XM.built) return;
+  XM.t += dt; const t = XM.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6;
+  XM.bl -= dt; if (XM.bl <= 0) { XM.bl = 0.45; const ph = Math.floor(t / 0.45); XMM.lt.forEach((m, i) => { m.color.setHex(((ph + i) % 2) ? [0xff4d4d, 0xffd23a, 0x4dd2ff, 0x7dff6b][i] : [0x7a2a2a, 0x7a6a1e, 0x1e5a70, 0x2c6a26][i]); }); }
+  XM.mons.forEach(m => {
+    const done = G.xm.done[m.id], s = (done ? 0.88 : 1) * cs * 0.95, d = Math.hypot(m.x - PL.x, m.z - PL.z), bd = m.g.userData.body;
+    m.g.scale.setScalar(s); bd.position.y = Math.abs(Math.sin(t * 2 + m.ph)) * 0.1; bd.rotation.z = Math.sin(t * 1.5 + m.ph) * 0.05;
+    if (d < 14) m.g.rotation.y += angd(Math.atan2(PL.x - m.x, PL.z - m.z), m.g.rotation.y) * Math.min(1, dt * 3);
+    m.lab.visible = d > 3.5 && d < 30 && cs < 4;
+  });
+  XM.trees.forEach(o => o.g.scale.setScalar(o.g.userData.sc * pk));
+  [...XM.gifts, ...XM.cookies].forEach(o => { if (o.on) { o.g.scale.setScalar(o.g.userData.sc * pk); o.g.rotation.y += dt * 0.6; } });
+  const S = XM.snow; if (S) {
+    const p = S.pos, v = S.vel, n = p.length / 3; for (let i = 0; i < n; i++) { let y = p[i * 3 + 1] - v[i * 2] * dt, x = p[i * 3] + Math.sin(t * 0.8 + v[i * 2 + 1]) * 0.25 * dt, z = p[i * 3 + 2] + Math.cos(t * 0.6 + v[i * 2 + 1]) * 0.2 * dt; if (y < 0) { y += 24; } p[i * 3] = x; p[i * 3 + 1] = y; p[i * 3 + 2] = z; }
+    S.pts.geometry.attributes.position.needsUpdate = true; S.g.position.set(PL.x, PL.y, PL.z); S.g.scale.setScalar(Math.min(cs, 3)); S.pts.material.opacity = 0.9 * Math.min(1, XM.k); S.pts.material.size = 0.3 * Math.min(cs, 3);
+  }
+  XM.chk -= dt; if (XM.chk <= 0) { XM.chk = 0.5; const now = nowMs(); [...XM.gifts, ...XM.cookies].forEach(o => { const key = 'x' + o.kind[0] + o.id; if (!o.on && !(G.resp[key] > now)) { o.on = true; o.g.visible = true; } }); }
+}
+function xmInteract(cand, ds) {
+  if (!XM.on || !XM.built) return;
+  XM.mons.forEach(m => { const d = ds(m.x, m.z, m.y); if (d < 3.4) cand(d, G.xm.done[m.id] ? '和 ' + m.name + ' 聊聊' : '和 ' + m.name + ' 說話（聖誕挑戰）', () => xmTalk(m)); });
+  XM.trees.forEach(o => { if (!o.big) return; const d = ds(o.x, o.z, o.y); if (d < 4.2) cand(d, '玩「接禮物」小遊戲', xmGameOpen); });
+  [...XM.gifts, ...XM.cookies].forEach(o => { if (!o.on) return; const d = ds(o.x, o.z, 0); if (d < 2.2) cand(d, o.kind === 'gift' ? '撿起聖誕禮物' : '撿起薑餅人餅乾', () => { addItem(o.kind); toast('撿到 ' + ITEMS[o.kind].n + '！'); o.on = false; o.g.visible = false; G.resp['x' + o.kind[0] + o.id] = nowMs() + (o.kind === 'gift' ? 4 : 7) * 60000; saveGame(); }); });
+}
+function xmMini(g, mp) {
+  if (!XM.on) return;
+  XM.mons.forEach(m => { const p = mp(m.x, m.z); g.fillStyle = G.xm.done[m.id] ? '#46b86a' : '#e0405a'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 5, 0, 7); g.fill(); g.stroke(); });
+  g.fillStyle = '#3fb86a'; XM.gifts.forEach(o => { if (!o.on) return; const p = mp(o.x, o.z); g.beginPath(); g.arc(p[0], p[1], 2.4, 0, 7); g.fill(); });
+  const b = XM.trees[0]; if (b) { const p = mp(b.x, b.z); g.fillStyle = '#ffd23a'; g.beginPath(); g.arc(p[0], p[1], 3.2, 0, 7); g.fill(); }
+}
+// ---- 問答 ----
+function xmTalk(m) {
+  if (G.xm.done[m.id]) { openDlg(m.name, m.again, [{ t: '再見', fn: closePanels }]); return; }
+  openDlg(m.name, m.intro, [{ t: '接受挑戰', go: true, fn: () => xmAsk(m, 0) }, { t: '下次再來', fn: closePanels }]);
+}
+function xmAsk(m, i) {
+  const st = m.steps[i], opts = [[st.ok, true], [st.bad[0], false], [st.bad[1], false]].sort(() => Math.random() - 0.5);
+  openDlg(m.name, st.t, opts.map(o => ({ t: o[0], fn: () => o[1] ? (i + 1 < m.steps.length ? xmOk(m, i) : xmWin(m)) : xmNo(m, i) })).concat([{ t: '先離開', fn: closePanels }]));
+}
+function xmOk(m, i) { openDlg(m.name, '答對了！', [{ t: '下一題', go: true, fn: () => xmAsk(m, i + 1) }]); }
+function xmNo(m, i) { openDlg(m.name, m.steps[i].no, [{ t: '再試一次', go: true, fn: () => xmAsk(m, i) }, { t: '先離開', fn: closePanels }]); }
+function xmWin(m) {
+  G.xm.done[m.id] = 1; addItem('xcandy', 5); addCoins(80); xmBtn(); const all = xmDone() === 3; let txt = m.win + '\n\n獲得：聖誕拐杖糖 ×5、同樂幣 80';
+  if (all) { addItem('cookie', 1); addItem('gift', 3); addCoins(200); txt += '\n\n三位聖誕朋友都開心了！額外獲得「聖誕守護小隊」獎勵：薑餅人餅乾 ×1、聖誕禮物 ×3、同樂幣 200'; }
+  saveGame(); openDlg(m.name, txt, [{ t: '太好了！', go: true, fn: closePanels }]);
+}
+function xmPanel() {
+  openPanel('xmp'); const L = $('xmpList'); L.innerHTML = '';
+  const s = document.createElement('p'); s.className = 'sm'; s.textContent = '聖誕節到了！找到三位聖誕朋友，答對問題就能拿到禮物。　禮物 ×' + have('gift') + '　薑餅人 ×' + have('cookie') + '　拐杖糖 ×' + have('xcandy') + '　（梅花廣場的大聖誕樹可以玩「接禮物」，最高 ' + (G.xm.best | 0) + ' 分）'; L.appendChild(s);
+  const gr = document.createElement('div'); gr.className = 'grid'; L.appendChild(gr);
+  XMCH.forEach(m => {
+    const c = document.createElement('div'); c.className = 'it'; const d = G.xm.done[m.id];
+    c.innerHTML = '<div class="sw" style="background:' + m.col + '"></div><div class="nm">' + m.name + (d ? '　✔ 已完成' : '') + '</div><div class="ds">' + (m.place ? (m.place.sub.indexOf(m.place.name) === 0 ? m.place.sub : m.place.name + '（' + m.place.sub + '）') : m.at[0]) + '</div>';
+    if (m.place) c.appendChild(mkBtn('前往', () => { closePanels(); navStart(m.place); }, true)); gr.appendChild(c);
+  });
+}
+// ---- 接禮物小遊戲：20 秒，左右移動籃子接住掉下來的禮物（+1）、金星星（+3），閃避煤炭（−2）----
+const XMG = { run: false, t: 0, score: 0, bx: 160, items: [], sp: 0, raf: 0, last: 0, keys: {} };
+function xmGameOpen() { openPanel('xmg'); xmGameReset(); }
+function xmGameReset() { XMG.run = false; XMG.score = 0; XMG.items = []; XMG.t = 20; $('xmgS').textContent = '左右移動（滑鼠、手指拖曳，或 ← →／A D）籃子，接住禮物！禮物 +1、金星星 +3、煤炭 −2。'; $('xmgGo').textContent = '開始（20 秒）'; $('xmgGo').hidden = false; xmGameDraw(); }
+function xmGameDraw() {
+  const c = $('xmgC'), g = c.getContext('2d'), W = c.width, H = c.height; const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#16305a'); bg.addColorStop(1, '#3a6aa8'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#fff'; for (let i = 0; i < 30; i++) g.fillRect((i * 97 + XMG.t * 20) % W, (i * 53 + XMG.t * 40) % H, 2, 2);
+  g.fillStyle = '#eaf4ff'; g.fillRect(0, H - 22, W, 22);
+  XMG.items.forEach(o => { g.font = '28px sans-serif'; g.textAlign = 'center'; g.fillStyle = o.k === 'gift' ? ['#d8404f', '#3a8fe0', '#3fb86a', '#b06ad8'][o.c] : o.k === 'star' ? '#ffd23a' : '#3a3a44'; if (o.k === 'gift') { g.fillRect(o.x - 13, o.y - 13, 26, 26); g.fillStyle = '#f2c230'; g.fillRect(o.x - 3, o.y - 13, 6, 26); g.fillRect(o.x - 13, o.y - 3, 26, 6); } else if (o.k === 'star') { g.beginPath(); for (let i = 0; i < 10; i++) { const r = i % 2 ? 6 : 14, a = i * Math.PI / 5 - Math.PI / 2; g.lineTo(o.x + Math.cos(a) * r, o.y + Math.sin(a) * r); } g.closePath(); g.fill(); } else { g.beginPath(); g.arc(o.x, o.y, 12, 0, 7); g.fill(); } });
+  g.fillStyle = '#b9733a'; g.fillRect(XMG.bx - 32, H - 52, 64, 30); g.fillStyle = '#8a5428'; g.fillRect(XMG.bx - 32, H - 52, 64, 6); g.fillStyle = '#fff'; g.font = '700 20px sans-serif'; g.textAlign = 'left'; g.fillText('分數 ' + XMG.score, 10, 26); g.textAlign = 'right'; g.fillText(Math.max(0, Math.ceil(XMG.t)) + ' 秒', W - 10, 26);
+}
+function xmGameStep(now) {
+  if (!XMG.run) return; if ($('xmg').hidden) { XMG.run = false; return; }
+  const dt = Math.min(0.05, (now - XMG.last) / 1000); XMG.last = now; XMG.t -= dt; const W = 320, H = 400;
+  const dir = (XMG.keys.ArrowRight || XMG.keys.KeyD ? 1 : 0) - (XMG.keys.ArrowLeft || XMG.keys.KeyA ? 1 : 0); XMG.bx = Math.max(32, Math.min(W - 32, XMG.bx + dir * 260 * dt));
+  XMG.sp -= dt; if (XMG.sp <= 0) { XMG.sp = 0.38 + Math.random() * 0.25; const r = Math.random(); XMG.items.push({ x: 20 + Math.random() * (W - 40), y: -14, v: 120 + Math.random() * 80 + (20 - XMG.t) * 4, k: r < 0.12 ? 'star' : r < 0.32 ? 'coal' : 'gift', c: (Math.random() * 4) | 0 }); }
+  XMG.items.forEach(o => { o.y += o.v * dt; if (o.y > H - 58 && o.y < H - 20 && Math.abs(o.x - XMG.bx) < 38 && !o.hit) { o.hit = 1; XMG.score = Math.max(0, XMG.score + (o.k === 'gift' ? 1 : o.k === 'star' ? 3 : -2)); } });
+  XMG.items = XMG.items.filter(o => !o.hit && o.y < H + 20); xmGameDraw();
+  if (XMG.t <= 0) { XMG.run = false; xmGameEnd(); return; } XMG.raf = requestAnimationFrame(xmGameStep);
+}
+function xmGameEnd() {
+  const sc = XMG.score, now = nowMs(); G.xm.best = Math.max(G.xm.best | 0, sc); let msg = '時間到！你接到 ' + sc + ' 分。';
+  if (sc >= 5) { if (!(G.resp.xmg > now)) { const c = Math.min(120, sc * 6); addCoins(c); G.resp.xmg = now + 3 * 60000; msg += ' 獲得同樂幣 ' + c + '！'; if (sc >= 18) { addItem('xcandy', 1); msg += '（高分獎勵：聖誕拐杖糖 ×1）'; } } else msg += '（同樂幣每 3 分鐘可以領一次，這次先練習。）'; } else msg += ' 再試一次吧！';
+  $('xmgS').textContent = msg + '　最高 ' + G.xm.best + ' 分'; $('xmgGo').textContent = '再玩一次'; $('xmgGo').hidden = false; saveGame(); xmGameDraw();
+}
+function xmGameStart() { XMG.run = true; XMG.t = 20; XMG.score = 0; XMG.items = []; XMG.sp = 0.3; XMG.bx = 160; $('xmgGo').hidden = true; $('xmgS').textContent = '接住禮物！'; XMG.last = performance.now(); cancelAnimationFrame(XMG.raf); XMG.raf = requestAnimationFrame(xmGameStep); }
+$('xmgGo').onclick = xmGameStart; $('xmgX').onclick = () => { XMG.run = false; closePanels(); };
+{ const c = $('xmgC'), mv = e => { const r = c.getBoundingClientRect(); XMG.bx = Math.max(32, Math.min(320 - 32, (e.clientX - r.left) / r.width * 320)); }; c.addEventListener('pointermove', mv); c.addEventListener('pointerdown', e => { mv(e); try { c.setPointerCapture(e.pointerId); } catch (x) { } }); }
+addEventListener('keydown', e => { if (!$('xmg').hidden) { XMG.keys[e.code] = true; if (e.code.startsWith('Arrow')) e.preventDefault(); } }); addEventListener('keyup', e => { XMG.keys[e.code] = false; });
+$('bXm').onclick = () => { if (STARTED) { if (!$('xmp').hidden) closePanels(); else xmPanel(); } };
+$('xmpX').onclick = closePanels;
+// ---- 依日期建議切換版本（每個節日每年只問一次；仍是手動決定）----
+function edSeasonNow() { const d = window.__edDate ? new Date(window.__edDate) : new Date(), m = d.getMonth() + 1, day = d.getDate(); if ((m === 10 && day >= 15) || (m === 11 && day <= 1)) return 'halloween'; if (m === 12 && day <= 26) return 'christmas'; if (typeof lnSeason === 'function' && lnSeason()) return 'lunar'; return null; }
+function edHint() {
+  const s = edSeasonNow(); if (!s || G.edition !== 'normal' || anyPanel()) return; const key = 'tongle_edhint_' + s + '_' + (new Date().getFullYear()); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch (e) { return; }
+  const nm = { christmas: '聖誕節', lunar: '農曆年' }[s] || '萬聖節';
+  openDlg('版本建議', ({ christmas: '聖誕節快到了！', lunar: '新年快到了！' }[s] || '萬聖節快到了！') + '要換成「' + nm + '限定版」嗎？\n（之後隨時可以在上方「版本」選單切換。）', [{ t: '換成' + nm + '版', go: true, fn: () => { closePanels(); hwApply(s); } }, { t: '先不要', fn: closePanels }]);
+}
+{ const iv = setInterval(() => { if (!STARTED) return; clearInterval(iv); setTimeout(edHint, 3500); }, 500); }
+window.__xm = { XM, xmApply, xmBuild, XMCH, XMG, edSeasonNow, edHint, xmGameEnd };
+/* ===== 農曆年限定版：燈籠、春聯、紅包與年糕、年獸／財神爺／小福娃三關問答、搶紅包小遊戲、煙火 ===== */
+window.LN = { on: false, k: 0, tint: new T.Color(0xc4604a), root: null, built: false, mons: [], reds: [], cakes: [], lants: [], coups: [], fw: null, t: 0, chk: 0 };
+const LNM = {
+  red: new T.MeshLambertMaterial({ color: 0xd8222c }), lant: new T.MeshBasicMaterial({ color: 0xf0343a }), gold: new T.MeshLambertMaterial({ color: 0xf2c230 }), goldB: new T.MeshBasicMaterial({ color: 0xffd45a }),
+  pole: new T.MeshLambertMaterial({ color: 0x6a3a22 }), dark: new T.MeshBasicMaterial({ color: 0x20180f }), white: new T.MeshBasicMaterial({ color: 0xffffff }), skin: new T.MeshLambertMaterial({ color: 0xf6d2b0 }),
+  black: new T.MeshLambertMaterial({ color: 0x1c1c24 }), cake: new T.MeshLambertMaterial({ color: 0xb8742e }), cakeTop: new T.MeshLambertMaterial({ color: 0xffe8b8 }), cheek: new T.MeshBasicMaterial({ color: 0xff8a8a }),
+  mane: new T.MeshLambertMaterial({ color: 0xf0b020 }), teeth: new T.MeshBasicMaterial({ color: 0xfffff0 })
+};
+const LG = {};
+function lnGeos() {
+  if (LG.lant) return; hwGeos();
+  LG.lant = hwMerge([[new T.SphereGeometry(0.36, 14, 10), hwM4(0, 0, 0, 1, 0.88, 1)]]);
+  LG.lantGold = hwMerge([[new T.CylinderGeometry(0.2, 0.2, 0.07, 10), hwM4(0, 0.33, 0, 1)], [new T.CylinderGeometry(0.2, 0.2, 0.07, 10), hwM4(0, -0.33, 0, 1)], [new T.CylinderGeometry(0.012, 0.012, 0.5, 4), hwM4(0, -0.6, 0, 1)], [new T.SphereGeometry(0.06, 6, 4), hwM4(0, -0.85, 0, 1, 1.2, 1.6, 1)], [new T.TorusGeometry(0.3, 0.02, 4, 14), hwM4(0, 0, 0, 1, 1, 1, Math.PI / 2)]]);
+  LG.pole = hwMerge([[new T.CylinderGeometry(0.07, 0.1, 3.0, 6), hwM4(0, 1.5, 0, 1)], [new T.CylinderGeometry(0.04, 0.04, 0.9, 5), hwM4(0.45, 2.95, 0, 1, 1, 1, 0, 0, Math.PI / 2)]]);
+  LG.hb = hwMerge([[new T.BoxGeometry(0.34, 0.5, 0.05), hwM4(0, 0.4, 0, 1)]]);
+  LG.hbGold = hwMerge([[new T.CylinderGeometry(0.09, 0.09, 0.06, 10), hwM4(0, 0.46, 0, 1, 1, 1, Math.PI / 2)], [new T.BoxGeometry(0.34, 0.03, 0.06), hwM4(0, 0.6, 0, 1)]]);
+  LG.cake = hwMerge([[new T.CylinderGeometry(0.3, 0.3, 0.16, 14), hwM4(0, 0.1, 0, 1)], [new T.CylinderGeometry(0.26, 0.26, 0.14, 14), hwM4(0, 0.25, 0, 1)]]);
+  LG.cakeTop = hwMerge([[new T.CylinderGeometry(0.24, 0.24, 0.03, 14), hwM4(0, 0.335, 0, 1)]]);
+  LG.cakeRed = hwMerge([[new T.BoxGeometry(0.2, 0.01, 0.2), hwM4(0, 0.355, 0, 1, 1, 1, 0, 0.78)]]);
+}
+function lnTex(chars, vertical, w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.fillStyle = '#c8161e'; g.fillRect(0, 0, w, h); g.strokeStyle = '#f2c230'; g.lineWidth = 5; g.strokeRect(5, 5, w - 10, h - 10);
+  g.fillStyle = '#ffd45a'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (vertical) { const n = chars.length, step = (h - 24) / n; g.font = '700 ' + Math.min(w * 0.7, step * 0.8) + 'px "Noto Sans TC","Microsoft JhengHei",sans-serif'; for (let i = 0; i < n; i++) g.fillText(chars[i], w / 2, 12 + step * (i + 0.5)); }
+  else { const n = chars.length, step = (w - 24) / n; g.font = '700 ' + Math.min(h * 0.72, step * 0.85) + 'px "Noto Sans TC","Microsoft JhengHei",sans-serif'; for (let i = 0; i < n; i++) g.fillText(chars[i], 12 + step * (i + 0.5), h / 2 + 2); }
+  const t = new T.CanvasTexture(c); t.anisotropy = 4; return t;
+}
+function lnCouplet(up, down, top) {
+  const g = new T.Group(), mk = (w, h, tex, x, y) => { const m = new T.Mesh(new T.BoxGeometry(w, h, 0.05), new T.MeshBasicMaterial({ map: tex })); m.position.set(x, y, 0); g.add(m); };
+  mk(0.62, 2.3, lnTex(up, true, 96, 360), -0.95, 1.55); mk(0.62, 2.3, lnTex(down, true, 96, 360), 0.95, 1.55); mk(2.5, 0.55, lnTex(top, false, 400, 84), 0, 2.95);
+  hwMesh(hwMerge([[new T.CylinderGeometry(0.06, 0.06, 2.5, 6), hwM4(-1.5, 1.25, 0, 1)], [new T.CylinderGeometry(0.06, 0.06, 2.5, 6), hwM4(1.5, 1.25, 0, 1)]]), LNM.pole, g); return g;
+}
+function lnLantern(sc) { const g = new T.Group(), p = new T.Group(); hwMesh(LG.pole, LNM.pole, g); p.position.set(0.9, 2.9, 0); hwMesh(LG.lant, LNM.lant, p); hwMesh(LG.lantGold, LNM.gold, p); p.position.y = 2.55; g.add(p); g.userData.sw = p; g.userData.sc = sc; g.scale.setScalar(sc); return g; }
+function lnRed() { const g = new T.Group(); hwMesh(LG.hb, LNM.red, g); hwMesh(LG.hbGold, LNM.goldB, g); return g; }
+function lnCake() { const g = new T.Group(); hwMesh(LG.cake, LNM.cake, g); hwMesh(LG.cakeTop, LNM.cakeTop, g); hwMesh(LG.cakeRed, LNM.red, g); return g; }
+function lnChar(kind) {
+  const g = new T.Group(), b = new T.Group(); g.add(b); g.userData.body = b; const M = (parts, m) => hwMesh(hwMerge(parts), m, b), S = (r, x, y, z, a, c, d) => [new T.SphereGeometry(r, 12, 9), hwM4(x, y, z, a || 1, c || 1, d || 1)];
+  if (kind === 'nian') {
+    M([S(0.62, 0, 0.7, 0, 1.15, 0.9, 1.25), S(0.12, -0.3, 0.1, 0.3, 1, 0.8, 1.3), S(0.12, 0.3, 0.1, 0.3, 1, 0.8, 1.3), S(0.12, -0.28, 0.1, -0.35, 1, 0.8, 1.3), S(0.12, 0.28, 0.1, -0.35, 1, 0.8, 1.3), S(0.5, 0, 1.5, 0.45, 1.1, 1, 1)], LNM.red);
+    const mane = []; for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; mane.push([new T.ConeGeometry(0.12, 0.5, 5), hwM4(Math.cos(a) * 0.62, 1.5 + Math.sin(a) * 0.62, 0.15, 1, 1, 1, 0, 0, a - Math.PI / 2)]); } M(mane, LNM.mane);
+    M([[new T.ConeGeometry(0.07, 0.34, 5), hwM4(-0.22, 2.08, 0.5, 1, 1, 1, 0, 0, 0.35)], [new T.ConeGeometry(0.07, 0.34, 5), hwM4(0.22, 2.08, 0.5, 1, 1, 1, 0, 0, -0.35)]], LNM.goldB);
+    M([S(0.13, -0.2, 1.62, 0.88), S(0.13, 0.2, 1.62, 0.88), S(0.07, 0, 1.32, 0.98, 1.7, 0.5, 0.5)], LNM.white);
+    M([S(0.06, -0.2, 1.62, 0.99), S(0.06, 0.2, 1.62, 0.99), S(0.17, 0, 1.28, 0.9, 1.4, 0.5, 0.6)], LNM.dark);
+    M([S(0.03, -0.1, 1.31, 1.05), S(0.03, 0.1, 1.31, 1.05)], LNM.teeth);
+  } else if (kind === 'god') {
+    M([S(0.58, 0, 0.62, 0, 1, 1.15, 1), S(0.1, -0.2, 0.06, 0.1, 1, 0.8, 1.3), S(0.1, 0.2, 0.06, 0.1, 1, 0.8, 1.3)], LNM.red);
+    M([[new T.TorusGeometry(0.5, 0.06, 6, 18), hwM4(0, 0.55, 0, 1, 1, 1, Math.PI / 2)], [new T.BoxGeometry(0.16, 0.5, 0.05), hwM4(0, 0.6, 0.57, 1)]], LNM.gold);
+    M([S(0.28, 0, 1.42, 0)], LNM.skin);
+    M([[new T.CylinderGeometry(0.22, 0.26, 0.34, 10), hwM4(0, 1.82, 0, 1)], [new T.BoxGeometry(0.5, 0.06, 0.1), hwM4(-0.4, 1.9, 0, 1, 1, 1, 0, 0, 0.1)], [new T.BoxGeometry(0.5, 0.06, 0.1), hwM4(0.4, 1.9, 0, 1, 1, 1, 0, 0, -0.1)]], LNM.black);
+    M([S(0.24, 0, 1.2, 0.13, 0.9, 0.9, 0.55)], LNM.black); M([S(0.035, -0.1, 1.46, 0.25), S(0.035, 0.1, 1.46, 0.25)], LNM.dark); M([S(0.06, -0.15, 1.38, 0.24, 1, 0.7, 0.5), S(0.06, 0.15, 1.38, 0.24, 1, 0.7, 0.5)], LNM.cheek);
+    M([[new T.CylinderGeometry(0.12, 0.2, 0.14, 8), hwM4(0, 0.95, 0.5, 1)]], LNM.goldB);
+  } else {
+    M([S(0.46, 0, 0.5, 0, 1, 1.1, 1), S(0.09, -0.16, 0.05, 0.1, 1, 0.8, 1.3), S(0.09, 0.16, 0.05, 0.1, 1, 0.8, 1.3)], LNM.red);
+    M([S(0.3, 0, 1.22, 0)], LNM.skin); M([S(0.2, -0.26, 1.5, 0), S(0.2, 0.26, 1.5, 0), S(0.29, 0, 1.28, -0.04, 1, 0.9, 0.95)], LNM.black);
+    M([S(0.035, -0.1, 1.25, 0.27), S(0.035, 0.1, 1.25, 0.27)], LNM.dark); M([S(0.06, -0.17, 1.15, 0.25, 1, 0.7, 0.5), S(0.06, 0.17, 1.15, 0.25, 1, 0.7, 0.5)], LNM.cheek);
+    M([[new T.TorusGeometry(0.22, 0.04, 5, 12), hwM4(0, 0.78, 0.4, 1)]], LNM.gold);
+    const l = new T.Group(); hwMesh(LG.lant, LNM.lant, l); hwMesh(LG.lantGold, LNM.gold, l); l.scale.setScalar(0.5); l.position.set(0.6, 0.9, 0.2); b.add(l);
+  }
+  return g;
+}
+const LNCH = [
+  { id: 'nian', name: '年獸小年', at: ['集合場', -5, 4], col: '#ff8f8f', kind: 'nian',
+    intro: '（年獸小年探出頭來，其實有點害羞：）\n\n「傳說我每年除夕都會出來嚇人……可是我也想交朋友啦！回答兩個問題，我就不再嚇你。」',
+    steps: [{ t: '傳說中年獸最怕什麼？', ok: '紅色、鞭炮聲和火光', bad: ['軟綿綿的棉花糖', '安安靜靜的睡覺聲'], no: '年獸抖了抖鬃毛：「才不是呢！再想一想。」' },
+      { t: '除夕夜全家人坐在一起吃的飯叫什麼？', ok: '年夜飯（團圓飯）', bad: ['營養早餐', '下午茶點心'], no: '年獸歪著頭：「那天吃的是更豐盛的一餐喔。」' }],
+    win: '年獸小年開心地甩甩鬃毛：「你好厲害！以後我不嚇人了，只負責陪大家過年！」', again: '年獸小年：「新年快樂！我現在是看家的好獸喔。」' },
+  { id: 'god', name: '財神爺', at: ['梅花廣場', 6, 4], col: '#ffd45a', kind: 'god',
+    intro: '（財神爺笑呵呵地摸著鬍子：）\n\n「新年到，恭喜發財！不過我最看重的是品德。答對兩題，福氣就分你一份。」',
+    steps: [{ t: '長輩給晚輩的紅包，代表什麼意思？', ok: '祝福，希望新的一年平安健康', bad: ['一定要馬上全部花光', '比誰收到的紅包比較厚'], no: '財神爺搖搖頭：「紅包的心意不是這樣喔。」' },
+      { t: '春聯通常是什麼時候貼上的？', ok: '過年前（約除夕前後）', bad: ['端午節的時候', '放暑假的時候'], no: '財神爺笑著說：「想想看，是迎接新年的時候喔。」' }],
+    win: '財神爺哈哈大笑：「懂得感恩分享，福氣才會長長久久！」', again: '財神爺：「恭喜發財，平安快樂！」' },
+  { id: 'kid', name: '小福娃', at: ['涼亭・遊戲區', 2, 3], col: '#ffb3c9', kind: 'kid',
+    intro: '（小福娃提著紅燈籠跑過來：）\n\n「過年好！我有兩個問題要考你，答對我就請你吃年糕！」',
+    steps: [{ t: '農曆新年是農曆的哪一天？', ok: '正月初一', bad: ['五月初五', '八月十五'], no: '小福娃拍拍手：「那是別的節日啦，再猜一次！」' },
+      { t: '元宵節（正月十五）大家習慣吃什麼？', ok: '湯圓', bad: ['粽子', '月餅'], no: '小福娃笑：「圓圓的、甜甜的，團圓的象徵喔。」' }],
+    win: '小福娃開心地轉圈：「答對啦！恭喜發財，紅包拿來～」', again: '小福娃：「新年快樂！我的紅燈籠亮不亮？」' }
+];
+const lnDone = () => LNCH.filter(m => G.ln && G.ln.done[m.id]).length;
+function lnBuild() {
+  if (LN.built) return; LN.built = true; lnGeos(); const root = LN.root = new T.Group(); scene.add(root);
+  const pl = n => NPLACES.find(p => p.name === n && !p.room), put = (g, s, hy) => { const p = pl(s[0]); if (!p) return null; const q = hwFindOpen(p.x + s[1], p.z + s[2]); g.position.set(q[0], q[2] + (hy || 0), q[1]); root.add(g); dynAdd(g); return q; };
+  // 燈籠杆 12 支（梅花廣場的 2 支較大；第一支可玩小遊戲）
+  [['梅花廣場', 0, -2, 1.5], ['校門', -6, -3, 1.2], ['校門', 6, -3, 1.2], ['風雨球場', 0, 9, 1.1], ['集合場', 8, 0, 1], ['集合場', -8, 0, 1], ['接送區', 6, -1, 1], ['後門', -4, 2, 1], ['停車場', -6, 2, 1], ['操場', 4, 10, 1], ['涼亭・遊戲區', -5, -3, 1], ['梅花廣場', -8, 5, 1]].forEach((s, i) => {
+    const g = lnLantern(s[3]); g.rotation.y = rr() * 6.28; const q = put(g, s); if (q) LN.lants.push({ id: i, x: q[0], z: q[1], y: q[2], g, big: i === 0, ph: rr() * 6 });
+  });
+  // 春聯 3 組
+  [['校門', 0, 3, '新春納福迎吉祥', '平安喜樂過好年', '同樂迎春'], ['集合場', 0, -6, '書香滿園春意濃', '笑語盈門福氣來', '萬象更新'], ['梅花廣場', -3, 7, '龍馬精神添喜氣', '花團錦簇慶團圓', '福滿同樂']].forEach(s => { const g = lnCouplet(s[3], s[4], s[5]); g.rotation.y = Math.PI * rr(); const q = put(g, s); if (q) LN.coups.push({ g }); });
+  // 紅包 14、年糕 6
+  [['校門', -3, -2], ['校門', 3, 1], ['接送區', 3, 1], ['梅花廣場', -5, 1], ['梅花廣場', 7, -1], ['集合場', 2, 1], ['集合場', 8, 3], ['停車場', 2, 3], ['涼亭・遊戲區', 4, 3], ['涼亭・遊戲區', -4, -2], ['穿堂樓層區', 2, 1], ['風雨球場', -8, 5], ['後門', -2, 2], ['操場', -5, 11]].forEach((s, i) => {
+    const g = lnRed(), q = put(g, s); if (q) { g.rotation.y = rr() * 6.28; g.userData.sc = 0.9 + rr() * 0.3; LN.reds.push({ id: i, x: q[0], z: q[1], g, on: true, kind: 'hongbao' }); }
+  });
+  [['梅花廣場', 8, 3], ['集合場', -6, 2], ['涼亭・遊戲區', 1, -4], ['後門', 3, 1], ['停車場', -4, -2], ['接送區', -4, 2]].forEach((s, i) => {
+    const g = lnCake(), q = put(g, s); if (q) { g.rotation.y = rr() * 6.28; g.userData.sc = 1; LN.cakes.push({ id: i, x: q[0], z: q[1], g, on: true, kind: 'nian' }); }
+  });
+  // 三位角色
+  LNCH.forEach(m => {
+    const g = lnChar(m.kind), p = pl(m.at[0]); if (!p) return; const q = hwFindOpen(p.x + m.at[1], p.z + m.at[2]); g.position.set(q[0], q[2], q[1]); root.add(g); dynAdd(g);
+    const lab = hwSprite(m.name, m.col); lab.position.set(0, 2.5, 0); g.add(lab); m.g = g; m.lab = lab; m.x = q[0]; m.z = q[1]; m.y = q[2]; m.place = p; m.ph = rr() * 6; LN.mons.push(m);
+  });
+  // 煙火：6 組、每組 44 點，以玩家為中心（加亮混合，顏色漸暗＝淡出）
+  const NB = 6, NP = 44, N = NB * NP, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3)); geo.setAttribute('color', new T.BufferAttribute(col, 3));
+  const pts = new T.Points(geo, new T.PointsMaterial({ size: 0.55, vertexColors: true, transparent: true, blending: T.AdditiveBlending, depthWrite: false })); pts.frustumCulled = false;
+  const fg = new T.Group(); fg.add(pts); scene.add(fg); dynAdd(fg); LN.fw = { g: fg, pts, pos, col, NB, NP, b: [], nx: 0.5 };
+  for (let i = 0; i < NB; i++) LN.fw.b.push({ life: -1, dir: new Float32Array(NP * 3), c: [1, 1, 1], x: 0, y: 0, z: 0 });
+  if (window.STY && STY.on && typeof styScan === 'function') styScan();
+}
+const LNC = [[1, 0.25, 0.25], [1, 0.85, 0.25], [0.4, 0.85, 1], [0.6, 1, 0.5], [1, 0.5, 0.9]];
+function lnBurst(F, b) {
+  const a = rr() * 6.283, r = 9 + rr() * 11; b.x = Math.cos(a) * r; b.z = Math.sin(a) * r; b.y = 11 + rr() * 8; b.life = 2.2; b.c = LNC[(rr() * LNC.length) | 0];
+  for (let i = 0; i < F.NP; i++) { const u = rr() * 2 - 1, th = rr() * 6.283, s = Math.sqrt(1 - u * u), v = 3 + rr() * 3; b.dir[i * 3] = s * Math.cos(th) * v; b.dir[i * 3 + 1] = u * v; b.dir[i * 3 + 2] = s * Math.sin(th) * v; }
+}
+function lnApply(ed, quiet) {
+  const on = ed === 'lunar'; LN.on = on; if (on) lnBuild(); if (LN.root) LN.root.visible = on; if (LN.fw) LN.fw.g.visible = on;
+  const b = $('bLn'); if (b) { b.hidden = !on; lnBtn(); }
+  if (on && !quiet) { toast('農曆年限定版開啟！去找年獸、財神爺和小福娃，順便撿紅包和年糕', 4200); saveGame(); }
+  if (!on) LN.k = Math.min(LN.k, 1);
+}
+function lnBtn() { const b = $('bLn'); if (b) b.textContent = '新春任務 ' + lnDone() + '/3'; }
+function lnTick(dt) {
+  LN.k += ((LN.on ? 1 : 0) - LN.k) * Math.min(1, dt * 1.6); if (!LN.on && LN.k < 0.01) LN.k = 0;
+  if (!LN.on || !LN.built) return;
+  LN.t += dt; const t = LN.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6;
+  LN.lants.forEach(o => { o.g.scale.setScalar(o.g.userData.sc * pk); o.g.userData.sw.rotation.z = Math.sin(t * 1.3 + o.ph) * 0.09; });
+  LN.coups.forEach(o => { o.g.scale.setScalar(pk); const dx = PL.x - o.g.position.x, dz = PL.z - o.g.position.z; if (dx * dx + dz * dz < 900) o.g.rotation.y += angd(Math.atan2(dx, dz), o.g.rotation.y) * Math.min(1, dt * 2); });
+  LN.mons.forEach(m => {
+    const done = G.ln.done[m.id], s = (done ? 0.9 : 1) * cs * 0.95, d = Math.hypot(m.x - PL.x, m.z - PL.z), bd = m.g.userData.body;
+    m.g.scale.setScalar(s); bd.position.y = Math.abs(Math.sin(t * 2 + m.ph)) * 0.1; bd.rotation.z = Math.sin(t * 1.5 + m.ph) * 0.05;
+    if (d < 14) m.g.rotation.y += angd(Math.atan2(PL.x - m.x, PL.z - m.z), m.g.rotation.y) * Math.min(1, dt * 3);
+    m.lab.visible = d > 3.5 && d < 30 && cs < 4;
+  });
+  [...LN.reds, ...LN.cakes].forEach(o => { if (o.on) { o.g.scale.setScalar(o.g.userData.sc * pk); o.g.rotation.y += dt * 0.6; } });
+  const F = LN.fw; if (F) {
+    F.nx -= dt; if (F.nx <= 0) { F.nx = 0.8 + rr() * 1.4; const b = F.b.find(x => x.life <= 0); if (b) lnBurst(F, b); }
+    F.b.forEach((b, bi) => { if (b.life > 0) b.life -= dt; for (let i = 0; i < F.NP; i++) { const k = (bi * F.NP + i) * 3, age = 2.2 - b.life, f = b.life > 0 ? Math.max(0, b.life / 2.2) : 0; F.pos[k] = b.x + b.dir[i * 3] * age * 0.8; F.pos[k + 1] = b.y + b.dir[i * 3 + 1] * age * 0.8 - 2.2 * age * age; F.pos[k + 2] = b.z + b.dir[i * 3 + 2] * age * 0.8; const q = f * f; F.col[k] = b.c[0] * q; F.col[k + 1] = b.c[1] * q; F.col[k + 2] = b.c[2] * q; } });
+    F.pts.geometry.attributes.position.needsUpdate = true; F.pts.geometry.attributes.color.needsUpdate = true; F.g.position.set(PL.x, PL.y, PL.z); F.g.scale.setScalar(Math.min(cs, 3)); F.pts.material.size = 0.55 * Math.min(cs, 3);
+  }
+  LN.chk -= dt; if (LN.chk <= 0) { LN.chk = 0.5; const now = nowMs(); [...LN.reds, ...LN.cakes].forEach(o => { const key = 'l' + o.kind[0] + o.id; if (!o.on && !(G.resp[key] > now)) { o.on = true; o.g.visible = true; } }); }
+}
+function lnInteract(cand, ds) {
+  if (!LN.on || !LN.built) return;
+  LN.mons.forEach(m => { const d = ds(m.x, m.z, m.y); if (d < 3.4) cand(d, G.ln.done[m.id] ? '和 ' + m.name + ' 聊聊' : '和 ' + m.name + ' 說話（新春挑戰）', () => lnTalk(m)); });
+  LN.lants.forEach(o => { if (!o.big) return; const d = ds(o.x, o.z, o.y); if (d < 4.2) cand(d, '玩「搶紅包」小遊戲', lnGameOpen); });
+  [...LN.reds, ...LN.cakes].forEach(o => { if (!o.on) return; const d = ds(o.x, o.z, 0); if (d < 2.2) cand(d, o.kind === 'hongbao' ? '撿起紅包' : '撿起年糕', () => { addItem(o.kind); toast('撿到 ' + ITEMS[o.kind].n + '！'); o.on = false; o.g.visible = false; G.resp['l' + o.kind[0] + o.id] = nowMs() + (o.kind === 'hongbao' ? 4 : 7) * 60000; saveGame(); }); });
+}
+function lnMini(g, mp) {
+  if (!LN.on) return;
+  LN.mons.forEach(m => { const p = mp(m.x, m.z); g.fillStyle = G.ln.done[m.id] ? '#46b86a' : '#e0405a'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 5, 0, 7); g.fill(); g.stroke(); });
+  g.fillStyle = '#e8283a'; LN.reds.forEach(o => { if (!o.on) return; const p = mp(o.x, o.z); g.beginPath(); g.arc(p[0], p[1], 2.4, 0, 7); g.fill(); });
+  const b = LN.lants[0]; if (b) { const p = mp(b.x, b.z); g.fillStyle = '#ffd23a'; g.beginPath(); g.arc(p[0], p[1], 3.2, 0, 7); g.fill(); }
+}
+// ---- 問答 ----
+function lnTalk(m) {
+  if (G.ln.done[m.id]) { openDlg(m.name, m.again, [{ t: '再見', fn: closePanels }]); return; }
+  openDlg(m.name, m.intro, [{ t: '接受挑戰', go: true, fn: () => lnAsk(m, 0) }, { t: '下次再來', fn: closePanels }]);
+}
+function lnAsk(m, i) {
+  const st = m.steps[i], opts = [[st.ok, true], [st.bad[0], false], [st.bad[1], false]].sort(() => Math.random() - 0.5);
+  openDlg(m.name, st.t, opts.map(o => ({ t: o[0], fn: () => o[1] ? (i + 1 < m.steps.length ? lnOk(m, i) : lnWin(m)) : lnNo(m, i) })).concat([{ t: '先離開', fn: closePanels }]));
+}
+function lnOk(m, i) { openDlg(m.name, '答對了！', [{ t: '下一題', go: true, fn: () => lnAsk(m, i + 1) }]); }
+function lnNo(m, i) { openDlg(m.name, m.steps[i].no, [{ t: '再試一次', go: true, fn: () => lnAsk(m, i) }, { t: '先離開', fn: closePanels }]); }
+function lnWin(m) {
+  G.ln.done[m.id] = 1; addItem('ingot', 2); addCoins(80); lnBtn(); const all = lnDone() === 3; let txt = m.win + '\n\n獲得：金元寶 ×2、同樂幣 80';
+  if (all) { addItem('nian', 1); addItem('hongbao', 3); addCoins(200); txt += '\n\n三位新春朋友都開心了！額外獲得「新春福氣」獎勵：年糕 ×1、紅包 ×3、同樂幣 200'; }
+  saveGame(); openDlg(m.name, txt, [{ t: '太好了！', go: true, fn: closePanels }]);
+}
+function lnPanel() {
+  openPanel('lnp'); const L = $('lnpList'); L.innerHTML = '';
+  const s = document.createElement('p'); s.className = 'sm'; s.textContent = '新年到了！找到三位新春朋友，答對問題就能拿到福氣。　紅包 ×' + have('hongbao') + '　年糕 ×' + have('nian') + '　金元寶 ×' + have('ingot') + '　（梅花廣場的大燈籠可以玩「搶紅包」，最高 ' + (G.ln.best | 0) + ' 分）'; L.appendChild(s);
+  const gr = document.createElement('div'); gr.className = 'grid'; L.appendChild(gr);
+  LNCH.forEach(m => {
+    const c = document.createElement('div'); c.className = 'it'; const d = G.ln.done[m.id];
+    c.innerHTML = '<div class="sw" style="background:' + m.col + '"></div><div class="nm">' + m.name + (d ? '　✔ 已完成' : '') + '</div><div class="ds">' + (m.place ? (m.place.sub.indexOf(m.place.name) === 0 ? m.place.sub : m.place.name + '（' + m.place.sub + '）') : m.at[0]) + '</div>';
+    if (m.place) c.appendChild(mkBtn('前往', () => { closePanels(); navStart(m.place); }, true)); gr.appendChild(c);
+  });
+}
+// ---- 搶紅包小遊戲：20 秒，左右移動福袋接紅包（+1）、金元寶（+3），閃避鞭炮（−2）----
+const LNG = { run: false, t: 0, score: 0, bx: 160, items: [], sp: 0, raf: 0, last: 0, keys: {} };
+function lnGameOpen() { openPanel('lng'); lnGameReset(); }
+function lnGameReset() { LNG.run = false; LNG.score = 0; LNG.items = []; LNG.t = 20; $('lngS').textContent = '左右移動（滑鼠、手指拖曳，或 ← →／A D）福袋，接住紅包！紅包 +1、金元寶 +3、鞭炮 −2。'; $('lngGo').textContent = '開始（20 秒）'; $('lngGo').hidden = false; lnGameDraw(); }
+function lnGameDraw() {
+  const c = $('lngC'), g = c.getContext('2d'), W = c.width, H = c.height; const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#5a0f1c'); bg.addColorStop(1, '#a8302c'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#ffd45a'; for (let i = 0; i < 26; i++) g.fillRect((i * 97 + LNG.t * 14) % W, (i * 53 + LNG.t * 30) % H, 2, 2);
+  g.fillStyle = '#7a1a20'; g.fillRect(0, H - 22, W, 22);
+  LNG.items.forEach(o => { if (o.k === 'hb') { g.fillStyle = '#e8283a'; g.fillRect(o.x - 11, o.y - 16, 22, 32); g.fillStyle = '#ffd45a'; g.beginPath(); g.arc(o.x, o.y, 6, 0, 7); g.fill(); g.fillRect(o.x - 11, o.y - 16, 22, 4); } else if (o.k === 'gold') { g.fillStyle = '#ffd45a'; g.beginPath(); g.ellipse(o.x, o.y + 3, 16, 9, 0, 0, 7); g.fill(); g.fillStyle = '#f0a81c'; g.beginPath(); g.ellipse(o.x, o.y - 3, 10, 8, 0, Math.PI, 0); g.fill(); } else { g.fillStyle = '#c4161e'; g.fillRect(o.x - 6, o.y - 14, 12, 28); g.fillStyle = '#ffd45a'; g.fillRect(o.x - 6, o.y - 4, 12, 4); g.strokeStyle = '#ffd45a'; g.lineWidth = 2; g.beginPath(); g.moveTo(o.x, o.y - 14); g.lineTo(o.x + 4, o.y - 20); g.stroke(); } });
+  g.fillStyle = '#f2c230'; g.beginPath(); g.moveTo(LNG.bx - 34, H - 54); g.lineTo(LNG.bx + 34, H - 54); g.lineTo(LNG.bx + 26, H - 22); g.lineTo(LNG.bx - 26, H - 22); g.closePath(); g.fill(); g.fillStyle = '#c4161e'; g.font = '700 18px sans-serif'; g.textAlign = 'center'; g.fillText('福', LNG.bx, H - 30);
+  g.fillStyle = '#fff'; g.font = '700 20px sans-serif'; g.textAlign = 'left'; g.fillText('分數 ' + LNG.score, 10, 26); g.textAlign = 'right'; g.fillText(Math.max(0, Math.ceil(LNG.t)) + ' 秒', W - 10, 26);
+}
+function lnGameStep(now) {
+  if (!LNG.run) return; if ($('lng').hidden) { LNG.run = false; return; }
+  const dt = Math.min(0.05, (now - LNG.last) / 1000); LNG.last = now; LNG.t -= dt; const W = 320, H = 400;
+  const dir = (LNG.keys.ArrowRight || LNG.keys.KeyD ? 1 : 0) - (LNG.keys.ArrowLeft || LNG.keys.KeyA ? 1 : 0); LNG.bx = Math.max(34, Math.min(W - 34, LNG.bx + dir * 260 * dt));
+  LNG.sp -= dt; if (LNG.sp <= 0) { LNG.sp = 0.36 + Math.random() * 0.25; const r = Math.random(); LNG.items.push({ x: 20 + Math.random() * (W - 40), y: -16, v: 120 + Math.random() * 80 + (20 - LNG.t) * 4, k: r < 0.12 ? 'gold' : r < 0.32 ? 'fc' : 'hb' }); }
+  LNG.items.forEach(o => { o.y += o.v * dt; if (o.y > H - 60 && o.y < H - 20 && Math.abs(o.x - LNG.bx) < 38 && !o.hit) { o.hit = 1; LNG.score = Math.max(0, LNG.score + (o.k === 'hb' ? 1 : o.k === 'gold' ? 3 : -2)); } });
+  LNG.items = LNG.items.filter(o => !o.hit && o.y < H + 20); lnGameDraw();
+  if (LNG.t <= 0) { LNG.run = false; lnGameEnd(); return; } LNG.raf = requestAnimationFrame(lnGameStep);
+}
+function lnGameEnd() {
+  const sc = LNG.score, now = nowMs(); G.ln.best = Math.max(G.ln.best | 0, sc); let msg = '時間到！你搶到 ' + sc + ' 分。';
+  if (sc >= 5) { if (!(G.resp.lng > now)) { const c = Math.min(120, sc * 6); addCoins(c); G.resp.lng = now + 3 * 60000; msg += ' 獲得同樂幣 ' + c + '！'; if (sc >= 18) { addItem('ingot', 1); msg += '（高分獎勵：金元寶 ×1）'; } } else msg += '（同樂幣每 3 分鐘可以領一次，這次先練習。）'; } else msg += ' 再試一次吧！';
+  $('lngS').textContent = msg + '　最高 ' + G.ln.best + ' 分'; $('lngGo').textContent = '再玩一次'; $('lngGo').hidden = false; saveGame(); lnGameDraw();
+}
+function lnGameStart() { LNG.run = true; LNG.t = 20; LNG.score = 0; LNG.items = []; LNG.sp = 0.3; LNG.bx = 160; $('lngGo').hidden = true; $('lngS').textContent = '搶紅包！'; LNG.last = performance.now(); cancelAnimationFrame(LNG.raf); LNG.raf = requestAnimationFrame(lnGameStep); }
+$('lngGo').onclick = lnGameStart; $('lngX').onclick = () => { LNG.run = false; closePanels(); };
+{ const c = $('lngC'), mv = e => { const r = c.getBoundingClientRect(); LNG.bx = Math.max(34, Math.min(320 - 34, (e.clientX - r.left) / r.width * 320)); }; c.addEventListener('pointermove', mv); c.addEventListener('pointerdown', e => { mv(e); try { c.setPointerCapture(e.pointerId); } catch (x) { } }); }
+addEventListener('keydown', e => { if (!$('lng').hidden) { LNG.keys[e.code] = true; if (e.code.startsWith('Arrow')) e.preventDefault(); } }); addEventListener('keyup', e => { LNG.keys[e.code] = false; });
+$('bLn').onclick = () => { if (STARTED) { if (!$('lnp').hidden) closePanels(); else lnPanel(); } };
+$('lnpX').onclick = closePanels;
+// ---- 農曆日期：臘月初一到正月十五之間建議切換（用瀏覽器內建農曆；不支援時改用 1/15–2/28）----
+function lnSeason() {
+  const d = window.__edDate ? new Date(window.__edDate) : new Date();
+  try { const p = new Intl.DateTimeFormat('zh-TW-u-ca-chinese', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Taipei' }).formatToParts(d), m = parseInt(p.find(x => x.type === 'month').value, 10), dd = parseInt(p.find(x => x.type === 'day').value, 10); if (m && dd) return m === 12 || (m === 1 && dd <= 15); } catch (e) { }
+  const m = d.getMonth() + 1, day = d.getDate(); return (m === 1 && day >= 15) || m === 2;
+}
+window.__ln = { LN, lnApply, lnBuild, LNCH, LNG, lnSeason, lnGameEnd };
 </script>
