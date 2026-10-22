@@ -4,7 +4,8 @@
 
 - 一般版：採集、釣魚、擺設、居民委託、日夜、寫實／動漫線條畫風、手機觸控
 - 萬聖節限定版：南瓜、可愛骷髏頭、小蝙蝠、三隻老師變成的校園妖怪
-- 多人上線（最多 25 人）：依 Claude Artifact 的 `room` 功能同步；單機開啟時自動停用
+- 單人版／多人版：開場畫面與右上「模式」按鈕可切換；單人版完全不連線、不需登入。
+- 多人上線（最多 25 人）：GitHub Pages 版用 Supabase（Google 登入 + Realtime），設定見 `docs/SUPABASE.md`；Claude Artifact 版用 `room`；都沒設定時自動停用，單機照玩
 
 ## 快速開始
 
@@ -13,7 +14,7 @@ bash build.sh        # 需要 node；產生 index.html
 # 直接用瀏覽器開啟 index.html 即可遊玩（需要網路載入 three.js）
 ```
 
-放到 GitHub Pages：Settings → Pages → 選分支根目錄，`index.html` 與 `.nojekyll` 已就緒。注意：多人上線依賴 Claude Artifact 的 `room`，放在 GitHub Pages 時不會連線，只能單機遊玩（要多人需改接自己的後端，見下方）。
+放到 GitHub Pages：Settings → Pages → 選分支根目錄，`index.html` 與 `.nojekyll` 已就緒。多人上線需要先完成 `docs/SUPABASE.md` 的設定並把金鑰填進 `config.js`；沒設定也能單機遊玩。
 
 ## 資料夾
 
@@ -22,9 +23,9 @@ bash build.sh        # 需要 node；產生 index.html
 - `tests/`：用 Playwright 在無顯示卡環境驗證的腳本（需 `playwright-core`，並把 three r128 的 `three.min.js` 放進 `tests/`；`bash tests/mk.sh` 建立測試頁，`tests/mock.js` 可在本機模擬多人房間）
 - `build.sh`：串接並檢查語法
 
-## 多人上線改接自己的後端
+## 多人上線架構
 
-`src/part12.js` 只依賴三個介面：`presence(patch)` 寫自己的狀態、`peers()` 讀所有人、`onPeers`。要改用 Firebase 等後端，只需替換 `mpInit` 與 `mpSend` 這兩處，遠端角色顯示與補間不必動。
+`src/part12.js` 的遠端角色顯示只依賴兩個介面：`presence(patch)` 寫自己的狀態、`peers()` 讀所有人。目前有兩種傳輸：Claude Artifact 的 `room`，以及 Supabase（`sbRoom`，Broadcast 傳位置、Presence 偵測離線）。要改用別的後端，只要再寫一個提供這兩個函式的物件並指派給 `MP.room`。
 
 ## 發布前請確認
 
