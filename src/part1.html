@@ -133,6 +133,13 @@ body.intro #joyL,body.intro #joyR,body.intro #hint{display:none!important}
 #lbls{position:fixed;inset:0;pointer-events:none;z-index:4;overflow:hidden}#lbls .lb{position:absolute;left:0;top:0;display:none;white-space:nowrap;font-weight:700;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff;will-change:transform}#lbls .pl{font-size:13px;color:#1f3a5c}#lbls .np{font-size:12px;color:#7a2f6b}#lbls .me{font-size:15px;color:#fff;background:#e8741a;border-radius:999px;padding:3px 10px;text-shadow:none;box-shadow:0 2px 6px #0005}
 #hud{top:calc(70px + env(safe-area-inset-top,0px));left:16px;display:flex;gap:14px;padding:6px 14px;font-weight:700;border-radius:999px}
 #hud .hc{display:flex;align-items:center}
+#hOnline,#hChat{cursor:pointer;pointer-events:auto;user-select:none}#hChat{color:var(--accent,#e8741a)}
+.mpp{position:fixed;top:calc(116px + env(safe-area-inset-top,0px));left:16px;z-index:12;width:min(340px,calc(100vw - 32px));max-height:min(52vh,340px);background:rgba(255,255,255,.95);color:#222;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.28);padding:10px;display:flex;flex-direction:column;font-size:14px;overflow:hidden}
+.mpp[hidden]{display:none}.mph{font-weight:800;margin-bottom:6px}.mpe{color:#777;padding:6px 2px}.mpn{font-size:12px;color:#777;margin-top:6px}
+.olp,#olp{overflow:auto}.olr{display:flex;align-items:center;gap:10px;padding:6px 2px;border-top:1px solid #eee}.olr .oln{flex:1;font-weight:700}
+.mpp a{color:#1f6fd1;cursor:pointer;font-size:13px;white-space:nowrap;text-decoration:underline}
+#chLog{overflow:auto;flex:1;min-height:90px;max-height:210px}.chm{padding:3px 2px;line-height:1.5;word-break:break-all}.chm b{color:#285467}.chm.me b{color:#e8741a}.chm a{margin-left:8px;opacity:.7}
+#chF{display:flex;gap:6px;margin-top:6px}#chIn{flex:1;min-width:0;padding:8px;border:1px solid #c9a560;border-radius:8px;font-size:16px}#chF button{padding:8px 12px;border:0;border-radius:8px;background:#e8741a;color:#fff;font-weight:700}
 #prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:7;background:rgba(24,31,38,.82);color:#fff;padding:8px 18px;border-radius:999px;font-size:15px;font-weight:700;border:1px solid rgba(255,255,255,.25);pointer-events:auto;cursor:pointer}
 #prompt kbd{background:#ffd24a;color:#241b05;border-radius:5px;padding:1px 8px;margin-right:8px;font:700 13px var(--font-num)}
 button[hidden]{display:none!important}
@@ -205,7 +212,9 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
 <dl><dt>WASD</dt><dd>移動（Shift 跑步、空白鍵跳躍）</dd><dt>拖曳</dt><dd>轉動視角；滾輪拉近拉遠</dd><dt>E</dt><dd>互動：採集、對話、釣魚、撿起家具</dd><dt>B</dt><dd>背包，可擺放家具與植物</dd></dl>
 <p class="sv" id="iSave"></p>
 </div>
-<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hOnline" hidden>線上 1</span></div>
+<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hOnline" hidden>線上 1</span><span class="hc" id="hChat" hidden>聊天</span></div>
+<div id="olp" class="mpp" hidden></div>
+<div id="chp" class="mpp" hidden><div id="chLog"></div><form id="chF" autocomplete="off"><input id="chIn" type="text" maxlength="60" enterkeyhint="send" placeholder="說句話…（Enter 送出）"><button type="submit">送出</button></form><div class="mpn">請友善交談，不要分享姓名、電話或住址。</div></div>
 <div id="prompt" hidden></div>
 <div id="toast" hidden></div>
 <div id="dlg" class="panel" hidden><div class="dn" id="dlgN"></div><div class="dt" id="dlgT"></div><div class="db" id="dlgB"></div></div>

@@ -62,6 +62,7 @@ function mpMake(peer) {
 }
 function mpDrop(r) { scene.remove(r.ch.node); r.ch.mixer.stopAllAction(); if (r.lab) { r.lab.material.map.dispose(); r.lab.material.dispose(); } MP.rem.delete(r.id); }
 function mpTick(dt) {
+  if (typeof mpChatTick === 'function') mpChatTick(dt);
   if (!MP.room || !MP.on) { MP.n = 1; if (MP.rem.size) [...MP.rem.values()].forEach(mpDrop); const e = $('hOnline'); if (e && !e.hidden) e.hidden = true; return; } if (STARTED) mpSend(dt);
   const peers = MP.room.peers(), seen = new Set(), cs = charScale(); let count = 0;
   for (const p of peers) {
@@ -124,6 +125,7 @@ async function sbJoin() {
   const ch = SB.client.channel('tongle-planet', { config: { private: true, broadcast: { self: false }, presence: { key: SB.key } } });
   ch.on('broadcast', { event: 'p' }, msg => { const p = msg && msg.payload; if (!p || typeof p.id !== 'string' || p.id === SB.key || p.id.length > 64) return;
     SB.remote.set(p.id, { t: Date.now(), p: { x: sbNum(p.x, 400), y: sbNum(p.y, 60), z: sbNum(p.z, 400), f: sbNum(p.f, 20), s: sbNum(p.s, 30), a: p.a === 1 ? 1 : 0, k: p.k === 1 ? 1 : 0, nm: mpClean(p.nm) } }); });
+  ch.on('broadcast', { event: 'c' }, msg => { try { if (window.mpChatIn) mpChatIn(msg && msg.payload); } catch (e) { } });
   ch.on('presence', { event: 'leave' }, e => { (e.leftPresences || []).forEach(() => { }); if (e.key) SB.remote.delete(e.key); });
   ch.on('presence', { event: 'join' }, e => { if (e.key && e.key !== SB.key) sbFlush(); });                 // 有人加入：馬上讓對方看到自己
   ch.on('presence', { event: 'sync' }, () => { try { const st = ch.presenceState(); [...SB.remote.keys()].forEach(k => { if (!(k in st)) SB.remote.delete(k); }); } catch (e) { } });
