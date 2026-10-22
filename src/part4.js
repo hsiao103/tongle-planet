@@ -1,7 +1,9 @@
 /* ===== 玩家、球面相機、控制、主迴圈 ===== */
 const $ = id => document.getElementById(id);
-const touchDev = ('ontouchstart' in window) && window.matchMedia('(pointer:coarse)').matches;
+const touchDev = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) && (window.matchMedia('(pointer:coarse)').matches || !window.matchMedia('(hover:hover)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
 if (touchDev) document.body.classList.add('touch');
+// 保險：第一次真的收到手指觸控（pointerType 為 touch）就切成手機操作；收到滑鼠移動且不是觸控裝置時恢復電腦版
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') document.body.classList.add('touch'); }, true);
 const PL = { x: 0, y: 0.1, z: 6, vy: 0, yaw: 0, pitch: -0.05, r: 0.35 };
 const view = { mode: 'walk', third: true };                 // 舊程式相容用（part5/part7 仍會讀取）
 const iso = { az: 0 }, orbit = { tx: 0, tz: 0 }, DQ = { hide: [] };
@@ -120,14 +122,27 @@ function stick(el, onMove) {
     const m = Math.hypot(dx, dy), lim = 40; if (m > lim) { dx *= lim / m; dy *= lim / m; }
     knob.style.transform = `translate(${dx}px,${dy}px)`; const dz = 0.2, mm = Math.hypot(dx, dy) / lim, sc = mm < dz ? 0 : (mm - dz) / (1 - dz) / (mm || 1);   // 死區 20%：手指輕放時的微小抖動不算輸入
     onMove(dx / lim * sc, dy / lim * sc); };
-  el.addEventListener('pointerdown', e => { id = e.pointerId; el.setPointerCapture(id); set(e); e.stopPropagation(); });
+  const rel = () => { if (id === null && !knob.style.transform) return; id = null; knob.style.transform = ''; onMove(0, 0); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); if (id !== null && el.hasPointerCapture && el.hasPointerCapture(id)) return; id = e.pointerId; try { el.setPointerCapture(id); } catch (x) { } set(e); });
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  // 保險：手指放開事件漏掉（搖桿被隱藏、對話框彈出、系統手勢、來電）時，主動歸零
+  ['pointerup', 'pointercancel'].forEach(t => addEventListener(t, e => { if (e.pointerId === id) rel(); }, true));
+  ['touchend', 'touchcancel'].forEach(t => addEventListener(t, e => { if (id !== null && !e.touches.length) rel(); }, true));
+  document.addEventListener('visibilitychange', rel); addEventListener('pagehide', rel);
+  setInterval(() => { if (id === null) return; if (!el.getClientRects().length || (el.hasPointerCapture && !el.hasPointerCapture(id))) rel(); }, 200);
   el.addEventListener('pointermove', e => { if (e.pointerId === id) set(e); });
-  const end = e => { if (e.pointerId === id) { id = null; knob.style.transform = ''; onMove(0, 0); } };
+  const end = e => { if (e.pointerId === id) rel(); };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('lostpointercapture', end);
-  addEventListener('blur', () => { id = null; knob.style.transform = ''; onMove(0, 0); });   // 切走視窗／來電：搖桿歸零，避免卡住不放
+  addEventListener('blur', rel);   // 切走視窗／來電：搖桿歸零，避免卡住不放
 }
 stick($('joyL'), (x, y) => { joy.lx = x; joy.ly = y; });
-stick($('joyR'), (x, y) => { joy.rx = x; joy.ry = y; });
+// 右側不再有搖桿：左上「跑」＝點一下開／關跑步，右下「跳」＝按住跳；轉視角用單指拖曳畫面
+{ const br = $('bRun'), bj = $('bJump');
+  br.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); joy.run = !joy.run; br.classList.toggle('on', joy.run); });
+  let jid = null; bj.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); keys.Space = true; jid = e.pointerId; try { bj.setPointerCapture(e.pointerId); } catch (x) { } });
+  setInterval(() => { if (jid !== null && keys.Space && (!bj.getClientRects().length || (bj.hasPointerCapture && !bj.hasPointerCapture(jid)))) { keys.Space = false; jid = null; } }, 200);
+  const jEnd = () => { keys.Space = false; }; bj.addEventListener('pointerup', jEnd); bj.addEventListener('pointercancel', jEnd); bj.addEventListener('lostpointercapture', jEnd);
+  addEventListener('blur', () => { keys.Space = false; }); }
 
 // 小地圖（校園範圍；校外時標記停在邊緣）
 const mc = $('miniC'), mg = mc.getContext('2d'), MX0 = -95, MZ0 = -142, MS = 300 / 165;
@@ -211,7 +226,7 @@ function frame(now) {
     cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + joy.ry * 1.2 * dt));
   }
   const f = AU ? AU.f : f0, s = AU ? AU.s : s0;
-  const sp = (AU ? AU.sp : keys.ShiftLeft || keys.ShiftRight ? 6.5 : 3.4) * dt, len = Math.hypot(f, s) || 1;
+  const sp = (AU ? AU.sp : keys.ShiftLeft || keys.ShiftRight || joy.run ? 6.5 : 3.4) * dt, len = Math.hypot(f, s) || 1;
   PL.want = (f || s) ? Math.min(1, len) * sp / Math.max(dt, 1e-3) : 0;
   if (f || s) moveStep(f, s, sp, len);
   const g = groundAt(PL.x, PL.y, PL.z);
