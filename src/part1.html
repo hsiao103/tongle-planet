@@ -82,6 +82,10 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #intro .lg2{width:40px;height:40px;border-radius:50%;background:#fff}
 #intro h2{margin:4px 0 12px;font-size:28px;line-height:1.2;letter-spacing:.03em}
 #intro p{margin:0 0 10px;font-size:14px;line-height:1.65;color:#cfd9d1}
+#intro .md{display:flex;gap:8px;margin:12px 0 4px}
+#intro .md button{flex:1;min-height:40px;border-radius:10px;font-size:14px;font-weight:700;color:#cfd9d1;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+#intro .md button.on{background:#2b7cff;color:#fff;border-color:#2b7cff}
+#intro .mh{margin:0 0 2px;font-size:12.5px;color:#9fb0a4}
 #intro .go{display:flex;gap:10px;margin:14px 0}
 #intro .go button{flex:1;min-height:46px;border-radius:12px;font-size:15px;font-weight:700;color:#eef3ee;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07)}
 #intro .go button.pri{background:#ffd24a;color:#241b05;border-color:#ffd24a}
@@ -173,6 +177,7 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
   <button id="bTime" type="button" title="時間：自動（跟真實時間）／白天／夜晚">時間：自動</button>
   <button id="bStyle" type="button" title="畫風：寫實／動漫線條">畫風：寫實</button>
   <button id="bChar" type="button" title="切換主角">主角：男孩</button>
+  <button id="bOnline" type="button" hidden title="登入 Google 後，和同學一起上線（最多 25 人）">多人：關</button>
   <button id="bEd" type="button" title="切換一般版／萬聖節限定版">版本：一般</button>
   <button id="bHw" type="button" hidden title="校園妖怪地圖">妖怪地圖</button>
   <button id="bMenu" type="button">傳送選單</button>
@@ -194,6 +199,8 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
 <h2><span class="o">同樂</span><span class="g">小行星</span></h2>
 <p>這是一顆只屬於同樂國小的小星球。校園在北半球的正中央，外面是草原、果樹與沙灘。</p>
 <p>採集水果、貝殼，抓蝴蝶、釣魚，賣給小舖換「同樂幣」；幫同學與老師完成委託；買家具與植物，把你的星球佈置成喜歡的樣子。</p>
+<div class="md" id="iMode"><button type="button" data-m="solo" class="on">單人版</button><button type="button" data-m="multi">多人版</button></div>
+<p class="mh" id="iModeHint"></p>
 <div class="go"><button type="button" class="pri" id="iGo">開始冒險</button><button type="button" id="iNew" hidden>重新開始</button></div>
 <dl><dt>WASD</dt><dd>移動（Shift 跑步、空白鍵跳躍）</dd><dt>拖曳</dt><dd>轉動視角；滾輪拉近拉遠</dd><dt>E</dt><dd>互動：採集、對話、釣魚、撿起家具</dd><dt>B</dt><dd>背包，可擺放家具與植物</dd></dl>
 <p class="sv" id="iSave"></p>
