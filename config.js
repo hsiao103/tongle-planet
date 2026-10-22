@@ -3,6 +3,6 @@
 // 請勿貼 service_role／secret 金鑰！
 window.TONGLE_SUPABASE = {
   url: 'https://cirypvdtlzmwpaicsmee.supabase.co',
-  key: '貼上 anon 或 publishable 金鑰',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpcnlwdmR0bHptd3BhaWNzbWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2MDM2NjcsImV4cCI6MjEwODE3OTY2N30.qBM9gCiFI6f20m_lW5xqj4CtTjTBHGlo7e3LQwVB1Q0',
   sendMs: 250   // 位置廣播間隔（毫秒）。人多或遇到流量上限時可調大，例如 400
 };
