@@ -118,11 +118,13 @@ function stick(el, onMove) {
   const knob = el.firstElementChild; let id = null;
   const set = (e) => { const r = el.getBoundingClientRect(); let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
     const m = Math.hypot(dx, dy), lim = 40; if (m > lim) { dx *= lim / m; dy *= lim / m; }
-    knob.style.transform = `translate(${dx}px,${dy}px)`; onMove(dx / lim, dy / lim); };
+    knob.style.transform = `translate(${dx}px,${dy}px)`; const dz = 0.2, mm = Math.hypot(dx, dy) / lim, sc = mm < dz ? 0 : (mm - dz) / (1 - dz) / (mm || 1);   // 死區 20%：手指輕放時的微小抖動不算輸入
+    onMove(dx / lim * sc, dy / lim * sc); };
   el.addEventListener('pointerdown', e => { id = e.pointerId; el.setPointerCapture(id); set(e); e.stopPropagation(); });
   el.addEventListener('pointermove', e => { if (e.pointerId === id) set(e); });
   const end = e => { if (e.pointerId === id) { id = null; knob.style.transform = ''; onMove(0, 0); } };
-  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end); el.addEventListener('lostpointercapture', end);
+  addEventListener('blur', () => { id = null; knob.style.transform = ''; onMove(0, 0); });   // 切走視窗／來電：搖桿歸零，避免卡住不放
 }
 stick($('joyL'), (x, y) => { joy.lx = x; joy.ly = y; });
 stick($('joyR'), (x, y) => { joy.rx = x; joy.ry = y; });
