@@ -152,8 +152,13 @@ function charTick(dt) {
   let sp0 = Math.min(d / dt, 12); if (PL.want > 0.5 && sp0 < PL.want * 0.55) sp0 = 0;                  // 頂著牆／邊界滑動：視為站著，避免抖動
   const tele = d > 2.5, sp = tele ? 0 : sp0; CH.speed += (sp - CH.speed) * Math.min(1, dt * 10);
   if (tele) CH.face = PL.yaw;
-  else if (PL.want > 0.5 ? Math.hypot(PL.ix || 0, PL.iz || 0) > 1e-6 : (d > 0.002 && CH.speed > 0.4)) { const fd = PL.want > 0.5 ? sphFace(PL.x, PL.z, PL.ix, PL.iz, [0, 0]) : sphFace(PL.x, PL.z, dx, dz, [0, 0]); CH.face += angd(Math.atan2(-fd[0], -fd[1]), CH.face) * (1 - Math.exp(-dt * 14)); }
-  else if (view.mode === 'walk' && !view.third) CH.face = PL.yaw;
+  else if (PL.want > 0.5 ? Math.hypot(PL.ix || 0, PL.iz || 0) > 1e-6 : (d > 0.002 && CH.speed > 0.4)) {
+    const fd = PL.want > 0.5 ? sphFace(PL.x, PL.z, PL.ix, PL.iz, [0, 0]) : sphFace(PL.x, PL.z, dx, dz, [0, 0]), ta = Math.atan2(-fd[0], -fd[1]);
+    // 防抖：想去的方向要「穩定」才轉身（原地被擋住、輸入亂跳、和 NPC 重疊時，不會來回翻面）；真的在走（速度夠）就即時轉
+    if (CH.ia === undefined || Math.abs(angd(ta, CH.ia)) > 0.5) { CH.ia = ta; CH.it = 0; } else CH.it += dt;
+    if (CH.speed > 1.2 || CH.it > 0.15) CH.face += angd(ta, CH.face) * (1 - Math.exp(-dt * 14));
+  } else CH.it = 0;
+  if (view.mode === 'walk' && !view.third && !(PL.want > 0.5) && !(d > 0.002 && CH.speed > 0.4)) CH.face = PL.yaw;
   avatar.rotation.y = CH.face;
   const h = CH.hero;
   if (h && avatar.visible) {
@@ -369,7 +374,7 @@ function npcTick(dt) {
       if (n.bubble) scene.remove(n.bubble); n.bubble = n.pname ? bubbleSprite(PERSONA[n.pname].say, n.pname) : bubbleSprite(say[Math.floor(Math.random() * say.length)]);
     }
     if (n.state === 'greet') {
-      n.gt -= dt; { const fv = sphFace(n.x, n.z, dxp, dzp, _fv9); n.yaw += angd(Math.atan2(-fv[0], -fv[1]), n.yaw) * (1 - Math.exp(-dt * 8)); }
+      n.gt -= dt; if (dp > 0.9) { const fv = sphFace(n.x, n.z, dxp, dzp, _fv9); n.yaw += angd(Math.atan2(-fv[0], -fv[1]), n.yaw) * (1 - Math.exp(-dt * 8)); }      // 重疊（<0.9）時不再追著玩家轉：方向會隨微小位移亂跳
       if (n.gt <= 0) { n.state = n.prev; if (n.bubble) n.bubble.visible = false; }
     } else if (n.state === 'walk' && n.path) {
       let tgt = n.path[Math.min(n.k, n.path.length - 1)], dx = tgt[0] - n.x, dz = tgt[2] - n.z, d = Math.hypot(dx, dz);
@@ -379,7 +384,7 @@ function npcTick(dt) {
       n.wait -= dt;
       if (n.role === 'guard' && n.home) {
         const hx = n.home.x - n.x, hz = n.home.z - n.z, dh = Math.hypot(hx, hz);
-        if (dh > 0.12) { n.gwalk = true; const fv = sphFace(n.x, n.z, hx, hz, _fv9); n.yaw += angd(Math.atan2(-fv[0], -fv[1]), n.yaw) * (1 - Math.exp(-dt * 8)); const st = Math.min(dh, 1.1 * dt); n.x += hx / dh * st; n.z += hz / dh * st; }
+        if (dh > (n.gwalk ? 0.04 : 0.12)) { n.gwalk = true; const fv = sphFace(n.x, n.z, hx, hz, _fv9); n.yaw += angd(Math.atan2(-fv[0], -fv[1]), n.yaw) * (1 - Math.exp(-dt * 8)); const st = Math.min(dh, 1.1 * dt); n.x += hx / dh * st; n.z += hz / dh * st; }
         else { n.gwalk = false; n.yaw += angd(n.home.yaw, n.yaw) * (1 - Math.exp(-dt * 3)); }
       }       // 站崗：被推開後面向家的方向走回校門口中間
       else if (n.wait <= 0 && now > n.planAt) npcPlan(n, now);
