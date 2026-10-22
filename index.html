@@ -7401,7 +7401,7 @@ async function sbStart(interactive) {
     await sbLoad(); if (!SB.client) SB.client = supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } });
     const r = await SB.client.auth.getSession();
     if (!r.data || !r.data.session) {
-      if (!interactive) { toast('登入已過期，已切回單人版；要多人請重新選擇多人版', 4500); mpSaveMode('solo'); return; }
+      if (!interactive) { toast('目前沒有登入，已先切回單人版；要玩多人請按右上角「模式：單人」，完成 Google 登入', 5500); mpSaveMode('solo'); return; }
       await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); return;
     }
     await sbJoin(); toast('已連線：和同學一起玩', 2600);
