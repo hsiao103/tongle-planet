@@ -1,3 +1,4 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>同樂小行星</title>
 <style>
 /* Layout: 全螢幕 3D 場景，左上資訊卡、右上模式鍵、左下樓層與路線、右下手機搖桿 */
@@ -5667,8 +5668,10 @@ sunShadowFollow();
 scene.fog = new T.Fog(0xaed6f0, 400, 1400);
 /* ===== 玩家、球面相機、控制、主迴圈 ===== */
 const $ = id => document.getElementById(id);
-const touchDev = ('ontouchstart' in window) && window.matchMedia('(pointer:coarse)').matches;
+const touchDev = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) && (window.matchMedia('(pointer:coarse)').matches || !window.matchMedia('(hover:hover)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent));
 if (touchDev) document.body.classList.add('touch');
+// 保險：第一次真的收到手指觸控（pointerType 為 touch）就切成手機操作；收到滑鼠移動且不是觸控裝置時恢復電腦版
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') document.body.classList.add('touch'); }, true);
 const PL = { x: 0, y: 0.1, z: 6, vy: 0, yaw: 0, pitch: -0.05, r: 0.35 };
 const view = { mode: 'walk', third: true };                 // 舊程式相容用（part5/part7 仍會讀取）
 const iso = { az: 0 }, orbit = { tx: 0, tz: 0 }, DQ = { hide: [] };
@@ -8022,4 +8025,4 @@ function lnSeason() {
   const m = d.getMonth() + 1, day = d.getDate(); return (m === 1 && day >= 15) || m === 2;
 }
 window.__ln = { LN, lnApply, lnBuild, LNCH, LNG, lnSeason, lnGameEnd };
-</script>
+</script></html>
