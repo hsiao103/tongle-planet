@@ -1,0 +1,8 @@
+node_modules/
+all.js
+src/part3.js
+tests/*.png
+tests/*.log
+tests/test.html
+tests/three.min.js
+.DS_Store
