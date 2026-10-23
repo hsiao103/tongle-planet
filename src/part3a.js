@@ -745,8 +745,7 @@ PLANMARK(__gym0, scene.children.length);   // 平面模式：風雨操場一併�
 // 兒童遊戲區（C）與涼亭（B）：對照空照俯視圖——遊戲區為跑道西側、D 棟東側的碎石鋪面（約 33×15 m），涼亭在其東南端靠梅花廣場
 { const sh = new T.Shape(); [[4.5, -101], [4.5, -63], [-11, -63], [-4.5, -101]].forEach((p, i) => i ? sh.lineTo(p[0], -p[1]) : sh.moveTo(p[0], -p[1]));
   const pm = new T.Mesh(new T.ShapeGeometry(sh), mat(0xd9d5ca)); pm.rotation.x = -Math.PI / 2; pm.position.y = 0.05; pm.receiveShadow = true; scene.add(pm); walk.push(pm); }
-[[-4.2, -92, M.red], [-0.6, -88.5, M.blue], [-4.0, -85, M.yellow], [-1.0, -81.5, M.teal]].forEach(p => box(p[0], p[1], p[0] + 1.6, p[1] + 1.6, 0.05, 1.35, p[2], { wall: true }));
-[-96, -94.4, -92.8].forEach(z => box(-1.0, z, 3.0, z + 0.08, 0.05, 1.5, M.steel, { noShadow: true }));   // 單槓
+// [v36] 原本的方塊與單槓已改由 part20.js 的遊戲器材取代
 const __ps = scene.children.length;
 { const cx = -3.4, cz = -59.3, hs = 1.6, cw = 0.5, ch = 3.8;   // 涼亭：四根方柱（下黃上藍）＋淺藍四角錐屋頂
   box(cx - hs - 0.2, cz - hs - 0.2, cx + hs + 0.2, cz + hs + 0.2, 0, 0.1, M.concrete, { walk: true });
