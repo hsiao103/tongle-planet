@@ -133,6 +133,7 @@ function hwTick(dt) {
   if (typeof pxTick === 'function') pxTick(dt);
   if (typeof stfTick === 'function') stfTick(dt);
   if (typeof seaTick === 'function') seaTick(dt);
+  if (typeof pgTick === 'function') pgTick(dt);
   if (typeof xmTick === 'function') xmTick(dt);
   if (typeof lnTick === 'function') lnTick(dt);
   HW.k += ((HW.on ? 1 : 0) - HW.k) * Math.min(1, dt * 1.6); if (!HW.on && HW.k < 0.01) HW.k = 0;
@@ -159,6 +160,7 @@ function hwInteract(cand, ds) {
   if (typeof pxInteract === 'function') pxInteract(cand, ds);
   if (typeof stfInteract === 'function') stfInteract(cand, ds);
   if (typeof seaInteract === 'function') seaInteract(cand, ds);
+  if (typeof pgInteract === 'function') pgInteract(cand, ds);
   if (typeof xmInteract === 'function') xmInteract(cand, ds);
   if (typeof lnInteract === 'function') lnInteract(cand, ds);
   if (!HW.on || !HW.built) return;
