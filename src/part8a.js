@@ -24,16 +24,24 @@ const ITEMS = {
   candy: { n: '萬聖節糖果', k: 'hw', sell: 30, c: '#ff8a1f', d: '萬聖節限定，甜甜的南瓜口味。' },
   pumpkin: { n: '小南瓜', k: 'hw', sell: 60, c: '#f28a1c', d: '圓滾滾、笑咪咪的南瓜。' },
   skull: { n: '可愛骷髏糖', k: 'hw', sell: 100, c: '#f4efe2', d: '白白胖胖的小骷髏，一點都不可怕。' },
+  gift: { n: '聖誕禮物', k: 'hw', sell: 50, c: '#d8404f', d: '包得漂漂亮亮的小禮物，聖誕節限定。' },
+  cookie: { n: '薑餅人餅乾', k: 'hw', sell: 90, c: '#b9733a', d: '香香脆脆、笑咪咪的薑餅人。' },
+  hongbao: { n: '紅包', k: 'hw', sell: 50, c: '#e8283a', d: '紅通通的新年紅包，裡面裝滿祝福。' },
+  nian: { n: '年糕', k: 'hw', sell: 90, c: '#d9a054', d: '年年高升的甜年糕。' },
+  ingot: { n: '金元寶', k: 'hw', sell: 70, c: '#f2c230', d: '金閃閃的小元寶，招財進寶。' },
+  rosef: { n: '玫瑰花', k: 'hw', sell: 25, c: '#d81f3c', d: '玫瑰王子親手照顧的紅玫瑰。' },
+  rosebq: { n: '玫瑰花束', k: 'hw', sell: 150, c: '#e03a5a', d: '五朵玫瑰紮成一束，很適合送人。' },
+  xcandy: { n: '聖誕拐杖糖', k: 'hw', sell: 30, c: '#e84a5f', d: '紅白相間的拐杖糖。' },
   rose: { n: '玫瑰花叢', k: 'plant', buy: 160, c: '#d8404f', d: '紅色小花。' }
 };
 const KIND_ORDER = ['fruit', 'shell', 'bug', 'fish', 'furn', 'plant', 'hw'];
-const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, pos: null, t: 0 };
+const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, pos: null, t: 0 };
 let STARTED = false;
-function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.pos = null; }
-function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
+function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.pos = null; }
+function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
 function saveGame() {
   if (!STARTED) return;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 const have = id => G.inv[id] | 0;
@@ -48,7 +56,7 @@ function refreshHud() {
   $('hCoin').textContent = G.coins; ['shopCoin', 'bagCoin'].forEach(i => { const e = $(i); if (e) e.textContent = G.coins; });
   const h = GT.hour, hh = Math.floor(h), mm = Math.floor((h - hh) * 60); $('hClock').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (GT.night ? '　夜晚' : '　白天');
 }
-const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp'];
+const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng'];
 function anyPanel() { return PANELS.some(p => !$(p).hidden); }
 function syncBlock() { GAME.block = anyPanel() || !STARTED; document.body.classList.toggle('gamedlg', anyPanel()); }
 function openPanel(id) { PANELS.forEach(p => { if (p !== id) $(p).hidden = true; }); $(id).hidden = false; syncBlock(); }

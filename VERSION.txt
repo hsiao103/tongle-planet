@@ -1,0 +1,5 @@
+同樂小行星 v34
+日期：2026-10-23
+重點：龜山島與港口(v32)、六位教職員(v33)、YAYA主任熊裝/彥彥體育老師(v34)
+建置：bash build.sh（讀 src/ 組成 index.html）
+index.html 為可直接開啟/部署的完整單檔；school_artifact.html 為 Artifact 版（無 doctype/viewport）

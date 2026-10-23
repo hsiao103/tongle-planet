@@ -272,6 +272,8 @@ function skyTick(px, py, pz) {
   const day = Math.max(0, Math.min(1, (el + 0.12) / 0.4)), dusk = Math.max(0, 1 - Math.abs(el) / 0.28);
   SKY.cur.copy(SKY.night).lerp(SKY.day, day).lerp(SKY.dusk, dusk * 0.55 * (day > 0.02 ? 1 : 0.4));
   if (window.HW && HW.k > 0.01) SKY.cur.lerp(HW.tint, HW.k * (0.5 + 0.25 * (1 - day)));
+  if (window.XM && XM.k > 0.01) SKY.cur.lerp(XM.tint, XM.k * (0.4 + 0.3 * (1 - day)));
+  if (window.LN && LN.k > 0.01) SKY.cur.lerp(LN.tint, LN.k * (0.25 + 0.4 * (1 - day)));
   scene.background = SKY.cur; if (scene.fog) { scene.fog.color.copy(SKY.cur); }
   sph(px, py, pz, _a);
   const gl = Math.max(0, Math.min(1, (cam.curD - 30) / 70));                                                  // 拉遠成球：太陽固定照一半星球，顯示日夜交界
@@ -280,7 +282,7 @@ function skyTick(px, py, pz) {
   if (gl > 0) { _sp2.copy(_a).addScaledVector(_sunD, 160); sun.position.lerp(_sp2, gl); if (el <= -0.06) sun.color.lerp(_col.set(0xfff1d2), gl); sun.intensity += (0.95 - sun.intensity) * gl; }
   SKY.cur.lerp(_space.set(0x050914), gl * 0.9); if (scene.fog) scene.fog.color.copy(SKY.cur);
   sun.target.position.copy(_a); sun.target.updateMatrixWorld();
-  hemi.intensity = (0.24 + 0.5 * day) * (1 - 0.6 * gl); hemi.color.set(0xdfeaff).lerp(_col.set(0xffd9b0), dusk * 0.4); if (window.HW && HW.k > 0.01) hemi.color.lerp(_col.set(0xc9a2ff), 0.45 * HW.k);
+  hemi.intensity = (0.24 + 0.5 * day) * (1 - 0.6 * gl); hemi.color.set(0xdfeaff).lerp(_col.set(0xffd9b0), dusk * 0.4); if (window.HW && HW.k > 0.01) hemi.color.lerp(_col.set(0xc9a2ff), 0.45 * HW.k); if (window.XM && XM.k > 0.01) hemi.color.lerp(_col.set(0xcfe6ff), 0.4 * XM.k); if (window.LN && LN.k > 0.01) hemi.color.lerp(_col.set(0xffc9a0), 0.4 * LN.k);
   STARS.material.opacity = Math.max(Math.max(0, 1 - day * 1.6), gl) * 0.9; STARS.position.copy(camera.position);
   const night = day < 0.05; if (night !== GT.night) { GT.night = night; isNight = night; classLights(night); const b = document.getElementById('bTime'); if (b) b.classList.toggle('on', night); }
   return day;
@@ -296,13 +298,15 @@ function planetSwapIn() {
   if (DYN.length > 120) for (let i = DYN.length - 1; i >= 0; i--) if (!DYN[i].parent) DYN.splice(i, 1);
   for (const o of DYN) {
     if (!o.parent) continue;
-    _sv.push(o, o.position.x, o.position.y, o.position.z, o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w);
+    _sv.push(o, o.position.x, o.position.y, o.position.z, o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w, o.rotation.x, o.rotation.y, o.rotation.z);
     const x = o.position.x, y = o.position.y, z = o.position.z;
     frameQuat(x, z, _pq); sph(x, y, z, _pp); o.position.copy(_pp); o.quaternion.premultiply(_pq); o.updateMatrixWorld(true);
   }
 }
 function planetSwapOut() {
-  for (let i = 0; i < _sv.length; i += 8) { const o = _sv[i]; o.position.set(_sv[i + 1], _sv[i + 2], _sv[i + 3]); o.quaternion.set(_sv[i + 4], _sv[i + 5], _sv[i + 6], _sv[i + 7]); o.updateMatrixWorld(true); }
+  for (let i = 0; i < _sv.length; i += 11) { const o = _sv[i]; o.position.set(_sv[i + 1], _sv[i + 2], _sv[i + 3]); o.quaternion.set(_sv[i + 4], _sv[i + 5], _sv[i + 6], _sv[i + 7]);
+    o.rotation.set(_sv[i + 8], _sv[i + 9], _sv[i + 10]);          // 還原「原本的歐拉角」：否則四元數被拆回歐拉角時，偏航超過 ±90° 會變成 (π, y, π)，下一幀只改 rotation.y 就整個人翻面（站著不動來回翻、抖動的原因）
+    o.updateMatrixWorld(true); }
   _sv.length = 0;
 }
 

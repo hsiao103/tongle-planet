@@ -26,7 +26,10 @@ function groundAt(x, y, z) {
   return hit.length ? hit[0].point.y : -Infinity;
 }
 function blocked(x, z, y, noEdge) {
-  if (!noEdge && pdist(x, z) > PWALK) return true;                        // 海岸外是海
+  if (pdist(x, z) > PWALK) {                                                // 海岸外是海（碼頭與龜山島除外）
+    if (typeof xtraWalk === 'function' && xtraWalk(x, z)) { if (xtraBlock(x, z, y)) return true; }
+    else if (!noEdge || (typeof xtraNear === 'function' && xtraNear(x, z))) return true;
+  }
   const r = PL.r;
   for (let i = 0; i < WALLS.length; i++) {
     const w = WALLS[i];
@@ -177,6 +180,7 @@ function whereText() {
   if (!id && (() => { const dx = PL.x - GOX, dz = PL.z - GOZ, lx = dx * GTF.c - dz * GTF.s, lz = dx * GTF.s + dz * GTF.c; return lx > GX0 && lx < GX1 && lz > GZ0 && lz < GZ1; })()) s = '風雨球場';
   if (s === '校園戶外' && Math.hypot((PL.x - TX) / TR, (PL.z - TZ) / (TS + TR)) < 1) s = '操場';
   if (s === '校園戶外') { const d = pdist(PL.x, PL.z); if (d > PWALK - 14) s = '海灘'; else if (d > 112) s = '校外草原'; }
+  if (typeof xtraWhere === 'function' && pdist(PL.x, PL.z) > PWALK - 14) { const w = xtraWhere(PL.x, PL.z); if (w) s = w; }
   hereName = s;
   const fl = Math.round(PL.y / H) + 1;
   $('where').textContent = `${s}${id ? ' · ' + fl + ' 樓' : ''}`;
@@ -193,7 +197,7 @@ function moveStep(f, s, sp, len) {
   if (!blocked(PL.x + _fa[0], PL.z, PL.y, true)) PL.x += _fa[0];
   if (!blocked(PL.x, PL.z + _fa[1], PL.y, true)) PL.z += _fa[1];
   const d = pdist(PL.x, PL.z);                                  // 海岸邊界：沿圓周順著滑，不來回抖
-  if (d > PWALK - 0.01) { const k = (PWALK - 0.01) / d; PL.x = PC.x + (PL.x - PC.x) * k; PL.z = PC.z + (PL.z - PC.z) * k; }
+  if (d > PWALK - 0.01 && !(typeof xtraWalk === 'function' && xtraWalk(PL.x, PL.z))) { const k = (PWALK - 0.01) / d; PL.x = PC.x + (PL.x - PC.x) * k; PL.z = PC.z + (PL.z - PC.z) * k; }
   fwTransport();
 }
 let indoorT = 0;

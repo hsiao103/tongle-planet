@@ -80,6 +80,11 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #bRun.on{background:rgba(232,116,26,.85);opacity:.95}#bJump:active{background:rgba(232,116,26,.85);opacity:.95}
 .knob{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.75);border:2px solid rgba(0,0,0,.45);box-sizing:border-box}
 .touch #joyL{display:block}.touch #bRun,.touch #bJump{display:block}.touch #hint{display:none}
+/* 手機：跳、跑、拾取/對話(E) 三個按鈕都集中在右側，右手拇指可及；左側只留搖桿 */
+.touch #bJump{right:24px!important;left:auto!important;bottom:calc(120px + env(safe-area-inset-bottom,0px))!important;width:84px!important;height:84px!important}
+.touch #bRun{right:120px!important;left:auto!important;bottom:calc(120px + env(safe-area-inset-bottom,0px))!important;width:60px!important;height:60px!important}
+.touch #prompt{left:auto!important;right:16px!important;transform:none!important;bottom:calc(216px + env(safe-area-inset-bottom,0px))!important;max-width:calc(100vw - 150px);font-size:16px;padding:12px 20px}
+@media (max-width:900px){.touch #bJump,.touch #bRun{bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}.touch #prompt{bottom:calc(184px + env(safe-area-inset-bottom,0px))!important}}
 .touch #floors{bottom:auto;top:calc(110px + env(safe-area-inset-top,0px))}
 #intro{z-index:12;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(400px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border-radius:18px;background:rgba(18,25,21,.82);color:#eef3ee;border-color:rgba(255,255,255,.12);backdrop-filter:blur(10px);display:none}
 #intro.show{display:block}
@@ -204,6 +209,8 @@ body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important
     <button type="button" data-tp="track">操場</button>
     <button type="button" data-tp="gym">風雨球場</button>
     <button type="button" data-tp="park">停車場</button>
+    <button type="button" data-tp="portA">校園港</button>
+    <button type="button" data-tp="portB">龜山島港</button>
       </div>
   <div class="row" id="floorRow"><span class="lab">教學大樓</span></div>
 </div>
@@ -5694,7 +5701,10 @@ function groundAt(x, y, z) {
   return hit.length ? hit[0].point.y : -Infinity;
 }
 function blocked(x, z, y, noEdge) {
-  if (!noEdge && pdist(x, z) > PWALK) return true;                        // 海岸外是海
+  if (pdist(x, z) > PWALK) {                                                // 海岸外是海（碼頭與龜山島除外）
+    if (typeof xtraWalk === 'function' && xtraWalk(x, z)) { if (xtraBlock(x, z, y)) return true; }
+    else if (!noEdge || (typeof xtraNear === 'function' && xtraNear(x, z))) return true;
+  }
   const r = PL.r;
   for (let i = 0; i < WALLS.length; i++) {
     const w = WALLS[i];
@@ -5845,6 +5855,7 @@ function whereText() {
   if (!id && (() => { const dx = PL.x - GOX, dz = PL.z - GOZ, lx = dx * GTF.c - dz * GTF.s, lz = dx * GTF.s + dz * GTF.c; return lx > GX0 && lx < GX1 && lz > GZ0 && lz < GZ1; })()) s = '風雨球場';
   if (s === '校園戶外' && Math.hypot((PL.x - TX) / TR, (PL.z - TZ) / (TS + TR)) < 1) s = '操場';
   if (s === '校園戶外') { const d = pdist(PL.x, PL.z); if (d > PWALK - 14) s = '海灘'; else if (d > 112) s = '校外草原'; }
+  if (typeof xtraWhere === 'function' && pdist(PL.x, PL.z) > PWALK - 14) { const w = xtraWhere(PL.x, PL.z); if (w) s = w; }
   hereName = s;
   const fl = Math.round(PL.y / H) + 1;
   $('where').textContent = `${s}${id ? ' · ' + fl + ' 樓' : ''}`;
@@ -5861,7 +5872,7 @@ function moveStep(f, s, sp, len) {
   if (!blocked(PL.x + _fa[0], PL.z, PL.y, true)) PL.x += _fa[0];
   if (!blocked(PL.x, PL.z + _fa[1], PL.y, true)) PL.z += _fa[1];
   const d = pdist(PL.x, PL.z);                                  // 海岸邊界：沿圓周順著滑，不來回抖
-  if (d > PWALK - 0.01) { const k = (PWALK - 0.01) / d; PL.x = PC.x + (PL.x - PC.x) * k; PL.z = PC.z + (PL.z - PC.z) * k; }
+  if (d > PWALK - 0.01 && !(typeof xtraWalk === 'function' && xtraWalk(PL.x, PL.z))) { const k = (PWALK - 0.01) / d; PL.x = PC.x + (PL.x - PC.x) * k; PL.z = PC.z + (PL.z - PC.z) * k; }
   fwTransport();
 }
 let indoorT = 0;
@@ -6594,6 +6605,8 @@ const ITEMS = {
   hongbao: { n: '紅包', k: 'hw', sell: 50, c: '#e8283a', d: '紅通通的新年紅包，裡面裝滿祝福。' },
   nian: { n: '年糕', k: 'hw', sell: 90, c: '#d9a054', d: '年年高升的甜年糕。' },
   ingot: { n: '金元寶', k: 'hw', sell: 70, c: '#f2c230', d: '金閃閃的小元寶，招財進寶。' },
+  rosef: { n: '玫瑰花', k: 'hw', sell: 25, c: '#d81f3c', d: '玫瑰王子親手照顧的紅玫瑰。' },
+  rosebq: { n: '玫瑰花束', k: 'hw', sell: 150, c: '#e03a5a', d: '五朵玫瑰紮成一束，很適合送人。' },
   xcandy: { n: '聖誕拐杖糖', k: 'hw', sell: 30, c: '#e84a5f', d: '紅白相間的拐杖糖。' },
   rose: { n: '玫瑰花叢', k: 'plant', buy: 160, c: '#d8404f', d: '紅色小花。' }
 };
@@ -7242,6 +7255,10 @@ function hwApply(ed, quiet) {
 }
 function hwBtn() { $('bHw').textContent = '妖怪地圖 ' + hwDone() + '/3'; }
 function hwTick(dt) {
+  if (typeof cloudTick === 'function') cloudTick(dt);
+  if (typeof pxTick === 'function') pxTick(dt);
+  if (typeof stfTick === 'function') stfTick(dt);
+  if (typeof seaTick === 'function') seaTick(dt);
   if (typeof xmTick === 'function') xmTick(dt);
   if (typeof lnTick === 'function') lnTick(dt);
   HW.k += ((HW.on ? 1 : 0) - HW.k) * Math.min(1, dt * 1.6); if (!HW.on && HW.k < 0.01) HW.k = 0;
@@ -7265,6 +7282,9 @@ function hwTick(dt) {
   HW.chk -= dt; if (HW.chk <= 0) { HW.chk = 0.5; const now = nowMs(); [...HW.pumps, ...HW.skulls].forEach(o => { const key = 'h' + o.kind[0] + o.id; if (!o.on && !(G.resp[key] > now)) { o.on = true; o.g.visible = true; } }); }
 }
 function hwInteract(cand, ds) {
+  if (typeof pxInteract === 'function') pxInteract(cand, ds);
+  if (typeof stfInteract === 'function') stfInteract(cand, ds);
+  if (typeof seaInteract === 'function') seaInteract(cand, ds);
   if (typeof xmInteract === 'function') xmInteract(cand, ds);
   if (typeof lnInteract === 'function') lnInteract(cand, ds);
   if (!HW.on || !HW.built) return;
@@ -7272,6 +7292,8 @@ function hwInteract(cand, ds) {
   [...HW.pumps, ...HW.skulls].forEach(o => { if (!o.on) return; const d = ds(o.x, o.z, 0); if (d < 2.2) cand(d, o.kind === 'pumpkin' ? '撿起小南瓜' : '撿起可愛骷髏糖', () => { addItem(o.kind); toast('撿到 ' + ITEMS[o.kind].n + '！'); o.on = false; o.g.visible = false; G.resp['h' + o.kind[0] + o.id] = nowMs() + (o.kind === 'pumpkin' ? 4 : 7) * 60000; saveGame(); }); });
 }
 function hwMini(g, mp) {
+  if (typeof pxMini === 'function') pxMini(g, mp);
+  if (typeof stfMini === 'function') stfMini(g, mp);
   if (typeof xmMini === 'function') xmMini(g, mp);
   if (typeof lnMini === 'function') lnMini(g, mp);
   if (!HW.on) return;
@@ -8025,4 +8047,373 @@ function lnSeason() {
   const m = d.getMonth() + 1, day = d.getDate(); return (m === 1 && day >= 15) || m === 2;
 }
 window.__ln = { LN, lnApply, lnBuild, LNCH, LNG, lnSeason, lnGameEnd };
+/* ===== 天空雲朵：不多的幾朵低多邊形白雲，繞著校園上空慢慢飄；夜晚自然變暗（用受光材質）===== */
+const CLD = { list: [], t: 0, mat: new T.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.94 }) };
+(function () {
+  const rr2 = (() => { let s = 777; return () => { s = (s * 16807) % 2147483647; return s / 2147483647; }; })();
+  const puff = () => {
+    const parts = [], n = 5 + ((rr2() * 3) | 0);
+    for (let i = 0; i < n; i++) { const u = (i - (n - 1) / 2) / n, r = 2.4 + rr2() * 1.6 - Math.abs(u) * 2.2; parts.push([new T.SphereGeometry(Math.max(1.5, r), 10, 7), hwM4(u * 8.5, Math.max(0, r - 2.4) * 0.5 + rr2() * 0.5, (rr2() - 0.5) * 2, 1, 0.78, 0.9)]); }
+    return hwMerge(parts);
+  };
+  for (let i = 0; i < 8; i++) {
+    const a = i / 8 * 6.283 + rr2() * 0.6, d = 20 + rr2() * 110, m = new T.Mesh(puff(), CLD.mat); m.castShadow = false; m.userData.noOutline = true; m.frustumCulled = false; m.scale.setScalar(1 + rr2() * 0.7);
+    scene.add(m); CLD.list.push({ m, x: PC.x + Math.cos(a) * d, z: PC.z + Math.sin(a) * d, y: 30 + rr2() * 16, sp: 0.5 + rr2() * 0.6, yaw: rr2() * 6 });
+  }
+})();
+function cloudTick(dt) {
+  CLD.t += dt;
+  CLD.list.forEach(c => {
+    c.x += c.sp * dt; if (c.x > PC.x + 140) c.x -= 280;
+    sph(c.x, c.y, c.z, c.m.position); frameQuat(c.x, c.z, c.m.quaternion); _q1.setFromAxisAngle(_ey, c.yaw); c.m.quaternion.multiply(_q1);
+  });
+}
+/* ===== 校園三位原創小角色：小飛行員（開小飛機繞校園）、小空拍員（地面操控空拍機）、玫瑰王子（角色扮演王子賣玫瑰花）===== */
+const PX = { built: false, t: 0, root: null, plane: null, drone: null, kid: null, prince: null };
+const PXM = {
+  red: new T.MeshLambertMaterial({ color: 0xd8403a }), white: new T.MeshLambertMaterial({ color: 0xf6f4ee }), blue: new T.MeshLambertMaterial({ color: 0x2f5fb0 }), navy: new T.MeshLambertMaterial({ color: 0x1f3a78 }),
+  gold: new T.MeshLambertMaterial({ color: 0xf2c230 }), skin: new T.MeshLambertMaterial({ color: 0xf6d2b0 }), hair: new T.MeshLambertMaterial({ color: 0x6a4428 }), black: new T.MeshLambertMaterial({ color: 0x2a2a30 }),
+  gray: new T.MeshLambertMaterial({ color: 0x8a9098 }), dark: new T.MeshBasicMaterial({ color: 0x20180f }), green: new T.MeshLambertMaterial({ color: 0x3f9a58 }), leaf: new T.MeshLambertMaterial({ color: 0x2f7a3a }),
+  rose: new T.MeshLambertMaterial({ color: 0xd81f3c }), wood: new T.MeshLambertMaterial({ color: 0xb48a56 }), hood: new T.MeshLambertMaterial({ color: 0x2fa6a0 }), cap: new T.MeshLambertMaterial({ color: 0xf0b020 }),
+  rotor: new T.MeshBasicMaterial({ color: 0xcfd6de, transparent: true, opacity: 0.45, side: T.DoubleSide }), glass: new T.MeshLambertMaterial({ color: 0x9fd6f0, transparent: true, opacity: 0.7 }),
+  led: new T.MeshBasicMaterial({ color: 0xff3030 }), pink: new T.MeshLambertMaterial({ color: 0xf59ab8 }), whiteRose: new T.MeshLambertMaterial({ color: 0xfff1f4 }), cheek: new T.MeshBasicMaterial({ color: 0xff9a9a })
+};
+const pxS = (r, x, y, z, a, b, c) => [new T.SphereGeometry(r, 12, 9), hwM4(x, y, z, a === undefined ? 1 : a, b === undefined ? 1 : b, c === undefined ? 1 : c)];
+const pxB = (w, h, d, x, y, z, ry, rx, rz) => [new T.BoxGeometry(w, h, d), hwM4(x, y, z, 1, 1, 1, ry || 0, rx || 0, rz || 0)];
+const pxM = (g, parts, mat) => hwMesh(hwMerge(parts), mat, g);
+function pxPlane() {
+  const g = new T.Group(), b = new T.Group(); g.add(b); g.userData.bank = b;
+  pxM(b, [pxS(0.55, 0, 0, 0, 1, 0.95, 2.1), pxS(0.3, 0, 0, 1.45, 0.9, 0.9, 1.3)], PXM.red);
+  pxM(b, [pxB(5.4, 0.1, 1.1, 0, 0.55, 0.2), pxB(5.4, 0.1, 1.1, 0, -0.25, 0.2), pxB(1.9, 0.08, 0.55, 0, 0.1, -1.9), pxB(0.08, 0.7, 0.6, 0, 0.45, -1.95)], PXM.white);
+  pxM(b, [pxB(0.07, 0.8, 0.07, -1.3, 0.15, 0.2), pxB(0.07, 0.8, 0.07, 1.3, 0.15, 0.2), pxB(0.07, 0.8, 0.07, -2.4, 0.15, 0.2), pxB(0.07, 0.8, 0.07, 2.4, 0.15, 0.2)], PXM.gray);
+  pxM(b, [pxS(0.18, -0.5, -0.7, 0.9), pxS(0.18, 0.5, -0.7, 0.9), pxB(1.1, 0.06, 0.06, 0, -0.55, 0.9)], PXM.black);
+  const sc = pxM(b, [pxB(0.16, 0.08, 1.2, 0, 0.55, -0.9)], PXM.red);                               // 飄動的紅圍巾
+  const pr = new T.Group(); pr.position.set(0, 0, 1.85); pxM(pr, [pxB(0.14, 2.1, 0.05, 0, 0, 0), pxS(0.12, 0, 0, 0.05, 1, 1, 1.6)], PXM.gray); b.add(pr); g.userData.prop = pr; g.userData.scarf = sc;
+  return g;
+}
+function pxDrone() {
+  const g = new T.Group(), rotors = [];
+  pxM(g, [pxB(0.5, 0.14, 0.5, 0, 0, 0), pxB(0.9, 0.05, 0.08, 0, 0, 0, Math.PI / 4), pxB(0.9, 0.05, 0.08, 0, 0, 0, -Math.PI / 4)], PXM.gray);
+  pxM(g, [pxS(0.1, 0, -0.14, 0.22)], PXM.black);
+  pxM(g, [pxS(0.05, 0, 0.1, 0.25)], PXM.glass);
+  [[-0.32, -0.32], [0.32, -0.32], [-0.32, 0.32], [0.32, 0.32]].forEach(p => { const r = new T.Group(); r.position.set(p[0], 0.09, p[1]); pxM(r, [[new T.CylinderGeometry(0.27, 0.27, 0.015, 14), hwM4(0, 0, 0, 1)]], PXM.rotor); pxM(r, [pxB(0.5, 0.02, 0.05, 0, 0.01, 0)], PXM.black); g.add(r); rotors.push(r); });
+  const led = new T.Mesh(new T.SphereGeometry(0.05, 6, 4), PXM.led); led.position.set(0, 0.02, -0.27); g.add(led); g.userData.rotors = rotors; g.userData.led = led; return g;
+}
+function pxBucket(col, rcol) {
+  const g = new T.Group(), M = (parts, m) => pxM(g, parts, m);
+  M([[new T.CylinderGeometry(0.34, 0.27, 0.62, 14, 1, true), hwM4(0, 0.31, 0, 1)], [new T.CylinderGeometry(0.27, 0.27, 0.03, 14), hwM4(0, 0.02, 0, 1)]], col);
+  M([[new T.TorusGeometry(0.34, 0.025, 5, 16), hwM4(0, 0.6, 0, 1, 1, 1, 0, Math.PI / 2)], [new T.TorusGeometry(0.3, 0.025, 5, 16), hwM4(0, 0.3, 0, 1, 1, 1, 0, Math.PI / 2)]], PXM.gray);
+  const st = [], fl = []; for (let i = 0; i < 11; i++) { const a = i * 2.4, rr = 0.05 + (i % 4) * 0.045, x = Math.cos(a) * rr, z = Math.sin(a) * rr, h = 0.55 + (i % 3) * 0.12, lean = 0.22 + (i % 3) * 0.08; st.push([new T.CylinderGeometry(0.012, 0.012, h, 4), hwM4(x + Math.cos(a) * h * 0.4 * lean, 0.45 + h / 2, z + Math.sin(a) * h * 0.4 * lean, 1, 1, 1, 0, Math.sin(a) * lean, -Math.cos(a) * lean)]); fl.push(pxS(0.075, x + Math.cos(a) * h * lean, 0.45 + h, z + Math.sin(a) * h * lean, 1, 0.85, 1)); }
+  M(st, PXM.leaf); M(fl, rcol);
+  return g;
+}
+
+// ---- 三位角色都用遊戲的 Q 版骨架模型（大頭、小身體、露出手臂）----
+const PXC = {};
+function pxMake(A, kind, h, colors) { const c = Object.assign({ shoes: 0x2b3340, socks: 0xffffff }, colors); c['school-sleeve'] = c.skin; const ch = makeChar(A[kind], { h, colors: c }); ch.mixer.update(0.01); ch.node.updateMatrixWorld(true); return ch; }
+function pxHead(ch) { const r = ch.head ? ch.head.r : 0.165 * ch.h, cy = ch.head ? ch.head.cy : 0.84 * ch.h; return { r, cy }; }
+function pxM2(g, c, x, y, z, mat) { const m = new T.Mesh(g, mat || propMat(c)); m.position.set(x, y, z); return m; }
+function pxHand(ch, bone, G) { const b = ch.node.getObjectByName(bone); if (!b) return; ch.node.updateMatrixWorld(true); const p = ch.node.worldToLocal(b.getWorldPosition(new T.Vector3())); G.position.copy(p); addProp(ch, bone, G); }
+function pxPose(ch, arms) { ch._pose = ['L', 'R'].map((sd, i) => { const b = ch.node.getObjectByName('UpperArm' + sd); return b ? { b, q0: b.quaternion.clone(), ax: arms[i] } : null; }).filter(Boolean); }
+function pxPoseApply(ch) { if (!ch || !ch._pose) return; const q = new T.Quaternion(); ch._pose.forEach(p => { if (!p.ax) return; q.setFromAxisAngle(new T.Vector3(p.ax[0], p.ax[1], p.ax[2]), p.ax[3]); p.b.quaternion.copy(p.q0).multiply(q); }); }
+async function pxChars() {
+  const A = { boy: await loadGLB('boy'), girl: await loadGLB('girl') };
+  { // 小空拍員：反戴黃帽、青綠上衣、手拿遙控器
+    const ch = PXC.kid = pxMake(A, 'boy', 1.3, { skin: 0xf2c9a4, hair: 0x2a2220, 'school-shirt': 0x2fa6a0, 'school-shorts': 0x34405a, collar: 0x2fa6a0 }), { r, cy } = pxHead(ch), G = new T.Group();
+    G.add(pxM2(new T.SphereGeometry(1.1 * r, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), 0xf0b020, 0, cy + 0.2 * r, 0));
+    G.add(pxM2(new T.CylinderGeometry(0.95 * r, 0.95 * r, 0.1 * r, 14, 1, false, 0, Math.PI), 0xd89a10, 0, cy + 0.24 * r, 0.62 * r));
+    addProp(ch, 'Head', G);
+    const rc = new T.Group(); rc.add(pxM2(new T.BoxGeometry(0.13 * ch.h, 0.04 * ch.h, 0.07 * ch.h), 0x2a2a30, 0, 0, 0), pxM2(new T.SphereGeometry(0.014 * ch.h, 6, 4), 0xd8403a, -0.03 * ch.h, 0.025 * ch.h, 0), pxM2(new T.SphereGeometry(0.014 * ch.h, 6, 4), 0xd8403a, 0.03 * ch.h, 0.025 * ch.h, 0)); pxHand(ch, 'FistR', rc);
+    pxPose(ch, [[1, 0, 0, -0.9], [1, 0, 0, -0.9]]);
+  }
+  { // 玫瑰王子：金冠、紅披風、手拿一朵玫瑰
+    const ch = PXC.prince = pxMake(A, 'boy', 1.3, { skin: 0xf6d2b0, hair: 0x6a4428, 'school-shirt': 0x2f5fb0, 'school-shorts': 0xf2efe6, collar: 0xffffff, shoes: 0x6a3a1c }), { r, cy } = pxHead(ch), G = new T.Group();
+    G.add(pxM2(new T.CylinderGeometry(0.62 * r, 0.7 * r, 0.3 * r, 12), 0xf2c230, 0, cy + 0.78 * r, 0));
+    for (let i = 0; i < 5; i++) { const a = i / 5 * 6.283; G.add(pxM2(new T.ConeGeometry(0.13 * r, 0.32 * r, 5), 0xf2c230, Math.cos(a) * 0.55 * r, cy + 1.07 * r, Math.sin(a) * 0.55 * r)); }
+    G.add(pxM2(new T.SphereGeometry(0.12 * r, 8, 6), 0xd81f3c, 0, cy + 0.8 * r, -0.68 * r)); addProp(ch, 'Head', G);
+    const ny = ch.head ? ch.head.ny : 0.7 * ch.h, cape = new T.Group(); cape.add(pxM2(new T.BoxGeometry(0.3 * ch.h, 0.34 * ch.h, 0.015 * ch.h), 0xc4202c, 0, ny * 0.55, 0.1 * ch.h)); cape.children[0].rotation.x = -0.08; addProp(ch, 'Torso', cape);
+    const rose = new T.Group(); rose.add(pxM2(new T.CylinderGeometry(0.006 * ch.h, 0.006 * ch.h, 0.2 * ch.h, 5), 0x2f7a3a, 0, 0.06 * ch.h, 0), pxM2(new T.SphereGeometry(0.03 * ch.h, 8, 6), 0xd81f3c, 0, 0.17 * ch.h, 0)); pxHand(ch, 'FistR', rose);
+    pxPose(ch, [null, null]);
+  }
+  { // 小飛行員：飛行帽、護目鏡、紅圍巾，坐在座艙裡
+    const ch = PXC.pilot = pxMake(A, 'girl', 1.15, { skin: 0xf2c9a4, hair: 0x3a2a20, 'school-shirt': 0x8a5a36, 'school-shorts': 0x4a4038, collar: 0xc4403a, shoes: 0x2a2020, 'hair-band': 0x8a5a36 }), { r, cy } = pxHead(ch), G = new T.Group();
+    G.add(pxM2(new T.SphereGeometry(1.1 * r, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62), 0x8a5a36, 0, cy + 0.12 * r, 0));
+    const gl = pxM2(new T.TorusGeometry(0.3 * r, 0.07 * r, 6, 12), 0x20180f, 0, cy + 0.38 * r, -0.98 * r); const gl2 = gl.clone(); gl.position.x = -0.38 * r; gl2.position.x = 0.38 * r; G.add(gl, gl2, pxM2(new T.BoxGeometry(2 * r, 0.1 * r, 0.06 * r), 0x20180f, 0, cy + 0.38 * r, -0.97 * r));
+    addProp(ch, 'Head', G);
+    ch.node.position.set(0, -0.48, 0.1); ch.node.rotation.y = Math.PI; pxPose(ch, [[1, 0, 0, -1.0], [1, 0, 0, -1.0]]); PXC.plane.g.userData.bank.add(ch.node);
+  }
+  PXC.ready = true;
+  // 掛上骨架角色
+  PX.kid.g.add(PXC.kid.node); PX.prince.g.add(PXC.prince.node);
+  if (window.STY && STY.on && typeof styScan === 'function') styScan();
+}
+function pxBuild() {
+  if (PX.built) return; const pl = n => NPLACES.find(p => p.name === n && !p.room); if (!pl('梅花廣場') || !pl('操場')) return; PX.built = true; hwGeos();
+  const root = PX.root = new T.Group(); scene.add(root);
+  const label = (txt, col, y) => { const s = hwSprite(txt, col); s.position.set(0, y, 0); return s; };
+  // 小飛機
+  const pg = PX.plane = pxPlane(), pw = new T.Group(); pw.add(pg); root.add(pw); dynAdd(pw); const lb = label('小飛行員 阿飛', '#ffb0a0', 2.4); pw.add(lb); PX.plane = PXC.plane = { w: pw, g: pg, lab: lb, th: 0.5 };
+  // 小空拍員＋空拍機
+  const p2 = pl('操場'), q2 = hwFindOpen(p2.x + 3, p2.z + 6), kg = new T.Group(); kg.position.set(q2[0], q2[2], q2[1]); root.add(kg); dynAdd(kg); const kl = label('小空拍員 阿翔', '#9fe0d8', 1.95); kg.add(kl);
+  PX.kid = { g: kg, lab: kl, x: q2[0], z: q2[1], y: q2[2], place: p2, ph: 0 };
+  const dg = pxDrone(); root.add(dg); dynAdd(dg); PX.drone = { g: dg, a: 0 };
+  // 玫瑰王子與玫瑰花桶（王子會在花桶附近走動）
+  const p3 = pl('梅花廣場'), q3 = hwFindOpen(p3.x + 5, p3.z + 7), pg2 = new T.Group(); pg2.position.set(q3[0], q3[2], q3[1]); root.add(pg2); dynAdd(pg2); const ll = label('玫瑰王子（角色扮演）', '#ffd0e0', 1.95); pg2.add(ll);
+  const bks = [[1.6, 0.4, PXM.blue, PXM.rose], [2.6, -0.5, PXM.gray, PXM.pink], [2.4, 1.2, PXM.wood, PXM.whiteRose]].map(o => { const q = hwFindOpen(q3[0] + o[0], q3[1] + o[1]), bg = pxBucket(o[2], o[3]); bg.position.set(q[0], q[2], q[1]); root.add(bg); dynAdd(bg); return { g: bg, x: q[0], z: q[1] }; });
+  PX.prince = { g: pg2, lab: ll, x: q3[0], z: q3[1], y: q3[2], hx: q3[0], hz: q3[1], tx: q3[0], tz: q3[1], wait: 2, place: p3, ph: 1, buckets: bks, walking: false };
+  pxChars().catch(e => console.warn('px chars', e));
+  if (window.STY && STY.on && typeof styScan === 'function') styScan();
+}
+function pxTick(dt) {
+  if (!PX.built) { if (typeof STARTED !== 'undefined' && STARTED && PWG.children.length) try { pxBuild(); } catch (e) { PX.built = true; console.error(e); } return; }
+  PX.t += dt; const t = PX.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6, face = (o, rate) => { const d = Math.hypot(o.x - PL.x, o.z - PL.z); if (d < 12) o.g.rotation.y += angd(Math.atan2(PL.x - o.x, PL.z - o.z) + Math.PI, o.g.rotation.y) * Math.min(1, dt * rate); return d; };
+  if (PXC.ready) ['kid', 'prince', 'pilot'].forEach(k => { const c = PXC[k]; c.mixer.update(dt); pxPoseApply(c); });
+  // 小飛機：以校園中心為圓心繞圈，帶一點傾斜與上下起伏
+  { const P = PX.plane; P.th += 0.2 * dt; const R = 42, th = P.th, x = PC.x + Math.cos(th) * R, z = PC.z + Math.sin(th) * R, y = (P.alt || 24) + Math.sin(t * 0.7) * 1.8;
+    P.w.position.set(x, y, z); P.w.rotation.y = Math.atan2(-Math.sin(th), Math.cos(th)); P.w.scale.setScalar(1.5 * pk); P.g.userData.bank.rotation.z = 0.3 + Math.sin(t * 1.1) * 0.05; P.g.userData.bank.rotation.x = Math.sin(t * 0.7) * 0.04; P.g.userData.prop.rotation.z += dt * 40; P.g.userData.scarf.rotation.y = Math.sin(t * 9) * 0.12; P.lab.visible = cs < 4; }
+  { const K = PX.kid, d = face(K, 3); K.g.scale.setScalar(cs); K.lab.visible = d > 3.5 && d < 30 && cs < 4;
+    const D = PX.drone; D.a += dt * 0.8; const r = 3.4, hx = K.x + Math.cos(D.a) * r * cs, hz = K.z + Math.sin(D.a) * r * cs, hy = K.y + (5 + Math.sin(t * 1.6) * 0.6) * cs; D.g.position.set(hx, hy, hz); D.g.scale.setScalar(cs * 1.2);
+    D.g.rotation.y = Math.atan2(-Math.sin(D.a), Math.cos(D.a)); D.g.rotation.x = 0.18; D.g.userData.rotors.forEach((r2, i) => { r2.rotation.y += dt * 60 * (i % 2 ? 1 : -1); }); D.g.userData.led.material.color.setHex(Math.floor(t * 3) % 2 ? 0xff3030 : 0x30ff60); }
+  { const Pr = PX.prince, dp0 = Math.hypot(Pr.x - PL.x, Pr.z - PL.z), near = dp0 < 3.8 && !(typeof anyPanel === 'function' && anyPanel() && false);
+    Pr.g.scale.setScalar(cs); Pr.buckets.forEach(b => b.g.scale.setScalar(Math.max(1, cs)));
+    if (near || (typeof anyPanel === 'function' && anyPanel() && dp0 < 8)) { Pr.walking = false; face(Pr, 4); }                 // 有人靠近或正在對話：停下來面對玩家
+    else if (Pr.walking) { const dx = Pr.tx - Pr.x, dz = Pr.tz - Pr.z, L = Math.hypot(dx, dz), step = 1.0 * dt;
+      if (L < step + 0.05) { Pr.walking = false; Pr.wait = 2.5 + Math.random() * 4; }
+      else { Pr.x += dx / L * step; Pr.z += dz / L * step; const gy = groundAt(Pr.x, Pr.y + 2.2, Pr.z); if (isFinite(gy)) Pr.y = gy; Pr.g.position.set(Pr.x, Pr.y, Pr.z); Pr.g.rotation.y += angd(Math.atan2(dx, dz) + Math.PI, Pr.g.rotation.y) * Math.min(1, dt * 6); } }
+    else { Pr.wait -= dt; if (Pr.wait <= 0) { const a = Math.random() * 6.283, r = 1.5 + Math.random() * 3.2, o = hwFindOpen(Pr.hx + Math.cos(a) * r, Pr.hz + Math.sin(a) * r); if (Math.hypot(o[0] - Pr.hx, o[1] - Pr.hz) < 5.5) { Pr.tx = o[0]; Pr.tz = o[1]; Pr.walking = true; } else Pr.wait = 1; } }
+    if (PXC.ready) { const ch = PXC.prince, w = Pr.walking && !near; play(ch, w ? 'Walk' : 'Idle', 0.2); if (w && ch.act.Walk) ch.act.Walk.timeScale = 0.7; }
+    Pr.lab.visible = dp0 > 3.5 && dp0 < 30 && cs < 4; }
+}
+function pxInteract(cand, ds) {
+  if (!PX.built) return;
+  const K = PX.kid, P = PX.prince, dk = ds(K.x, K.z, K.y); let dp = ds(P.x, P.z, P.y); P.buckets.forEach(b => { dp = Math.min(dp, ds(b.x, b.z, P.y)); });
+  if (dk < 3.4) cand(dk, '和 阿翔（小空拍員）說話', pxKidTalk);
+  if (dp < 3.6) cand(dp, '向玫瑰王子買花', pxPrinceTalk);
+}
+function pxMini(g, mp) {
+  if (!PX.built) return; const dot = (x, z, c, r) => { const p = mp(x, z); g.fillStyle = c; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], r, 0, 7); g.fill(); g.stroke(); };
+  dot(PX.kid.x, PX.kid.z, '#2fa6a0', 4.5); dot(PX.prince.x, PX.prince.z, '#d81f3c', 4.5); const w = PX.plane.w.position; dot(w.x, w.z, '#f2c230', 3.2);
+}
+// ---- 對話 ----
+function pxKidTalk() {
+  const done = () => closePanels(), menu = () => openDlg('阿翔（小空拍員）', '（阿翔舉著遙控器，抬頭盯著天上的小空拍機：）\n\n「嗨！我的空拍機正在拍校園的全景喔。你想知道什麼？」', [
+    { t: '空拍機怎麼飛起來的？', go: true, fn: () => openDlg('阿翔（小空拍員）', '「空拍機有四個螺旋槳，轉得越快，往上推的力量越大。四個轉速一點點不一樣，機身就會往前、後、左、右傾斜，往那個方向飛。」', [{ t: '還有呢？', go: true, fn: menu }, { t: '好酷！', fn: done }]) },
+    { t: '空拍有哪些安全規則？', go: true, fn: () => openDlg('阿翔（小空拍員）', '「一、保持在視線範圍內；二、不要飛到人群上方；三、遠離機場和重要設施；四、高度大約不要超過 120 公尺；五、飛行前先確認天氣和電量。守規則，大家才安全！」', [{ t: '還有呢？', go: true, fn: menu }, { t: '記住了！', fn: done }]) },
+    { t: '請他幫我空拍一張', go: true, fn: () => { const now = nowMs(); if (G.resp.pxdr > now) openDlg('阿翔（小空拍員）', '「剛剛才拍過囉，電池要休息一下，等一下再來！」', [{ t: '好', fn: done }]); else { G.resp.pxdr = now + 5 * 60000; addCoins(30); saveGame(); openDlg('阿翔（小空拍員）', '「笑一個～咔嚓！畫面超漂亮。這張照片送你，還有一點拍攝小費！」\n\n獲得：同樂幣 30', [{ t: '謝謝！', go: true, fn: done }]); } } },
+    { t: '先不用了', fn: done }]);
+  menu();
+}
+function pxPrinceTalk() {
+  const done = () => closePanels(), buy = (id, n, price, nm) => { if (G.coins < price) { openDlg('玫瑰王子', '「哎呀，同樂幣好像不太夠喔。先去採集或完成委託，再回來找我吧！」', [{ t: '好的', fn: done }]); return; } addCoins(-price); addItem(id, n); saveGame(); openDlg('玫瑰王子', '「送給你，' + nm + '！要好好照顧它喔。」\n\n花費：同樂幣 ' + price + '　獲得：' + ITEMS[id].n + ' ×' + n, [{ t: '再看看', go: true, fn: menu }, { t: '謝謝', fn: done }]); },
+    menu = () => openDlg('玫瑰王子', '（頭戴小皇冠的王子優雅地行了一個禮：）\n\n「歡迎光臨！我是角色扮演的玫瑰王子，今天在這裡賣花。每一朵玫瑰都是我親手照顧的。」\n\n你有 ' + G.coins + ' 同樂幣', [
+      { t: '買一朵玫瑰（40 幣）', go: true, fn: () => buy('rosef', 1, 40, '一朵玫瑰') },
+      { t: '買一束玫瑰（5 朵，160 幣）', go: true, fn: () => buy('rosebq', 1, 160, '一束玫瑰') },
+      { t: '聊聊玫瑰', go: true, fn: () => openDlg('玫瑰王子', '「花要用心照顧，才會開得漂亮。澆水、曬太陽，還要有耐心。其實照顧朋友也一樣喔。」', [{ t: '說得真好', go: true, fn: menu }, { t: '再見', fn: done }]) },
+      { t: '先不買', fn: done }]);
+  menu();
+}
+/* ===== 海上龜山島（烏龜造型）、校園港與龜山島港、渡船（自動航行／直接傳送）、海鷗 =====
+   座標：以「海上座標」(u, v, y) 蓋在球面上：u＝由校園往外（徑向）的公尺數，v＝沿海岸（切向）的公尺數，皆為球面上的真實公尺；
+   由 seaFlat() 轉回遊戲用的平面座標（走路、碰撞、導覽仍是平面座標），畫面上的島與碼頭則直接用球面座標建模。 */
+const SEA = { TH0: 2.8, PHI0: 0, R: 13, built: false, t: 0, ride: null, gulls: [], root: null, slot: { A: [-38, 0], B: [-24.2, 0] }, pierA: [-50, -40], pierB: [-22, -12], hw: 1.6 };
+const seaFlat = (u, v) => { const th = SEA.TH0 + u / PR, phi = SEA.PHI0 + v / (PR * Math.sin(th)), r = th * PR; return [PC.x + r * Math.cos(phi), PC.z + r * Math.sin(phi)]; };
+const seaUV = (x, z) => { const dx = x - PC.x, dz = z - PC.z, th = Math.hypot(dx, dz) / PR; let dp = Math.atan2(dz, dx) - SEA.PHI0; dp = Math.atan2(Math.sin(dp), Math.cos(dp)); return [(th - SEA.TH0) * PR, dp * PR * Math.sin(th)]; };
+const seaPhi = (x, z) => Math.atan2(z - PC.z, x - PC.x);
+// ---- 碰撞與位置判斷（供 part4 的 blocked／moveStep／whereText 使用）----
+function seaPier(u, v, w) { return (u > SEA.pierA[0] - 0.5 && u < SEA.pierA[1] + 0.4 && Math.abs(v) < (w || SEA.hw) - 0.05) ? 'A' : (u > SEA.pierB[0] - 0.4 && u < SEA.pierB[1] + 0.5 && Math.abs(v) < (w || SEA.hw) - 0.05) ? 'B' : null; }
+function xtraWalk(x, z) { const [u, v] = seaUV(x, z); return u * u + v * v < (SEA.R - 0.3) * (SEA.R - 0.3) || !!seaPier(u, v); }
+function xtraNear(x, z) { const [u, v] = seaUV(x, z); return (u > -55 && u < -35 && Math.abs(v) < 8) || u * u + v * v < (SEA.R + 6) * (SEA.R + 6) || (u > -27 && u < -10 && Math.abs(v) < 8); }
+function xtraBlock(x, z, y) {
+  if (y > 8) return false; const [u, v] = seaUV(x, z); if (u * u + v * v > 20 * 20) return false;
+  if ((u / 6.9) ** 2 + (v / 5.5) ** 2 < 1) return true;                         // 龜殼
+  if (Math.hypot(u + 9.4, v) < 2.3 || Math.hypot(u + 6.9, v) < 1.5) return true;  // 龜頭、脖子
+  if (Math.hypot(u - 8.3, v) < 1.4) return true;                                 // 尾巴
+  for (const a of [-4.8, 4.8]) for (const b of [-6.1, 6.1]) if (Math.hypot(u - a, v - b) < 2.3) return true;   // 四隻腳
+  return false;
+}
+function xtraWhere(x, z) { const [u, v] = seaUV(x, z); const p = seaPier(u, v, 3); if (p === 'A') return '校園港'; if (p === 'B') return '龜山島港'; if (u * u + v * v < (SEA.R + 0.5) ** 2) return '龜山島'; return null; }
+// ---- 建模工具：參數曲面（海上座標 → 球面）----
+const _seaV = new T.Vector3();
+function seaSurf(nA, nB, fn, color, opts) {
+  opts = opts || {}; const pos = [], col = [], idx = [], c = new T.Color();
+  for (let i = 0; i <= nA; i++) for (let j = 0; j <= nB; j++) { const p = fn(i / nA, j / nB), f = seaFlat(p[0], p[1]); sph(f[0], p[2], f[1], _seaV); pos.push(_seaV.x, _seaV.y, _seaV.z); c.set(typeof color === 'function' ? color(i / nA, j / nB) : color); col.push(c.r, c.g, c.b); }
+  for (let i = 0; i < nA; i++) for (let j = 0; j < nB; j++) { const a = i * (nB + 1) + j, b = a + 1, d = a + nB + 1, e = d + 1; idx.push(a, d, b, b, d, e); }
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new T.Float32BufferAttribute(col, 3)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new T.Mesh(g, opts.mat || new T.MeshLambertMaterial({ vertexColors: true, side: T.DoubleSide })); m.frustumCulled = false; m.userData.noOutline = !!opts.noOutline; return m;
+}
+const seaEll = (cu, cv, cy, ru, rv, ry, color) => seaSurf(12, 18, (a, b) => { const al = a * Math.PI, be = b * 2 * Math.PI; return [cu + ru * Math.sin(al) * Math.cos(be), cv + rv * Math.sin(al) * Math.sin(be), cy + ry * Math.cos(al)]; }, color);
+function seaFlatGrid(nA, nB, fn) {                                  // 平面座標的走路面（不顯示，只供射線偵測地面）
+  const pos = [], idx = []; for (let i = 0; i <= nA; i++) for (let j = 0; j <= nB; j++) { const p = fn(i / nA, j / nB), f = seaFlat(p[0], p[1]); pos.push(f[0], p[2], f[1]); }
+  for (let i = 0; i < nA; i++) for (let j = 0; j < nB; j++) { const a = i * (nB + 1) + j, b = a + 1, d = a + nB + 1, e = d + 1; idx.push(a, d, b, b, d, e); }
+  const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  const m = new T.Mesh(g, new T.MeshBasicMaterial({ side: T.DoubleSide })); m.visible = false; m.matrixAutoUpdate = false; scene.add(m); m.updateMatrixWorld(true); walk.push(m); return m;
+}
+function seaPlace(o, u, v, y, hdg) { const f = seaFlat(u, v), phi = seaPhi(f[0], f[1]); placeOnPlanet(o, f[0], f[1], -phi - (hdg || 0), y || 0); }   // hdg：在海上座標裡的朝向（0＝朝外、向 u 增加）
+// ---- 渡船、碼頭 ----
+const SM = { wood: new T.MeshLambertMaterial({ color: 0xb48a56 }), dark: new T.MeshLambertMaterial({ color: 0x6a4a2c }), hull: new T.MeshLambertMaterial({ color: 0x2f6aa8 }), white: new T.MeshLambertMaterial({ color: 0xf6f4ee }), red: new T.MeshLambertMaterial({ color: 0xd8403a }), gold: new T.MeshLambertMaterial({ color: 0xf2c230 }) };
+function seaBoat() {
+  const g = new T.Group(), M = (parts, m) => hwMesh(hwMerge(parts), m, g);
+  M([[new T.SphereGeometry(1, 16, 10), hwM4(0, 0.35, 0, 2.2, 0.62, 0.95)]], SM.hull);
+  M([[new T.BoxGeometry(3.4, 0.06, 1.3), hwM4(0, 0.58, 0, 1)], [new T.BoxGeometry(0.9, 0.7, 0.9), hwM4(-0.7, 0.95, 0, 1)]], SM.white);
+  M([[new T.BoxGeometry(1.1, 0.08, 1.1), hwM4(-0.7, 1.33, 0, 1)], [new T.BoxGeometry(0.05, 0.9, 0.05), hwM4(1.0, 1.0, 0, 1)], [new T.BoxGeometry(0.45, 0.28, 0.03), hwM4(1.22, 1.35, 0, 1)]], SM.red);
+  M([[new T.BoxGeometry(3.6, 0.1, 0.06), hwM4(0, 0.62, 0.62, 1)], [new T.BoxGeometry(3.6, 0.1, 0.06), hwM4(0, 0.62, -0.62, 1)]], SM.gold);
+  return g;
+}
+let SEG = null;
+function seaPierMod() {
+  if (SEG) return SEG; const P = [[new T.BoxGeometry(2, 0.12, 3.2), hwM4(0, 0.06, 0, 1)]], Q = [], R = [];
+  [-1.4, 1.4].forEach(z => { [-0.9, 0.9].forEach(x => Q.push([new T.CylinderGeometry(0.09, 0.09, 2.6, 6), hwM4(x, -1.2, z, 1)])); R.push([new T.BoxGeometry(2, 0.06, 0.06), hwM4(0, 0.85, z, 1)], [new T.BoxGeometry(0.06, 0.8, 0.06), hwM4(0, 0.45, z, 1)]); });
+  return SEG = { top: hwMerge(P), post: hwMerge(Q), rail: hwMerge(R) };
+}
+function seaSign(u, v, text, col) {
+  const g = new T.Group(); hwMesh(hwMerge([[new T.CylinderGeometry(0.07, 0.07, 2.2, 6), hwM4(0, 1.1, 0, 1)], [new T.BoxGeometry(1.4, 0.5, 0.06), hwM4(0, 2.2, 0, 1)]]), SM.dark, g);
+  const s = hwSprite(text, col); s.position.set(0, 2.9, 0); g.add(s); seaPlace(g, u, v, 0, 0); SEA.root.add(g);
+}
+function seaBuild() {
+  if (SEA.built) return; SEA.built = true; hwGeos(); const root = SEA.root = new T.Group(); scene.add(root); const add = o => { root.add(o); return o; };
+  // 龜山島：沙灘底座＋岩壁＋泡沫圈
+  const sand = 0xe9d9a6, R = SEA.R;
+  add(seaSurf(6, 40, (a, b) => { const r = a * R, t = b * 2 * Math.PI; return [r * Math.cos(t), r * Math.sin(t), 0.05]; }, sand));
+  add(seaSurf(4, 40, (a, b) => { const t = b * 2 * Math.PI, r = R + a * 0.9; return [r * Math.cos(t), r * Math.sin(t), 0.05 - 3.4 * a]; }, a => (a < 0.2 ? 0xd8c690 : 0x8a826e)));
+  add(seaSurf(3, 40, (a, b) => { const t = b * 2 * Math.PI, r = R + 0.9 + a * 2.6; return [r * Math.cos(t), r * Math.sin(t), -0.44]; }, 0xffffff, { mat: new T.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.4, depthWrite: false, side: T.DoubleSide }), noOutline: true }));
+  // 烏龜：龜殼（六角龜甲花紋）、頭、脖子、四肢、尾巴；頭朝向校園（u 負向）
+  add(seaSurf(10, 36, (a, b) => { const al = a * Math.PI / 2, be = b * 2 * Math.PI, k = Math.sin(al); return [6.9 * k * Math.cos(be), 5.5 * k * Math.sin(be), 0.05 + 5.6 * Math.pow(Math.cos(al), 0.8)]; }, (a, b) => a > 0.93 ? 0x5a4a2a : (((Math.floor(b * 9) + Math.floor(a * 4)) % 2) ? 0x4f8a3f : 0x3f6f34)));
+  const skin = 0x9bbf6a; add(seaEll(-9.4, 0, 2.0, 2.4, 1.9, 1.8, skin)); add(seaEll(-6.9, 0, 1.3, 2.2, 1.7, 1.4, skin)); add(seaEll(8.3, 0, 0.7, 1.9, 0.7, 0.6, skin));
+  [[-4.8, -6.1], [-4.8, 6.1], [4.8, -6.1], [4.8, 6.1]].forEach(p => add(seaEll(p[0], p[1], 1.1, 2.4, 2.0, 1.4, skin)));
+  add(seaEll(-11.3, -1.0, 2.9, 0.38, 0.38, 0.38, 0x1c1c22)); add(seaEll(-11.3, 1.0, 2.9, 0.38, 0.38, 0.38, 0x1c1c22)); add(seaEll(-11.5, 0, 1.3, 0.4, 0.9, 0.18, 0xd86a5a));   // 眼睛、嘴
+  // 碼頭：校園港（A）、龜山島港（B）
+  const G = seaPierMod(), mod = (u0, u1) => { for (let u = u0 + 1; u < u1; u += 2) { const g = new T.Group(); hwMesh(G.top, SM.wood, g); hwMesh(G.post, SM.dark, g); hwMesh(G.rail, SM.dark, g); seaPlace(g, u, 0, 0, 0); root.add(g); } };
+  mod(SEA.pierA[0], SEA.pierA[1]); mod(SEA.pierB[0], SEA.pierB[1]);
+  seaFlatGrid(10, 2, (a, b) => [SEA.pierA[0] - 0.4 + a * (SEA.pierA[1] - SEA.pierA[0] + 0.4), (b - 0.5) * 2 * 1.6, 0.12]); seaFlatGrid(10, 2, (a, b) => [SEA.pierB[0] + a * (SEA.pierB[1] - SEA.pierB[0] + 0.5), (b - 0.5) * 2 * 1.6, 0.12]);
+  seaFlatGrid(6, 40, (a, b) => { const r = a * (R - 0.3), t = b * 2 * Math.PI; return [r * Math.cos(t), r * Math.sin(t), 0.05]; });
+  seaSign(SEA.pierA[0] + 2, 2.4, '校園港', '#9fe0ff'); seaSign(SEA.pierB[0] + 2, 2.4, '龜山島港', '#ffe08a');
+  { const s = hwSprite('龜山島', '#ffe08a'); const f = new T.Group(); f.add(s); s.position.set(0, 9, 0); seaPlace(f, 0, 0, 0, 0); root.add(f); }
+  // 船：兩岸各停一艘，出發時換成會航行的那艘
+  SEA.bA = seaBoat(); SEA.bB = seaBoat(); SEA.bF = seaBoat(); [SEA.bA, SEA.bB, SEA.bF].forEach(b => root.add(b)); SEA.bF.visible = false;
+  // 海鷗
+  const mk = () => { const g = new T.Group(), b = new T.Group(); g.add(b); const W = new T.MeshLambertMaterial({ color: 0xffffff }), GY = new T.MeshLambertMaterial({ color: 0x9aa4ac }), OR = new T.MeshLambertMaterial({ color: 0xf0a020 });
+    hwMesh(hwMerge([[new T.SphereGeometry(0.2, 8, 6), hwM4(0, 0, 0, 1.7, 0.8, 0.8)], [new T.SphereGeometry(0.1, 8, 6), hwM4(0.33, 0.07, 0, 1)], [new T.BoxGeometry(0.3, 0.03, 0.16), hwM4(-0.42, 0.02, 0, 1)]]), W, b);
+    hwMesh(hwMerge([[new T.ConeGeometry(0.035, 0.16, 5), hwM4(0.5, 0.05, 0, 1, 1, 1, 0, 0, -Math.PI / 2)]]), OR, b);
+    const wing = s => { const p = new T.Group(); p.position.set(0, 0.05, s * 0.1); hwMesh(hwMerge([[new T.BoxGeometry(0.32, 0.025, 0.55), hwM4(0, 0, s * 0.27, 1)]]), W, p); hwMesh(hwMerge([[new T.BoxGeometry(0.2, 0.026, 0.3), hwM4(-0.04, 0, s * 0.64, 1)]]), GY, p); b.add(p); return p; };
+    g.userData.wl = wing(-1); g.userData.wr = wing(1); g.userData.b = b; return g; };
+  for (let i = 0; i < 9; i++) { const g = mk(); root.add(g); dynAdd(g); const th = 2.18 + Math.random() * 0.55; SEA.gulls.push({ g, th, phi: Math.random() * 6.283, h: 5 + Math.random() * 7, hd: Math.random() * 6.28, tth: th, tphi: 0, th2: 0, sp: 4 + Math.random() * 2.5, ph: Math.random() * 6, bank: 0, new: 0 }); }
+  if (window.STY && STY.on && typeof styScan === 'function') styScan();
+  seaBoatsIdle();
+}
+function seaBoatsIdle() {
+  if (!SEA.built) return; const t = SEA.t, bob = Math.sin(t * 1.6) * 0.05 - 0.25, ride = !!SEA.ride;
+  if (!ride) { SEA.bA.visible = SEA.bB.visible = true; SEA.bF.visible = false; }
+  if (!(ride && SEA.ride.from === 'A')) seaPlace(SEA.bA, SEA.slot.A[0], 0, bob, 0);
+  if (!(ride && SEA.ride.from === 'B')) seaPlace(SEA.bB, SEA.slot.B[0], 0, bob + Math.sin(t * 1.3) * 0.02, Math.PI);
+}
+// ---- 航行 ----
+function seaStand(p) { return p === 'A' ? [SEA.pierA[1] - 0.8, 0, -80] : [SEA.pierB[0] + 0.8, 0, 0]; }
+function seaTp(to) {                                            // 直接傳送：站到對岸碼頭、面向陸地／島心
+  closePanels(); const s = seaStand(to), f = seaFlat(s[0], s[1]), l = seaFlat(s[2], 0); teleport(f[0], 0.15, f[1], l[0], l[1]); toast(to === 'B' ? '抵達龜山島港' : '回到校園港', 2600);
+}
+function seaSail(to) {                                          // 自動航行：船載著主角從一座碼頭開到另一座
+  closePanels(); const from = to === 'B' ? 'A' : 'B', a = SEA.slot[from], b = SEA.slot[to];
+  SEA.ride = { t: 0, T: 11, from, to, a, b, sw: to === 'B' ? 7 : -7 }; GAME.block = true; (from === 'A' ? SEA.bA : SEA.bB).visible = false; SEA.bF.visible = true;
+  const f = seaFlat(a[0], 0), l = seaFlat(b[0], 0); teleport(f[0], 0.2, f[1], l[0], l[1]); toast('出發囉！自動航行中…', 2400);
+}
+function seaTick(dt) {
+  if (!SEA.built) { if (typeof STARTED !== 'undefined' && STARTED && PWG.children.length) try { seaBuild(); } catch (e) { SEA.built = true; console.error(e); } return; }
+  SEA.t += dt; const t = SEA.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6; seaBoatsIdle();
+  const R = SEA.ride; if (R) {
+    R.t += dt; const s = Math.min(1, R.t / R.T), e = s < 0.5 ? 2 * s * s : 1 - 2 * (1 - s) * (1 - s), uu = (a, b) => a + (b - a) * e, pos = k => { const ee = Math.min(1, Math.max(0, k)); return [R.a[0] + (R.b[0] - R.a[0]) * ee, R.sw * Math.sin(Math.PI * ee) * 1.0]; };
+    const p0 = pos(e), p1 = pos(e + 0.02), hdg = Math.atan2(p1[1] - p0[1], p1[0] - p0[0]), by = -0.2 + Math.sin(t * 2.2) * 0.05;
+    seaPlace(SEA.bF, p0[0], p0[1], by, hdg + Math.sin(t * 1.4) * 0.03); const f = seaFlat(p0[0], p0[1]); PL.x = f[0]; PL.z = f[1]; PL.y = by + 0.45; PL.vy = 0; fwTransport();
+    if (s >= 1) { SEA.ride = null; GAME.block = false; const to = R.to; SEA.bF.visible = false; seaBoatsIdle(); const st = seaStand(to), ff = seaFlat(st[0], st[1]), ll = seaFlat(st[2], 0); teleport(ff[0], 0.15, ff[1], ll[0], ll[1]); toast(to === 'B' ? '抵達龜山島！' : '回到校園港', 2800); }
+  }
+  // 海鷗：在海岸帶隨機繞飛，翅膀拍動
+  SEA.gulls.forEach(G => {
+    G.new -= dt; if (G.new <= 0) { G.new = 4 + Math.random() * 6; G.tth = 2.12 + Math.random() * 0.66; G.tphi = G.phi + (Math.random() - 0.5) * 2.2; G.th2 = 5 + Math.random() * 8; }
+    const du = (G.tth - G.th) * PR, dv = Math.atan2(Math.sin(G.tphi - G.phi), Math.cos(G.tphi - G.phi)) * PR * Math.sin(G.th), want = Math.atan2(dv, du);
+    let dh = want - G.hd; dh = Math.atan2(Math.sin(dh), Math.cos(dh)); const turn = Math.max(-1.3, Math.min(1.3, dh * 1.5)); G.hd += turn * dt; G.bank += (-turn * 0.5 - G.bank) * Math.min(1, dt * 3);
+    G.th += Math.cos(G.hd) * G.sp * dt / PR; G.phi += Math.sin(G.hd) * G.sp * dt / (PR * Math.sin(G.th)); G.h += (G.th2 - G.h) * Math.min(1, dt * 0.5);
+    const x = PC.x + G.th * PR * Math.cos(G.phi), z = PC.z + G.th * PR * Math.sin(G.phi), g = G.g; g.position.set(x, G.h + Math.sin(t * 0.9 + G.ph) * 0.6, z); g.rotation.set(G.bank, -(G.phi + G.hd), 0, 'YXZ'); g.scale.setScalar(1.2 * pk);
+    const fl = Math.sin(t * (8 + G.sp) + G.ph) * 0.55; g.userData.wl.rotation.x = fl; g.userData.wr.rotation.x = -fl;
+  });
+}
+function seaInteract(cand, ds) {
+  if (!SEA.built || SEA.ride) return; const [u, v] = seaUV(PL.x, PL.z);
+  const dA = Math.hypot(u - (SEA.pierA[1] - 0.8), v), dB = Math.hypot(u - (SEA.pierB[0] + 0.8), v);
+  if (dA < 3.6) cand(dA, '搭船前往龜山島', () => openDlg('渡船', '（船靠在校園港的碼頭邊，隨著海浪輕輕搖晃。）\n\n想去海上的龜山島嗎？可以搭船慢慢欣賞海景，也可以直接傳送。', [{ t: '自動航行（約 11 秒）', go: true, fn: () => seaSail('B') }, { t: '直接傳送', fn: () => seaTp('B') }, { t: '先不要', fn: closePanels }]));
+  if (dB < 3.6) cand(dB, '搭船回校園港', () => openDlg('渡船', '（龜山島的港口，遠遠可以看到校園。）\n\n要回校園港嗎？', [{ t: '自動航行（約 11 秒）', go: true, fn: () => seaSail('A') }, { t: '直接傳送', fn: () => seaTp('A') }, { t: '再逛逛', fn: closePanels }]));
+}
+// 傳送選單：校園港、龜山島港
+{ const f = seaFlat(SEA.pierA[1] - 0.8, 0), l = seaFlat(-80, 0), f2 = seaFlat(SEA.pierB[0] + 0.8, 0), l2 = seaFlat(0, 0); TP.portA = [f[0], 0.15, f[1], l[0], l[1]]; TP.portB = [f2[0], 0.15, f2[1], l2[0], l2[1]]; }
+window.__sea = { SEA, seaFlat, seaUV, seaSail, seaTp };
+// ===== 校園教職員：6 位自動走動的骨架角色（頭大身小、露出手臂） =====
+const STF = { built: false, t: 0, list: [] };
+const STF_DEF = [
+  { id: 'ting', name: '霆霆校長', role: '校長', kind: 'boy', h: 1.5, home: '梅花廣場', off: [4, 5], col: '#ffe08a', sp: 0.9, R: 9,
+    c: { skin: 0xf2c9a4, hair: 0x2a2220, 'school-shirt': 0x27406b, 'school-shorts': 0x2c3342, collar: 0xffffff, shoes: 0x2a2020 }, acc: 'tie',
+    lines: ['歡迎來到同樂！這裡的每一位孩子，都是校園裡最亮的星星。', '走一走、看一看，校園裡藏著很多有趣的角落喔。', '遇到困難別擔心，老師和同學都會幫你。'] },
+  { id: 'ye', name: 'YAYA主任', role: '主任', kind: 'boy', h: 1.45, home: '校門', off: [3, 6], col: '#9fd0ff', sp: 1.0, R: 9,
+    c: { skin: 0xeeba94, hair: 0x7a4a28, 'school-shirt': 0x9a6338, 'school-shorts': 0x7a4a28, collar: 0xf0d9b0, shoes: 0x5a3418 }, acc: 'bear',
+    lines: ['我是YAYA主任～穿著熊熊裝，抱一下就不怕啦！', '校園安全最重要，進出校門請放慢腳步喔。', '今天的行政事務滿滿，不過看到你們精神好，就有力氣了。'] },
+  { id: 'qi', name: '琪琪主任', role: '主任', kind: 'girl', h: 1.42, home: '集合場', off: [3, -4], col: '#ffc0d8', sp: 1.0, R: 9,
+    c: { skin: 0xf6d2b0, hair: 0x4a2c20, 'school-shirt': 0xc0506a, 'school-shorts': 0x4a3a46, collar: 0xffffff, shoes: 0x5a2a30, 'hair-band': 0xf2c230 }, acc: 'bun',
+    lines: ['活動前先熱身，運動才不會受傷。', '集合的時候要快、靜、齊，今天的隊伍看起來很棒！', '記得多喝水，補充水分很重要。'] },
+  { id: 'yan', name: '彥彥組長', role: '組長', kind: 'boy', h: 1.45, home: '操場', off: [-4, 7], col: '#9fe8b0', sp: 1.15, R: 11,
+    c: { skin: 0xe8b48c, hair: 0x201a16, 'school-shirt': 0x2a5fc0, 'school-shorts': 0xf4f4f4, collar: 0xe03a2c, shoes: 0xf0f0f0 }, acc: 'pe',
+    lines: ['跑操場前先暖身，一起來動一動吧！', '運動不是比誰快，是比誰願意持續。', '想挑戰操場跑道嗎？我幫你計時！'] },
+  { id: 'min', name: '敏敏老師', role: '老師', kind: 'girl', h: 1.38, home: '涼亭・遊戲區', off: [4, 3], col: '#ffd9a0', sp: 0.9, R: 8,
+    c: { skin: 0xf4cfae, hair: 0x2c1f1a, 'school-shirt': 0xe8935a, 'school-shorts': 0x5a4636, collar: 0xffffff, shoes: 0x7a4a2a, 'hair-band': 0xffffff }, acc: 'book',
+    lines: ['你看過今天的課表了嗎？好好把握學習的時間。', '好奇心是最棒的老師，有問題就大膽問！', '我最喜歡看到孩子們發現新東西的表情。'] },
+  { id: 'ning', name: '寧寧老師', role: '老師', kind: 'girl', h: 1.38, home: '風雨球場', off: [5, 5], col: '#d9c0ff', sp: 1.0, R: 9,
+    c: { skin: 0xf2c9a4, hair: 0x3a2a3a, 'school-shirt': 0x8a6cc8, 'school-shorts': 0x3c3a5a, collar: 0xffffff, shoes: 0x3a2a4a, 'hair-band': 0xff9ac0 }, acc: 'flower',
+    lines: ['下課時間到球場玩，記得注意安全喔。', '合作比競爭更有趣，找朋友一起玩吧！', '今天也要笑一個，心情會變好～'] }
+];
+async function stfBuild() {
+  if (STF.built) return; const pl = n => NPLACES.find(p => p.name === n && !p.room); if (!pl('梅花廣場') || !pl('操場')) return; STF.built = true; hwGeos();
+  const root = STF.root = new T.Group(); scene.add(root); const A = { boy: await loadGLB('boy'), girl: await loadGLB('girl') };
+  STF_DEF.forEach(D => {
+    const p = pl(D.home) || pl('梅花廣場'), q = hwFindOpen(p.x + D.off[0], p.z + D.off[1]), g = new T.Group(); g.position.set(q[0], q[2], q[1]); root.add(g); dynAdd(g);
+    const ch = pxMake(A, D.kind, D.h, D.c), { r, cy } = pxHead(ch), G = new T.Group(), H = D.h;
+    if (D.acc === 'glasses') { const m = new T.TorusGeometry(0.3 * r, 0.05 * r, 6, 12), a = pxM2(m, 0x202028, -0.38 * r, cy + 0.1 * r, -0.98 * r), b = a.clone(); b.position.x = 0.38 * r; G.add(a, b, pxM2(new T.BoxGeometry(0.4 * r, 0.05 * r, 0.05 * r), 0x202028, 0, cy + 0.1 * r, -0.98 * r)); }
+    if (D.acc === 'bear') {                                                                           // 熊熊裝：熊耳、口鼻、鼻頭、尾巴
+      [-1, 1].forEach(sx => { G.add(pxM2(new T.SphereGeometry(0.34 * r, 10, 8), 0x8a5230, sx * 0.72 * r, cy + 0.88 * r, 0.02 * r), pxM2(new T.SphereGeometry(0.2 * r, 8, 6), 0xf0c8a0, sx * 0.72 * r, cy + 0.88 * r, -0.2 * r)); });
+      G.add(pxM2(new T.SphereGeometry(0.34 * r, 10, 8), 0xf0d9b0, 0, cy - 0.28 * r, -0.9 * r), pxM2(new T.SphereGeometry(0.11 * r, 8, 6), 0x2a1a14, 0, cy - 0.12 * r, -1.2 * r)); }
+    if (D.acc === 'pe') {                                                                              // 體育老師：藍色運動帽
+      G.add(pxM2(new T.SphereGeometry(1.08 * r, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), 0x1f4fa8, 0, cy + 0.15 * r, 0), pxM2(new T.CylinderGeometry(0.95 * r, 0.95 * r, 0.1 * r, 14, 1, false, Math.PI, Math.PI), 0xe03a2c, 0, cy + 0.2 * r, -0.62 * r)); }
+    if (D.acc === 'bun') G.add(pxM2(new T.SphereGeometry(0.4 * r, 10, 8), D.c.hair, 0, cy + 0.95 * r, 0.1 * r));
+    if (D.acc === 'flower') { G.add(pxM2(new T.SphereGeometry(0.2 * r, 8, 6), 0xff7aa8, 0.75 * r, cy + 0.65 * r, -0.2 * r), pxM2(new T.SphereGeometry(0.1 * r, 6, 4), 0xffe070, 0.75 * r, cy + 0.65 * r, -0.36 * r)); }
+    if (G.children.length) addProp(ch, 'Head', G);
+    const ny = ch.head ? ch.head.ny : 0.7 * H, B = new T.Group();
+    if (D.acc === 'tie') B.add(pxM2(new T.BoxGeometry(0.035 * H, 0.14 * H, 0.012 * H), 0xc4202c, 0, ny * 0.62, -0.1 * H));
+    if (D.acc === 'whistle' || D.acc === 'pe') B.add(pxM2(new T.CylinderGeometry(0.014 * H, 0.014 * H, 0.04 * H, 8), 0xe0e0e0, 0.015 * H, ny * 0.64, -0.1 * H));
+    B.add(pxM2(new T.BoxGeometry(0.06 * H, 0.04 * H, 0.008 * H), 0xffffff, -0.05 * H, ny * 0.56, -0.102 * H));          // 名牌
+    if (D.acc === 'book') { const bk = new T.Group(); bk.add(pxM2(new T.BoxGeometry(0.09 * H, 0.012 * H, 0.12 * H), 0x2f6fb0, 0, 0, 0), pxM2(new T.BoxGeometry(0.085 * H, 0.01 * H, 0.115 * H), 0xfdf6e0, 0, 0.011 * H, 0)); pxHand(ch, 'FistR', bk); }
+    if (D.acc === 'bear') B.add(pxM2(new T.SphereGeometry(0.06 * H, 8, 6), 0xf0d9b0, 0, ny * 0.3, 0.12 * H));
+    if (D.acc === 'pe') { const sw = new T.Group(); sw.add(pxM2(new T.CylinderGeometry(0.03 * H, 0.03 * H, 0.015 * H, 12), 0xd0d0d8, 0, 0, 0), pxM2(new T.SphereGeometry(0.008 * H, 6, 4), 0xe03a2c, 0, 0.012 * H, 0)); pxHand(ch, 'FistR', sw); }
+    addProp(ch, 'Torso', B); pxPose(ch, [null, null]); g.add(ch.node);
+    const lab = hwSprite(D.name, D.col); lab.position.set(0, H * 1.2 + 0.25, 0); g.add(lab);
+    STF.list.push({ D, g, ch, lab, x: q[0], z: q[1], y: q[2], hx: q[0], hz: q[1], tx: q[0], tz: q[1], wait: 1 + Math.random() * 4, walking: false });
+  });
+  STF.ready = true; if (window.STY && STY.on && typeof styScan === 'function') styScan();
+}
+function stfTick(dt) {
+  if (!STF.built) { if (typeof STARTED !== 'undefined' && STARTED && PWG.children.length) try { stfBuild().catch(e => console.warn('stf', e)); } catch (e) { STF.built = true; console.error(e); } return; }
+  if (!STF.ready) return; STF.t += dt; const cs = charScale();
+  STF.list.forEach(S => {
+    const D = S.D, d = Math.hypot(S.x - PL.x, S.z - PL.z), near = d < 3.4 || (typeof anyPanel === 'function' && anyPanel() && d < 8);
+    S.ch.mixer.update(dt); S.g.scale.setScalar(cs);
+    if (near) { S.walking = false; S.g.rotation.y += angd(Math.atan2(PL.x - S.x, PL.z - S.z) + Math.PI, S.g.rotation.y) * Math.min(1, dt * 4); }
+    else if (S.walking) { const dx = S.tx - S.x, dz = S.tz - S.z, L = Math.hypot(dx, dz), step = D.sp * dt;
+      if (L < step + 0.05) { S.walking = false; S.wait = 2 + Math.random() * 5; }
+      else { S.x += dx / L * step; S.z += dz / L * step; const gy = groundAt(S.x, S.y + 2.2, S.z); if (isFinite(gy)) S.y = gy; S.g.position.set(S.x, S.y, S.z); S.g.rotation.y += angd(Math.atan2(dx, dz) + Math.PI, S.g.rotation.y) * Math.min(1, dt * 6); } }
+    else { S.wait -= dt; if (S.wait <= 0) { const a = Math.random() * 6.283, r = 2 + Math.random() * D.R * 0.7, o = hwFindOpen(S.hx + Math.cos(a) * r, S.hz + Math.sin(a) * r); if (Math.hypot(o[0] - S.hx, o[1] - S.hz) < D.R + 2) { S.tx = o[0]; S.tz = o[1]; S.walking = true; } else S.wait = 1; } }
+    const w = S.walking && !near; play(S.ch, w ? 'Walk' : 'Idle', 0.2); if (w && S.ch.act.Walk) S.ch.act.Walk.timeScale = 0.75 * D.sp;
+    S.lab.visible = d > 3.2 && d < 30 && cs < 4;
+  });
+}
+function stfInteract(cand, ds) { if (!STF.ready) return; STF.list.forEach(S => { const d = ds(S.x, S.z, S.y); if (d < 3.4) cand(d, '和 ' + S.D.name + ' 說話', () => stfTalk(S)); }); }
+function stfMini(g, mp) { if (!STF.ready) return; STF.list.forEach(S => { const p = mp(S.x, S.z); g.fillStyle = S.D.col; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 3.8, 0, 7); g.fill(); g.stroke(); }); }
+function stfTalk(S) {
+  const D = S.D, done = () => closePanels(), pick = () => D.lines[Math.floor(Math.random() * D.lines.length)];
+  const menu = first => openDlg(D.name + '（' + D.role + '）', first ? '（' + D.name + '笑著向你揮揮手：）\n\n「你好呀！」' : '「' + pick() + '」', [{ t: '再聊聊', go: true, fn: () => menu(false) }, { t: '謝謝，再見', fn: done }]);
+  menu(true);
+}
 </script></html>
