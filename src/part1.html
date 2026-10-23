@@ -70,11 +70,20 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #mini canvas{width:150px;height:150px;border-radius:6px}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));
   font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 14px;z-index:4;white-space:nowrap}
-#joyL,#joyR{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;
+#joyL{position:fixed;bottom:calc(120px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;
   border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.14);z-index:6;display:none;touch-action:none;opacity:.5}
-#joyL{left:24px}#joyR{right:24px}
+#joyL{left:24px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#bRun,#bJump{position:fixed;display:none;z-index:6;border-radius:50%;border:2px solid rgba(255,255,255,.65);background:rgba(0,0,0,.28);color:#fff;font-weight:800;font-size:20px;touch-action:none;user-select:none;-webkit-user-select:none;padding:0;opacity:.7}
+#bRun{left:24px;bottom:calc(244px + env(safe-area-inset-bottom,0px));width:64px;height:64px}
+#bJump{right:24px;bottom:calc(130px + env(safe-area-inset-bottom,0px));width:88px;height:88px;font-size:24px}
+#bRun.on{background:rgba(232,116,26,.85);opacity:.95}#bJump:active{background:rgba(232,116,26,.85);opacity:.95}
 .knob{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.75);border:2px solid rgba(0,0,0,.45);box-sizing:border-box}
-.touch #joyL,.touch #joyR{display:block}.touch #hint{display:none}
+.touch #joyL{display:block}.touch #bRun,.touch #bJump{display:block}.touch #hint{display:none}
+/* 手機：跳、跑、拾取/對話(E) 三個按鈕都集中在右側，右手拇指可及；左側只留搖桿 */
+.touch #bJump{right:24px!important;left:auto!important;bottom:calc(120px + env(safe-area-inset-bottom,0px))!important;width:84px!important;height:84px!important}
+.touch #bRun{right:120px!important;left:auto!important;bottom:calc(120px + env(safe-area-inset-bottom,0px))!important;width:60px!important;height:60px!important}
+.touch #prompt{left:auto!important;right:16px!important;transform:none!important;bottom:calc(216px + env(safe-area-inset-bottom,0px))!important;max-width:calc(100vw - 150px);font-size:16px;padding:12px 20px}
+@media (max-width:900px){.touch #bJump,.touch #bRun{bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}.touch #prompt{bottom:calc(184px + env(safe-area-inset-bottom,0px))!important}}
 .touch #floors{bottom:auto;top:calc(110px + env(safe-area-inset-top,0px))}
 #intro{z-index:12;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(400px,calc(100vw - 32px));box-sizing:border-box;padding:20px 22px;border-radius:18px;background:rgba(18,25,21,.82);color:#eef3ee;border-color:rgba(255,255,255,.12);backdrop-filter:blur(10px);display:none}
 #intro.show{display:block}
@@ -91,7 +100,7 @@ button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 #intro .go button.pri{background:#ffd24a;color:#241b05;border-color:#ffd24a}
 #intro dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);font-size:12.5px;color:#cfd9d1;align-items:center}
 #intro dt{font:700 11px var(--font-num);letter-spacing:.08em;background:rgba(255,255,255,.12);border-radius:5px;padding:2px 8px;text-align:center}#intro dd{margin:0}
-body.intro #joyL,body.intro #joyR,body.intro #hint{display:none!important}
+body.intro #joyL,body.intro #bRun,body.intro #bJump,body.intro #hint{display:none!important}
 @media (max-width:640px){#intro{left:12px;right:12px;width:auto;padding:18px;max-height:calc(100vh - 90px);overflow:auto}#intro h2{font-size:25px}}
 #info{background:rgba(24,31,38,.66);color:#f1f4f2;border-color:rgba(255,255,255,.12);border-radius:999px;padding:6px 18px 6px 6px;max-width:calc(100vw - 96px)}
 #info .logo{gap:10px}#info .logo .lg{width:44px;height:44px;border:2px solid rgba(255,255,255,.7)}
@@ -105,7 +114,7 @@ body.intro #joyL,body.intro #joyR,body.intro #hint{display:none!important}
 #intro dt{background:rgba(79,177,143,.28);color:#c9f3d6}
 #intro dl{border-top-color:rgba(143,217,168,.28)}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:20;font-size:15px;color:var(--muted)}
-@media (max-width:900px){#modes{max-width:calc(100vw - 32px);top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:16px;right:auto;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 8px}#modes::-webkit-scrollbar{display:none}#modes button{flex:none;white-space:nowrap;padding:6px 10px;font-size:13px}#joyL,#joyR{bottom:calc(88px + env(safe-area-inset-bottom,0px))}#dqd{bottom:calc(210px + env(safe-area-inset-bottom,0px))}
+@media (max-width:900px){#modes{max-width:calc(100vw - 32px);top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:16px;right:auto;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 8px}#modes::-webkit-scrollbar{display:none}#modes button{flex:none;white-space:nowrap;padding:6px 10px;font-size:13px}#joyL{bottom:calc(88px + env(safe-area-inset-bottom,0px))}#bRun{bottom:calc(212px + env(safe-area-inset-bottom,0px))}#bJump{bottom:calc(98px + env(safe-area-inset-bottom,0px))}#dqd{bottom:calc(210px + env(safe-area-inset-bottom,0px))}
   #floors{bottom:calc(16px + env(safe-area-inset-bottom,0px))}}
 @media (max-width:640px){#mini{display:none}}
 .touch #mini{display:none}
@@ -166,7 +175,7 @@ button[hidden]{display:none!important}
 #place{z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;border-radius:999px;padding:8px 18px;background:rgba(24,31,38,.85);color:#fff}
 #place button{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}#place button.pri{background:#ffd24a;color:#241b05;border-color:#ffd24a;font-weight:700}
 #intro .sv{font-size:12px;color:#9fc9ae;margin:6px 0 0}
-body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
+body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@700&text=%E5%90%8C%E6%A8%82%E5%9C%8B%E6%B0%91%E5%B0%8F%E5%AD%B8&display=block">
@@ -187,6 +196,8 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
   <button id="bOnline" type="button" hidden title="登入 Google 後，和同學一起上線（最多 25 人）">多人：關</button>
   <button id="bEd" type="button" title="切換一般版／萬聖節限定版">版本：一般</button>
   <button id="bHw" type="button" hidden title="校園妖怪地圖">妖怪地圖</button>
+  <button id="bXm" type="button" hidden title="聖誕任務">聖誕任務</button>
+  <button id="bLn" type="button" hidden title="新春任務">新春任務</button>
   <button id="bMenu" type="button">傳送選單</button>
 </div>
 <div class="panel" id="search"><div class="sbox"><button type="button" id="sBtn" aria-label="找教室或地點"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button><input id="q" type="search" placeholder="找教室或地點：電腦教室、操場…" autocomplete="off"></div><div id="sres"></div></div>
@@ -197,6 +208,8 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
     <button type="button" data-tp="track">操場</button>
     <button type="button" data-tp="gym">風雨球場</button>
     <button type="button" data-tp="park">停車場</button>
+    <button type="button" data-tp="portA">校園港</button>
+    <button type="button" data-tp="portB">龜山島港</button>
       </div>
   <div class="row" id="floorRow"><span class="lab">教學大樓</span></div>
 </div>
@@ -221,10 +234,15 @@ body.gamedlg #joyL,body.gamedlg #joyR{display:none!important}
 <div id="shop" class="panel big" hidden><div class="ph"><b>同樂小舖</b><span class="pc"><i class="coin"></i><b id="shopCoin">0</b></span><button type="button" class="px" id="shopX">關閉</button></div><div class="tabs"><button type="button" id="shopBuy" class="on">購買</button><button type="button" id="shopSell">賣出</button></div><div class="grid" id="shopList"></div></div>
 <div id="bag" class="panel big" hidden><div class="ph"><b>背包</b><span class="pc"><i class="coin"></i><b id="bagCoin">0</b></span><button type="button" class="px" id="bagX">關閉</button></div><div class="grid" id="bagList"></div><p class="sm">家具與植物可「擺放」到星球上；其他物品到小舖賣出換同樂幣。</p></div>
 <div id="hwp" class="panel big" hidden><div class="ph"><b>萬聖節限定 · 校園妖怪地圖</b><button type="button" class="px" id="hwpX">關閉</button></div><div id="hwpList"></div></div>
+<div id="xmp" class="panel big" hidden><div class="ph"><b>聖誕節限定 · 聖誕任務</b><button type="button" class="px" id="xmpX">關閉</button></div><div id="xmpList"></div></div>
+<div id="xmg" class="panel big" hidden><div class="ph"><b>聖誕 · 接禮物</b><button type="button" class="px" id="xmgX">關閉</button></div><div style="text-align:center"><canvas id="xmgC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="xmgS"></p><button type="button" class="go" id="xmgGo">開始</button></div></div>
+<div id="lnp" class="panel big" hidden><div class="ph"><b>農曆年限定 · 新春任務</b><button type="button" class="px" id="lnpX">關閉</button></div><div id="lnpList"></div></div>
+<div id="lng" class="panel big" hidden><div class="ph"><b>新春 · 搶紅包</b><button type="button" class="px" id="lngX">關閉</button></div><div style="text-align:center"><canvas id="lngC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="lngS"></p><button type="button" class="go" id="lngGo">開始</button></div></div>
 <div id="edp" class="panel big" hidden><div class="ph"><b>選擇版本</b><button type="button" class="px" id="edpX">關閉</button></div><div class="grid" id="edpList"></div></div>
 <div id="qst" class="panel big" hidden><div class="ph"><b>委託</b><button type="button" class="px" id="qstX">關閉</button></div><div id="qstList"></div></div>
 <div id="place" class="panel" hidden><b id="placeN"></b><button type="button" id="pOk" class="pri">放下 (E)</button><button type="button" id="pRot">旋轉 (R)</button><button type="button" id="pNo">取消 (X)</button></div>
 <div id="joyL"><div class="knob"></div></div>
-<div id="joyR"><div class="knob"></div></div>
+<button id="bRun" type="button" aria-label="跑步（點一下開關）">跑</button>
+<button id="bJump" type="button" aria-label="跳">跳</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

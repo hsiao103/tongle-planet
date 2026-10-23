@@ -121,12 +121,20 @@ function hwBuild() {
 const hwDone = () => HWMON.filter(m => G.hw && G.hw.done[m.id]).length;
 function hwApply(ed, quiet) {
   G.edition = ed; const on = ed === 'halloween'; HW.on = on; if (on) hwBuild();
-  if (HW.root) HW.root.visible = on; $('bEd').textContent = on ? '版本：萬聖節' : '版本：一般'; $('bEd').classList.toggle('on', on); $('bHw').hidden = !on; hwBtn();
-  if (!quiet) { toast(on ? '萬聖節限定版開啟！去找三隻校園妖怪，順便撿南瓜和骷髏糖' : '已切換回一般版', 3600); saveGame(); }
+  if (HW.root) HW.root.visible = on; $('bEd').textContent = '版本：' + ({ halloween: '萬聖節', christmas: '聖誕節', lunar: '農曆年' }[ed] || '一般'); $('bEd').classList.toggle('on', ed !== 'normal'); $('bHw').hidden = !on; hwBtn();
+  if (typeof xmApply === 'function') xmApply(ed, quiet);
+  if (typeof lnApply === 'function') lnApply(ed, quiet);
+  if (!quiet) { if (on) toast('萬聖節限定版開啟！去找三隻校園妖怪，順便撿南瓜和骷髏糖', 3600); else if (ed === 'normal') toast('已切換回一般版', 3600); saveGame(); }
   if (!on) HW.k = Math.min(HW.k, 1);
 }
 function hwBtn() { $('bHw').textContent = '妖怪地圖 ' + hwDone() + '/3'; }
 function hwTick(dt) {
+  if (typeof cloudTick === 'function') cloudTick(dt);
+  if (typeof pxTick === 'function') pxTick(dt);
+  if (typeof stfTick === 'function') stfTick(dt);
+  if (typeof seaTick === 'function') seaTick(dt);
+  if (typeof xmTick === 'function') xmTick(dt);
+  if (typeof lnTick === 'function') lnTick(dt);
   HW.k += ((HW.on ? 1 : 0) - HW.k) * Math.min(1, dt * 1.6); if (!HW.on && HW.k < 0.01) HW.k = 0;
   if (!HW.on || !HW.built) return;
   HW.t += dt; const t = HW.t, cs = charScale(), pk = 1 + (cs - 1) * 0.6;
@@ -148,11 +156,20 @@ function hwTick(dt) {
   HW.chk -= dt; if (HW.chk <= 0) { HW.chk = 0.5; const now = nowMs(); [...HW.pumps, ...HW.skulls].forEach(o => { const key = 'h' + o.kind[0] + o.id; if (!o.on && !(G.resp[key] > now)) { o.on = true; o.g.visible = true; } }); }
 }
 function hwInteract(cand, ds) {
+  if (typeof pxInteract === 'function') pxInteract(cand, ds);
+  if (typeof stfInteract === 'function') stfInteract(cand, ds);
+  if (typeof seaInteract === 'function') seaInteract(cand, ds);
+  if (typeof xmInteract === 'function') xmInteract(cand, ds);
+  if (typeof lnInteract === 'function') lnInteract(cand, ds);
   if (!HW.on || !HW.built) return;
   HW.mons.forEach(m => { const d = ds(m.x, m.z, m.y); if (d < 3.4) cand(d, G.hw.done[m.id] ? '和 ' + m.name + ' 聊聊' : '挑戰 ' + m.name + '（老師變成的妖怪）', () => hwTalk(m)); });
   [...HW.pumps, ...HW.skulls].forEach(o => { if (!o.on) return; const d = ds(o.x, o.z, 0); if (d < 2.2) cand(d, o.kind === 'pumpkin' ? '撿起小南瓜' : '撿起可愛骷髏糖', () => { addItem(o.kind); toast('撿到 ' + ITEMS[o.kind].n + '！'); o.on = false; o.g.visible = false; G.resp['h' + o.kind[0] + o.id] = nowMs() + (o.kind === 'pumpkin' ? 4 : 7) * 60000; saveGame(); }); });
 }
 function hwMini(g, mp) {
+  if (typeof pxMini === 'function') pxMini(g, mp);
+  if (typeof stfMini === 'function') stfMini(g, mp);
+  if (typeof xmMini === 'function') xmMini(g, mp);
+  if (typeof lnMini === 'function') lnMini(g, mp);
   if (!HW.on) return;
   HW.mons.forEach(m => { const p = mp(m.x, m.z); g.fillStyle = G.hw.done[m.id] ? '#46b86a' : '#a05cff'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 5, 0, 7); g.fill(); g.stroke(); });
   g.fillStyle = '#f28a1c'; HW.pumps.forEach(o => { if (!o.on) return; const p = mp(o.x, o.z); g.beginPath(); g.arc(p[0], p[1], 2.4, 0, 7); g.fill(); });
@@ -186,7 +203,7 @@ function hwPanel() {
 }
 function edPanel() {
   openPanel('edp'); const L = $('edpList'); L.innerHTML = '';
-  [['normal', '一般版', '平常的同樂小行星：採集、釣魚、擺設、居民委託。'], ['halloween', '萬聖節限定版', '紫色夜空、南瓜、可愛骷髏頭、小蝙蝠，還有三隻老師變成的校園妖怪。'], ['teacher', '教師節限定版', '破關解密，認識老師有多熟悉（規劃中，敬請期待）。']].forEach(([id, n, d]) => {
+  [['normal', '一般版', '平常的同樂小行星：採集、釣魚、擺設、居民委託。'], ['halloween', '萬聖節限定版', '紫色夜空、南瓜、可愛骷髏頭、小蝙蝠，還有三隻老師變成的校園妖怪。'], ['christmas', '聖誕節限定版', '飄雪的藍色夜空、聖誕樹與彩燈、禮物和薑餅人，還有雪人、聖誕老公公、小麋鹿三關問答，以及「接禮物」小遊戲。'], ['lunar', '農曆年限定版', '紅燈籠與春聯、煙火、紅包與年糕收集，還有年獸、財神爺、小福娃三關問答，以及「搶紅包」小遊戲。'], ['teacher', '教師節限定版', '破關解密，認識老師有多熟悉（規劃中，敬請期待）。']].forEach(([id, n, d]) => {
     const c = document.createElement('div'); c.className = 'it'; c.innerHTML = '<div class="nm">' + n + (G.edition === id ? '　（目前）' : '') + '</div><div class="ds">' + d + '</div>';
     c.appendChild(mkBtn(id === 'teacher' ? '規劃中' : '切換', () => { closePanels(); hwApply(id); }, true, id === 'teacher' || G.edition === id)); L.appendChild(c);
   });

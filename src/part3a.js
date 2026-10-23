@@ -28,7 +28,7 @@ function bld(o) {
   else { nR = Math.max(1, Math.round((L - BAY) / 8.4)); rw = (L - BAY) / nR; roomU0 = o.stair === 's' ? BAY : 0; }
   const VF = o.stairNS ? D - WT - 4.4 - 1.8 : 0, fv = x => x + VF;   // 南北向梯：切齊東側外牆（東西寬 4.4 m），fv 把梯間 v 座標整體平移到東側
   const colA = [su + 0.35, su + 2.0], colB = [su + 2.6, su + 4.25];
-  FOOT.push({ id: o.id, x0: o.x0, z0: o.z0, x1: o.x1, z1: o.z1, c: o.mini || '#2f7d63', tf: tf });
+  FOOT.push({ id: o.id, x0: o.x0, z0: o.z0, x1: o.x1, z1: o.z1, c: o.mini || '#2f7d63', tf: tf, fl: F });
   const info = { id: o.id, short: o.short, name: o.name, floors: F, tp: null };
   const W = { wall: true };
   const gaps = o.railGaps || [], doors = o.endDoors || [];
