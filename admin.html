@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>同樂小行星 多人紀錄管理</title>
+<style>
+:root{--bg:#f3f1ea;--panel:#fffefb;--fg:#1f2a26;--muted:#66726b;--line:#d9d6c8;--accent:#2f7d5a;--accent-fg:#fff;--warn:#b3402a;--row:#f7f5ee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a18;--panel:#1d2522;--fg:#e8eee9;--muted:#9aa8a0;--line:#33403a;--accent:#4fb98a;--accent-fg:#0d1512;--warn:#ff8a70;--row:#222c28;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141a18;--panel:#1d2522;--fg:#e8eee9;--muted:#9aa8a0;--line:#33403a;--accent:#4fb98a;--accent-fg:#0d1512;--warn:#ff8a70;--row:#222c28;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;padding:16px max(16px,env(safe-area-inset-left,0px))}
+main{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:22px}
+.sub{margin:0;color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--muted);min-width:0}
+input,select,button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+button{cursor:pointer}
+button.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+button.dng{color:var(--warn);border-color:var(--warn)}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;gap:6px}.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+tbody tr:nth-child(even){background:var(--row)}
+td.t{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.m{word-break:break-word}
+.uid{font:12px ui-monospace,Consolas,monospace;color:var(--muted)}
+.pill{display:inline-block;padding:0 8px;border-radius:999px;font-size:12px;border:1px solid var(--line)}
+.pill.join{color:var(--accent);border-color:var(--accent)}.pill.leave{color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+#msg{min-height:1.4em;font-size:13px}#msg.err{color:var(--warn)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>同樂小行星 多人紀錄管理</h1>
+    <p class="sub">登入／進出紀錄與聊天紀錄。僅限管理者（老師）使用；紀錄保留 90 天，請勿外流或用於公開張貼。</p>
+  </div>
+
+  <section class="card" id="gate">
+    <p id="gateTxt">讀取中…</p>
+    <button class="pri" id="login" hidden>使用 Google 登入</button>
+  </section>
+
+  <div id="app" hidden style="display:flex;flex-direction:column;gap:14px">
+    <section class="card">
+      <div class="row">
+        <div class="tabs" role="group" aria-label="紀錄種類">
+          <button id="tLogin" aria-pressed="true">登入紀錄</button>
+          <button id="tChat" aria-pressed="false">聊天紀錄</button>
+        </div>
+        <span class="sub" id="who"></span>
+        <button id="logout">登出</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="bar">
+        <label>從<input type="date" id="fFrom"></label>
+        <label>到<input type="date" id="fTo"></label>
+        <label>暱稱含<input type="search" id="fNick" placeholder="暱稱"></label>
+        <label id="lMsg" hidden>內容含<input type="search" id="fMsg" placeholder="關鍵字"></label>
+        <label id="lEv">事件<select id="fEv"><option value="">全部</option><option value="join">進入</option><option value="leave">離開</option></select></label>
+        <button class="pri" id="go">查詢</button>
+        <button id="csv">匯出 CSV</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row" style="margin-bottom:8px">
+        <span id="count" class="sub" aria-live="polite"></span>
+        <span style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="dng" id="delSel" disabled>刪除勾選</button>
+          <button class="dng" id="purge">清除 90 天前的紀錄</button>
+        </span>
+      </div>
+      <div class="wrap"><table>
+        <thead><tr id="head"></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <div class="row" style="margin-top:10px">
+        <button id="prev">上一頁</button><span id="page" class="sub"></span><button id="next">下一頁</button>
+      </div>
+      <p id="msg" class="sub" role="status"></p>
+    </section>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var PAGE = 100, st = { tab: 'login', page: 0, total: 0, rows: [], sel: {} };
+  var cfg = window.TONGLE_SUPABASE, client = null;
+  function say(t, err) { var m = $('msg'); m.textContent = t || ''; m.className = 'sub' + (err ? ' err' : ''); }
+  function tbl() { return st.tab === 'login' ? 'mp_login_log' : 'mp_chat_log'; }
+  function fmt(iso) { try { return new Date(iso).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false }); } catch (e) { return iso; } }
+  function likeEsc(s) { return '%' + String(s).replace(/[\\%_]/g, function (c) { return '\\' + c; }) + '%'; }
+  function dayIso(v, end) { if (!v) return null; var d = new Date(v + 'T00:00:00+08:00'); if (end) d = new Date(d.getTime() + 86400000); return d.toISOString(); }
+
+  function query(from, to, count) {
+    var q = client.from(tbl()).select('*', count ? { count: 'exact' } : undefined).order('created_at', { ascending: false });
+    var a = dayIso($('fFrom').value), b = dayIso($('fTo').value, true), n = $('fNick').value.trim(), m = $('fMsg').value.trim(), e = $('fEv').value;
+    if (a) q = q.gte('created_at', a); if (b) q = q.lt('created_at', b);
+    if (n) q = q.ilike('nick', likeEsc(n));
+    if (st.tab === 'chat' && m) q = q.ilike('msg', likeEsc(m));
+    if (st.tab === 'login' && e) q = q.eq('event', e);
+    return q.range(from, to);
+  }
+  function head() {
+    var h = $('head'); h.innerHTML = '';
+    (st.tab === 'login' ? ['', '時間（台北）', '暱稱', '事件', '使用者編號'] : ['', '時間（台北）', '暱稱', '內容', '使用者編號']).forEach(function (t) { var th = document.createElement('th'); th.textContent = t; h.appendChild(th); });
+  }
+  function draw() {
+    var tb = $('rows'); tb.innerHTML = '';
+    st.rows.forEach(function (r) {
+      var tr = document.createElement('tr'), c;
+      c = document.createElement('td'); var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!st.sel[r.id]; cb.setAttribute('aria-label', '選取這筆');
+      cb.onchange = function () { if (cb.checked) st.sel[r.id] = 1; else delete st.sel[r.id]; $('delSel').disabled = !Object.keys(st.sel).length; }; c.appendChild(cb); tr.appendChild(c);
+      c = document.createElement('td'); c.className = 't'; c.textContent = fmt(r.created_at); tr.appendChild(c);
+      c = document.createElement('td'); c.textContent = r.nick; tr.appendChild(c);
+      c = document.createElement('td'); if (st.tab === 'login') { var p = document.createElement('span'); p.className = 'pill ' + r.event; p.textContent = r.event === 'join' ? '進入' : '離開'; c.appendChild(p); } else { c.className = 'm'; c.textContent = r.msg; } tr.appendChild(c);
+      c = document.createElement('td'); c.className = 'uid'; c.textContent = String(r.user_id || '').slice(0, 8); c.title = r.user_id || ''; tr.appendChild(c);
+      tb.appendChild(tr);
+    });
+    var pages = Math.max(1, Math.ceil(st.total / PAGE));
+    $('count').textContent = '符合 ' + st.total + ' 筆'; $('page').textContent = '第 ' + (st.page + 1) + ' / ' + pages + ' 頁';
+    $('prev').disabled = st.page <= 0; $('next').disabled = st.page + 1 >= pages; $('delSel').disabled = !Object.keys(st.sel).length;
+  }
+  async function load(resetPage) {
+    if (resetPage) st.page = 0; st.sel = {}; say('查詢中…'); head();
+    var r = await query(st.page * PAGE, st.page * PAGE + PAGE - 1, true);
+    if (r.error) { say(/does not exist|relation|schema cache/i.test(r.error.message) ? '資料表還沒建立：請先在 Supabase 執行 supabase/setup_logs.sql' : '查詢失敗：' + r.error.message, true); st.rows = []; st.total = 0; draw(); return; }
+    st.rows = r.data || []; st.total = r.count || 0; say(''); draw();
+  }
+  function csvCell(v) { var s = v == null ? '' : String(v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
+  async function exportCsv() {
+    say('匯出中…'); var all = [], from = 0, MAX = 20000;
+    while (from < MAX) { var r = await query(from, from + 999, false); if (r.error) { say('匯出失敗：' + r.error.message, true); return; } all = all.concat(r.data || []); if (!r.data || r.data.length < 1000) break; from += 1000; }
+    var cols = st.tab === 'login' ? ['created_at', 'nick', 'event', 'user_id'] : ['created_at', 'nick', 'msg', 'user_id'];
+    var lines = [cols.concat([]).map(csvCell).join(',')].concat(all.map(function (r) { return cols.map(function (c) { return csvCell(c === 'created_at' ? fmt(r[c]) : r[c]); }).join(','); }));
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = (st.tab === 'login' ? '登入紀錄' : '聊天紀錄') + '_' + new Date().toISOString().slice(0, 10) + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+    say('已匯出 ' + all.length + ' 筆' + (all.length >= MAX ? '（達上限，請縮小日期範圍）' : ''));
+  }
+  async function delSel() {
+    var ids = Object.keys(st.sel).map(Number); if (!ids.length) return;
+    if (!$('delSel').dataset.arm) { $('delSel').dataset.arm = 1; $('delSel').textContent = '再按一次確認刪除 ' + ids.length + ' 筆'; setTimeout(function () { delete $('delSel').dataset.arm; $('delSel').textContent = '刪除勾選'; }, 4000); return; }
+    delete $('delSel').dataset.arm; $('delSel').textContent = '刪除勾選';
+    var r = await client.from(tbl()).delete().in('id', ids); if (r.error) { say('刪除失敗：' + r.error.message, true); return; }
+    await load(false); say('已刪除 ' + ids.length + ' 筆');
+  }
+  async function purge() {
+    var b = $('purge'); if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = '再按一次確認清除'; setTimeout(function () { delete b.dataset.arm; b.textContent = '清除 90 天前的紀錄'; }, 4000); return; }
+    delete b.dataset.arm; b.textContent = '清除 90 天前的紀錄';
+    var r = await client.rpc('tongle_purge_logs', { p_days: 90 }); if (r.error) { say('清除失敗：' + r.error.message, true); return; }
+    await load(true); say('已清除 ' + r.data + ' 筆（兩種紀錄合計）');
+  }
+  function tab(t) { st.tab = t; $('tLogin').setAttribute('aria-pressed', t === 'login'); $('tChat').setAttribute('aria-pressed', t === 'chat'); $('lMsg').hidden = t !== 'chat'; $('lEv').hidden = t !== 'login'; load(true); }
+
+  async function init() {
+    if (!cfg || !cfg.url || !cfg.key || !window.supabase) { $('gateTxt').textContent = '尚未設定 config.js 或無法載入 Supabase。'; return; }
+    client = supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } });
+    var s = await client.auth.getSession(), sess = s.data && s.data.session;
+    if (!sess) { $('gateTxt').textContent = '請先以管理者的 Google 帳號登入。'; $('login').hidden = false;
+      $('login').onclick = function () { client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); }; return; }
+    var a = await client.rpc('tongle_is_admin');
+    if (a.error || a.data !== true) { $('gateTxt').textContent = a.error ? '無法確認管理權限：請先在 Supabase 執行 supabase/setup_logs.sql。' : '這個帳號不是管理者，無法查看紀錄。'; $('login').hidden = false; $('login').textContent = '改用其他帳號登入'; $('login').onclick = async function () { await client.auth.signOut(); location.reload(); }; return; }
+    $('gate').hidden = true; $('app').hidden = false; $('who').textContent = '管理者已登入';
+    $('tLogin').onclick = function () { tab('login'); }; $('tChat').onclick = function () { tab('chat'); };
+    $('go').onclick = function () { load(true); }; $('csv').onclick = exportCsv; $('delSel').onclick = delSel; $('purge').onclick = purge;
+    $('prev').onclick = function () { st.page--; load(false); }; $('next').onclick = function () { st.page++; load(false); };
+    $('logout').onclick = async function () { await client.auth.signOut(); location.reload(); };
+    ['fNick', 'fMsg'].forEach(function (id) { $(id).addEventListener('keydown', function (e) { if (e.key === 'Enter') load(true); }); });
+    load(true);
+  }
+  init().catch(function (e) { $('gateTxt').textContent = '載入失敗：' + e.message; });
+})();
+</script>
+</body>
+</html>
