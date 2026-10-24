@@ -37,3 +37,13 @@ Supabase 專案：`cirypvdtlzmwpaicsmee`（網址 `https://cirypvdtlzmwpaicsmee.
 - 每人約每 0.25 秒廣播一次位置（`sendMs`），25 人時約每秒 100 則訊息送出。Supabase 免費方案對 Realtime 有每秒訊息數與連線數上限（請以後台 Realtime / Usage 顯示的數字為準）；若遇到限流，把 `config.js` 的 `sendMs` 調成 400 或 500 即可，畫面靠補間仍然順。
 - 暱稱不使用 Google 顯示名稱（通常是真名），預設「旅人 + 兩位數字」，在「版本」選單內可自訂。
 - 目前只同步「看見彼此」；背包、錢幣、萬聖節進度仍存在各人瀏覽器。
+
+
+## 5. 多人版紀錄（v35）
+程式會把進出多人版寫入 `mp_login_log`（欄位 nick、event）、把聊天寫入 `mp_chat_log`（欄位 nick、msg）；資料表不存在時靜默略過。
+建表 SQL 與查詢用的 `admin.html` 目前不在儲存庫內（請補回原檔），README 的 v35 段落有說明用途。
+
+## 6. 全班共同 Boss 與節慶開關（v38）
+1. SQL Editor 貼上並執行 `supabase/setup_event.sql`。
+2. 最後一步手動執行：`insert into tongle_admin (email) values ('老師的 Google 信箱');`（不要把信箱寫進公開儲存庫）。
+3. 老師登入多人版後，在傳送門的「全班共同 Boss」面板最下方會出現管理區。

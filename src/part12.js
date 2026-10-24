@@ -120,6 +120,8 @@ function sbFlush() {
 }
 function sbBtn() { mpUI(); }
 function sbNum(v, lim) { return typeof v === 'number' && isFinite(v) && Math.abs(v) <= lim ? v : 0; }
+/* 紀錄（校方管理用）：聊天與進出各寫一筆到 Supabase 資料表；資料表未建立或寫入失敗時靜默略過，不影響遊戲 */
+function sbLog(table, row) { if (!SB.client || SB.logOff) return; try { SB.client.from(table).insert(row).then(r => { if (r && r.error) { if (!SB.logWarn) { SB.logWarn = 1; console.warn('log', table, r.error.message); } if (/does not exist|schema cache|relation/i.test(r.error.message || '')) SB.logOff = 1; } }, () => { }); } catch (e) { } }
 async function sbJoin() {
   SB.key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + String(Math.random()).slice(2); SB.mine = { nm: MP.nick, k: CH.kind === 'girl' ? 1 : 0 }; SB.remote.clear();
   const ch = SB.client.channel('tongle-planet', { config: { private: true, broadcast: { self: false }, presence: { key: SB.key } } });
@@ -130,12 +132,12 @@ async function sbJoin() {
   ch.on('presence', { event: 'join' }, e => { if (e.key && e.key !== SB.key) sbFlush(); });                 // 有人加入：馬上讓對方看到自己
   ch.on('presence', { event: 'sync' }, () => { try { const st = ch.presenceState(); [...SB.remote.keys()].forEach(k => { if (!(k in st)) SB.remote.delete(k); }); } catch (e) { } });
   await new Promise((ok, no) => { ch.subscribe(async (status, err) => {
-    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: MP.nick }); } catch (e) { } if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
+    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: MP.nick }); } catch (e) { } if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; sbLog('mp_login_log', { nick: MP.nick, event: 'join' }); clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { if (!SB.ch) no(err || new Error(status)); else { toast('多人連線中斷，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); } }
   }); });
 }
 async function sbStop() {
-  const ch = SB.ch; SB.ch = null; clearInterval(SB.ka); MP.room = null; MP.on = false; SB.remote.clear(); clearTimeout(SB.timer); SB.timer = 0;
+  const ch = SB.ch; if (ch) sbLog('mp_login_log', { nick: MP.nick, event: 'leave' }); SB.ch = null; clearInterval(SB.ka); MP.room = null; MP.on = false; SB.remote.clear(); clearTimeout(SB.timer); SB.timer = 0;
   if (ch) { try { await ch.unsubscribe(); } catch (e) { } } sbBtn();
 }
 async function sbStart(interactive) {
@@ -148,7 +150,7 @@ async function sbStart(interactive) {
       if (!interactive) { toast('目前沒有登入，已先切回單人版；要玩多人請按右上角「模式：單人」，完成 Google 登入', 5500); mpSaveMode('solo'); return; }
       await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); return;
     }
-    await sbJoin(); toast('已連線：和同學一起玩', 2600);
+    await sbJoin(); toast('已連線：和同學一起玩（聊天內容會保留供校方管理）', 4200);
   } catch (e) { console.warn('supabase', e); toast('多人連線失敗，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); }
   finally { SB.busy = false; }
 }

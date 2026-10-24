@@ -43,7 +43,7 @@ function chSend(raw) {
   const text = chFilter(raw); if (!text) return false; const now = Date.now();
   if (now - CHAT.lastSend < 1500) { toast('說慢一點喔，等一下再送', 1500); return false; } CHAT.lastSend = now;
   try { SB.ch.send({ type: 'broadcast', event: 'c', payload: { id: SB.key, nm: MP.nick, t: text } }); } catch (e) { return false; }
-  chAdd('', MP.nick, text, true); return true;
+  sbLog('mp_chat_log', { nick: MP.nick, msg: text }); chAdd('', MP.nick, text, true); return true;
 }
 function chBadge() { const b = $('hChat'); if (b) b.textContent = CHAT.unread ? '聊天 ●' + (CHAT.unread > 9 ? '9+' : CHAT.unread) : '聊天'; }
 function chRenderLog() {

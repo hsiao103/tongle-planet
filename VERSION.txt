@@ -1,0 +1,5 @@
+同樂小行星 v38
+日期：2026-10-25
+重點：全班共同 Boss 與節慶開關（第三階段）(v38)；遊戲傳送門與獎勵(v37)；龜山島與港口(v32)
+建置：bash build.sh（讀 src/ 組成 index.html）
+index.html 為可直接開啟/部署的完整單檔；school_artifact.html 為 Artifact 版（無 doctype/viewport）
