@@ -153,6 +153,12 @@ body.intro #joyL,body.intro #bRun,body.intro #bJump,body.intro #hint{display:non
 #prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:7;background:rgba(24,31,38,.82);color:#fff;padding:8px 18px;border-radius:999px;font-size:15px;font-weight:700;border:1px solid rgba(255,255,255,.25);pointer-events:auto;cursor:pointer}
 #prompt kbd{background:#ffd24a;color:#241b05;border-radius:5px;padding:1px 8px;margin-right:8px;font:700 13px var(--font-num)}
 button[hidden]{display:none!important}
+.bsbar{height:18px;border-radius:9px;background:#e6e0d0;overflow:hidden;margin:6px 0}.bsbar i{display:block;height:100%;background:linear-gradient(90deg,#e0402e,#f2b01e)}
+.bsrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.bslist div{padding:2px 0}.bsadm select{margin:2px 6px 2px 0;padding:4px 8px;border-radius:8px}
+#gmp{position:fixed;inset:0;z-index:40;background:#0b1024;display:flex;flex-direction:column}#gmp[hidden]{display:none}
+#gmp .gmbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px calc(6px);padding-top:calc(6px + env(safe-area-inset-top,0px));background:#141b3d;color:#ffd166;font-size:15px}
+#gmp .gmbar button{background:#2f7d5a;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 14px;font:700 14px var(--font-num,sans-serif);cursor:pointer}
+#gmF{flex:1;width:100%;border:0;background:#0b1024}
 #toast{position:fixed;left:50%;top:calc(120px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;background:rgba(36,28,12,.9);color:#ffe9a8;padding:9px 18px;border-radius:12px;font-size:15px;font-weight:700;pointer-events:none;max-width:86vw;text-align:center}
 #dlg{z-index:11;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100vw - 32px));box-sizing:border-box;padding:14px 18px;border-radius:16px;background:rgba(255,252,240,.95);color:#2a2418;border:2px solid #d9a850}
 #dlg .dn{font-weight:800;color:#c4601a;font-size:16px;margin-bottom:4px}
@@ -226,7 +232,7 @@ body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important
 <dl><dt>WASD</dt><dd>移動（Shift 跑步、空白鍵跳躍）</dd><dt>拖曳</dt><dd>轉動視角；滾輪拉近拉遠</dd><dt>E</dt><dd>互動：採集、對話、釣魚、撿起家具</dd><dt>B</dt><dd>背包，可擺放家具與植物</dd></dl>
 <p class="sv" id="iSave"></p>
 </div>
-<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hOnline" hidden>線上 1</span><span class="hc" id="hChat" hidden>聊天</span></div>
+<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hBoss" hidden style="cursor:pointer"></span><span class="hc" id="hOnline" hidden>線上 1</span><span class="hc" id="hChat" hidden>聊天</span></div>
 <div id="olp" class="mpp" hidden></div>
 <div id="chp" class="mpp" hidden><div id="chLog"></div><form id="chF" autocomplete="off"><input id="chIn" type="text" maxlength="60" enterkeyhint="send" placeholder="說句話…（Enter 送出）"><button type="submit">送出</button></form><div class="mpn">請友善交談，不要分享姓名、電話或住址。</div></div>
 <div id="prompt" hidden></div>
@@ -241,6 +247,8 @@ body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important
 <div id="lng" class="panel big" hidden><div class="ph"><b>新春 · 搶紅包</b><button type="button" class="px" id="lngX">關閉</button></div><div style="text-align:center"><canvas id="lngC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="lngS"></p><button type="button" class="go" id="lngGo">開始</button></div></div>
 <div id="edp" class="panel big" hidden><div class="ph"><b>選擇版本</b><button type="button" class="px" id="edpX">關閉</button></div><div class="grid" id="edpList"></div></div>
 <div id="qst" class="panel big" hidden><div class="ph"><b>委託</b><button type="button" class="px" id="qstX">關閉</button></div><div id="qstList"></div></div>
+<div id="bsp" class="panel big" hidden><div class="ph"><b>全班共同 Boss</b><button type="button" class="px" id="bspX">關閉</button></div><div id="bspList"></div></div>
+<div id="gmp" hidden><div class="gmbar"><b>🪐 同樂遊戲館</b><button type="button" id="gmX">回小行星 (Esc)</button></div><iframe id="gmF" title="同樂遊戲" allow="fullscreen" referrerpolicy="same-origin"></iframe></div>
 <div id="place" class="panel" hidden><b id="placeN"></b><button type="button" id="pOk" class="pri">放下 (E)</button><button type="button" id="pRot">旋轉 (R)</button><button type="button" id="pNo">取消 (X)</button></div>
 <div id="joyL"><div class="knob"></div></div>
 <button id="bRun" type="button" aria-label="跑步（點一下開關）">跑</button>
@@ -6610,13 +6618,13 @@ const ITEMS = {
   rose: { n: '玫瑰花叢', k: 'plant', buy: 160, c: '#d8404f', d: '紅色小花。' }
 };
 const KIND_ORDER = ['fruit', 'shell', 'bug', 'fish', 'furn', 'plant', 'hw'];
-const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, pos: null, t: 0 };
+const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, gp: { clear: {}, best: {}, day: '', n: 0 }, pos: null, t: 0 };
 let STARTED = false;
-function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.pos = null; }
-function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
+function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.gp = { clear: {}, best: {}, day: '', n: 0 }; G.pos = null; }
+function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.gp = o.gp || { clear: {}, best: {}, day: '', n: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
 function saveGame() {
   if (!STARTED) return;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, gp: G.gp, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 const have = id => G.inv[id] | 0;
@@ -6631,7 +6639,7 @@ function refreshHud() {
   $('hCoin').textContent = G.coins; ['shopCoin', 'bagCoin'].forEach(i => { const e = $(i); if (e) e.textContent = G.coins; });
   const h = GT.hour, hh = Math.floor(h), mm = Math.floor((h - hh) * 60); $('hClock').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (GT.night ? '　夜晚' : '　白天');
 }
-const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng'];
+const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng', 'gmp', 'bsp'];
 function anyPanel() { return PANELS.some(p => !$(p).hidden); }
 function syncBlock() { GAME.block = anyPanel() || !STARTED; document.body.classList.toggle('gamedlg', anyPanel()); }
 function openPanel(id) { PANELS.forEach(p => { if (p !== id) $(p).hidden = true; }); $(id).hidden = false; syncBlock(); }
@@ -6906,6 +6914,7 @@ function findInteract() {
   BUGS.forEach(b => { if (!b.g || !b.g.visible) return; const d = Math.hypot(b.x - PL.x, b.z - PL.z); if (d < 2.0 && Math.abs(b.y - PL.y) < 2.8) cand(d, '用網子抓' + ITEMS[b.type].n, () => { if (b.type !== 'stag' && Math.random() < 0.25) { toast('哎呀，被牠逃走了！'); b.h += 3; return; } addItem(b.type); toast('抓到 ' + ITEMS[b.type].n + '！'); scene.remove(b.g); b.g = null; saveGame(); }); });
   PLACED.forEach(p => { const d = Math.hypot(p.rec.x - PL.x, p.rec.z - PL.z); if (d < (PROP_R[p.rec.id] || 0.5) + 1.7) cand(d + 0.2, '收回' + ITEMS[p.rec.id].n, () => { addItem(p.rec.id); placedRemove(p); toast('收回 ' + ITEMS[p.rec.id].n); saveGame(); }); });
   if (nearShore()) cand(FISH.st === 'idle' ? 6 : 0.1, FISH.st === 'idle' ? '在這裡釣魚' : FISH.st === 'wait' ? '等待魚上鉤…（現在拉會嚇跑）' : '拉竿！', fishPress);
+  if (typeof gtInteract === 'function') gtInteract(cand, ds);
   if (typeof hwInteract === 'function') hwInteract(cand, ds);
   return best;
 }
@@ -6927,7 +6936,7 @@ const TM = ['auto', 'day', 'night'], TMN = { auto: '時間：自動', day: '時�
 function setTimeMode(m) { GT.mode = m; G.timeMode = m; $('bTime').textContent = TMN[m]; $('bTime').classList.toggle('on', m !== 'auto'); saveGame(); }
 $('bTime').onclick = () => setTimeMode(TM[(TM.indexOf(GT.mode) + 1) % 3]);
 function gameMini(g, mp) {
-  if (typeof hwMini === 'function') hwMini(g, mp); if (typeof mpMini === 'function') mpMini(g, mp);
+  if (typeof gtMini === 'function') gtMini(g, mp); if (typeof hwMini === 'function') hwMini(g, mp); if (typeof mpMini === 'function') mpMini(g, mp);
   const s = mp(SHOP.x, SHOP.z); g.fillStyle = '#f2b01e'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.fillRect(s[0] - 6, s[1] - 6, 12, 12); g.strokeRect(s[0] - 6, s[1] - 6, 12, 12);
   g.fillStyle = '#2b7cff'; NPCS.forEach(n => { const p = mp(n.x, n.z); g.beginPath(); g.arc(p[0], p[1], 3.2, 0, 7); g.fill(); });
 }
@@ -6935,7 +6944,7 @@ function gameMini(g, mp) {
 // ---- 每幀 ----
 let hudT = 0, shopAnim = 0;
 function gameTick(dt) {
-  placeTick(); fishTick(dt); bugTick(dt); styleTick(dt); flyTick(dt); lblTick(); if (typeof hwTick === 'function') hwTick(dt); if (typeof mpTick === 'function') mpTick(dt);
+  placeTick(); fishTick(dt); bugTick(dt); styleTick(dt); flyTick(dt); lblTick(); if (typeof gtTick === 'function') gtTick(dt); if (typeof hwTick === 'function') hwTick(dt); if (typeof mpTick === 'function') mpTick(dt);
   PROP_GLOW.color.set(GT.night ? 0xffe9a0 : 0xcfc7a0);
   if (CLERK) { CLERK.mixer.update(dt); CLERK.node.scale.setScalar(charScale()); }
   hudT -= dt; if (hudT <= 0) {
@@ -7092,6 +7101,7 @@ function lblBuild() {
   const add = (txt, x, z, h, cls, key) => { const e = document.createElement('div'); e.className = 'lb ' + (cls || ''); e.textContent = txt; LBL.el.appendChild(e); LBL.items.push({ e, x, z, h, key, flat: true }); };
   NPLACES.filter(p => !p.room).forEach(p => add(p.name.replace(/（.*）/, ''), p.x, p.z, 4, 'pl'));
   add('同樂小舖', SHOP.x, SHOP.z, 4.5, 'pl');
+  if (typeof GP !== 'undefined') add('遊戲傳送門', GP.x, GP.z, 4.6, 'pl');
   NPCS.forEach(n => { if (n.pname) { const e = document.createElement('div'); e.className = 'lb np'; e.textContent = n.pname; LBL.el.appendChild(e); LBL.items.push({ e, npc: n, h: 0, dyn: true }); } });
   const me = document.createElement('div'); me.className = 'lb me'; me.textContent = '▼ 你在這裡'; LBL.el.appendChild(me); LBL.items.push({ e: me, me: true, h: 0, dyn: true });
   LBL.ready = true;
@@ -7460,8 +7470,6 @@ function sbFlush() {
   if (!SB.ch || SB.timer) return; const c = window.TONGLE_SUPABASE || {}, ms = Math.max(100, Math.min(2000, c.sendMs | 0 || 250)), wait = Math.max(0, ms - (Date.now() - SB.sentAt));
   SB.timer = setTimeout(() => { SB.timer = 0; sbSend(); }, wait);
 }
-/* 紀錄（校方管理用）：聊天與進出各寫一筆到 Supabase 資料表；資料表未建立或寫入失敗時靜默略過，不影響遊戲 */
-function sbLog(table, row) { if (!SB.client || SB.logOff) return; try { SB.client.from(table).insert(row).then(r => { if (r && r.error) { if (!SB.logWarn) { SB.logWarn = 1; console.warn('log', table, r.error.message); } if (/does not exist|schema cache|relation/i.test(r.error.message || '')) SB.logOff = 1; } }, () => { }); } catch (e) { } }
 function sbBtn() { mpUI(); }
 function sbNum(v, lim) { return typeof v === 'number' && isFinite(v) && Math.abs(v) <= lim ? v : 0; }
 async function sbJoin() {
@@ -7474,12 +7482,12 @@ async function sbJoin() {
   ch.on('presence', { event: 'join' }, e => { if (e.key && e.key !== SB.key) sbFlush(); });                 // 有人加入：馬上讓對方看到自己
   ch.on('presence', { event: 'sync' }, () => { try { const st = ch.presenceState(); [...SB.remote.keys()].forEach(k => { if (!(k in st)) SB.remote.delete(k); }); } catch (e) { } });
   await new Promise((ok, no) => { ch.subscribe(async (status, err) => {
-    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: MP.nick }); } catch (e) { } if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; sbLog('mp_login_log', { nick: MP.nick, event: 'join' }); clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
+    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: MP.nick }); } catch (e) { } if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { if (!SB.ch) no(err || new Error(status)); else { toast('多人連線中斷，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); } }
   }); });
 }
 async function sbStop() {
-  const ch = SB.ch; if (ch) sbLog('mp_login_log', { nick: MP.nick, event: 'leave' }); SB.ch = null; clearInterval(SB.ka); MP.room = null; MP.on = false; SB.remote.clear(); clearTimeout(SB.timer); SB.timer = 0;
+  const ch = SB.ch; SB.ch = null; clearInterval(SB.ka); MP.room = null; MP.on = false; SB.remote.clear(); clearTimeout(SB.timer); SB.timer = 0;
   if (ch) { try { await ch.unsubscribe(); } catch (e) { } } sbBtn();
 }
 async function sbStart(interactive) {
@@ -7492,7 +7500,7 @@ async function sbStart(interactive) {
       if (!interactive) { toast('目前沒有登入，已先切回單人版；要玩多人請按右上角「模式：單人」，完成 Google 登入', 5500); mpSaveMode('solo'); return; }
       await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); return;
     }
-    await sbJoin(); toast('已連線：和同學一起玩（聊天內容會保留供校方管理）', 4200);
+    await sbJoin(); toast('已連線：和同學一起玩', 2600);
   } catch (e) { console.warn('supabase', e); toast('多人連線失敗，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); }
   finally { SB.busy = false; }
 }
@@ -7548,7 +7556,7 @@ function chSend(raw) {
   const text = chFilter(raw); if (!text) return false; const now = Date.now();
   if (now - CHAT.lastSend < 1500) { toast('說慢一點喔，等一下再送', 1500); return false; } CHAT.lastSend = now;
   try { SB.ch.send({ type: 'broadcast', event: 'c', payload: { id: SB.key, nm: MP.nick, t: text } }); } catch (e) { return false; }
-  sbLog('mp_chat_log', { nick: MP.nick, msg: text }); chAdd('', MP.nick, text, true); return true;
+  chAdd('', MP.nick, text, true); return true;
 }
 function chBadge() { const b = $('hChat'); if (b) b.textContent = CHAT.unread ? '聊天 ●' + (CHAT.unread > 9 ? '9+' : CHAT.unread) : '聊天'; }
 function chRenderLog() {
@@ -8544,4 +8552,198 @@ function pgInteract(cand, ds) {
   PGE.seats.forEach(S => { const p = S.pos(), d = ds(p[0], p[2], p[1]); if (d < 2.3) cand(d, '坐上' + S.name, () => pgOn(S)); });
   const s = PGE.slide, d = ds(s.ladder[0], s.ladder[1], s.g.userData.gy); if (d < 2.6) cand(d, '玩溜滑梯', pgSlideGo);
 }
+/* ===== 遊戲傳送門（v37）：把橫向卷軸、垂直卷軸兩個小遊戲接進小行星 =====
+   傳送門在小舖南側。按 E 選擇遊戲 → 以全螢幕視窗(iframe)開啟 games/ 內的遊戲。
+   遊戲透過 postMessage 回報：tongle:close（回小行星）、tongle:result（結果→gpReward 發同樂幣／道具並存檔，第二階段）。 */
+const GP = { x: 14.5, z: 12.5, t: 0, ring: null, disc: null, runes: [], last: null, label: '' };
+(function () {
+  const g = new T.Group(), glow = c => new T.MeshBasicMaterial({ color: c });
+  g.add(cym(1.9, 2.1, 0.18, 0, 0.09, 0, 0x4b3f7a, 28), cym(1.5, 1.7, 0.1, 0, 0.22, 0, 0x6c5fb0, 28));
+  [-1.55, 1.55].forEach(x => g.add(bxm(0.34, 2.9, 0.34, x, 1.65, 0, 0x7a6cc4), spm(0.28, x, 3.2, 0, 0xffe27a)));
+  const ring = new T.Mesh(new T.TorusGeometry(1.55, 0.14, 10, 40), glow(0x9fe8ff)); ring.position.y = 1.95; g.add(ring);
+  const disc = new T.Mesh(new T.CircleGeometry(1.42, 36), new T.MeshBasicMaterial({ color: 0x7a6bff, transparent: true, opacity: 0.55, side: T.DoubleSide, depthWrite: false }));
+  disc.position.y = 1.95; g.add(disc);
+  for (let i = 0; i < 6; i++) { const s = spm(0.1, 0, 0, 0, i % 2 ? 0xffe27a : 0xffffff); s.material = glow(i % 2 ? 0xffe27a : 0xffffff); g.add(s); GP.runes.push(s); }
+  const sign = new T.Mesh(new T.PlaneGeometry(2.8, 0.7), new T.MeshBasicMaterial({ map: canvasTex(320, 80, (c, w, h) => { c.fillStyle = '#1b2550'; c.fillRect(0, 0, w, h); c.strokeStyle = '#ffd166'; c.lineWidth = 8; c.strokeRect(4, 4, w - 8, h - 8); c.fillStyle = '#ffd166'; c.font = 'bold 40px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('遊戲傳送門', w / 2, h / 2 + 2); }) }));
+  sign.position.set(0, 3.95, 0.05); g.add(sign);
+  placeOnPlanet(g, GP.x, GP.z, -Math.PI / 2); scene.add(g); g.traverse(o => { o.matrixAutoUpdate = true; });
+  GP.ring = ring; GP.disc = disc; GP.g = g;
+})();
+// 目前版本對應的節慶（沒有對應就交給遊戲依日期自動選）
+function gpTheme() { if (typeof bsFest === 'function' && FEST_THEME[bsFest()]) return FEST_THEME[bsFest()]; return ({ halloween: 'halloween', teacher: 'teacher', lunar: 'newyear' })[G.edition] || ''; }
+function gpOpen(file, extra) {
+  closePanels(); GP.last = null; const f = $('gmF');
+  f.src = 'games/' + file + '?from=planet&embed=1' + (extra || ''); openPanel('gmp'); setTimeout(() => { try { f.focus(); } catch (e) {} }, 300);
+}
+// ---- 第二階段：獎勵與存檔 ----
+// 首次通關：一次性獎勵；之後重玩：依分數給少量同樂幣，每天最多 5 次，避免一直刷。
+function gpReward(r) {
+  if (!r) return '';
+  const gp = G.gp, today = new Date().toISOString().slice(0, 10); if (gp.day !== today) { gp.day = today; gp.n = 0; }
+  const key = r.game === 'side' ? 'side' : 'shooter_' + (r.theme || 'x'), won = !!r.win, first = won && !gp.clear[key];
+  const lines = []; let coins = 0;
+  if (r.game === 'shooter') { const b = gp.best[key] || 0; if (r.score > b) { gp.best[key] = r.score; lines.push('新紀錄！最高分 ' + r.score); } else lines.push('分數 ' + r.score + '（最高 ' + b + '）'); }
+  if (first) {
+    gp.clear[key] = 1;
+    if (r.game === 'side') { coins += 150 + 20 * Math.max(0, r.stars | 0); addItem('sapling', 1); lines.push('首次通關：樹苗 ×1'); }
+    else { coins += 200; if (r.theme === 'halloween') { addItem('candy', 3); lines.push('首次通關：萬聖節糖果 ×3'); } else lines.push('首次通關獎勵'); }
+  } else if (gp.n < 5) {
+    gp.n++; coins += r.game === 'side' ? (won ? 40 : 0) : Math.min(60, Math.floor((r.score | 0) / 100) + (won ? 20 : 0));
+    if (!coins) lines.push('這次沒有獎勵，再接再厲！'); else lines.push('今天第 ' + gp.n + '/5 次重玩獎勵');
+  } else lines.push('今天的重玩獎勵已領完，明天再來！');
+  if (coins) { addCoins(coins); lines.unshift('同樂幣 +' + coins); }
+  saveGame(); return lines.join('\n');
+}
+async function gpClose() {
+  if ($('gmp').hidden) return; closePanels(); const r = GP.last; GP.last = null;
+  if (!r) { toast('已回到同樂小行星'); return; }
+  const head = r.game === 'side' ? (r.win ? '橫向卷軸：任務完成！' : '橫向卷軸') : '垂直卷軸：' + (r.win ? '守護成功！' : '再接再厲！');
+  let txt = head + '\n' + gpReward(r);
+  const dmg = r.game === 'side' ? (r.win ? 150 + 50 * Math.max(0, r.stars | 0) : 0) : Math.min(3000, Math.floor((r.score | 0) / 10) + (r.win ? 300 : 0));
+  if (dmg > 0 && typeof bsHit === 'function' && bsLive()) {                       // 第三階段：把傷害加進全班 Boss
+    const name = BS.st.boss_name, b = await bsHit(dmg);
+    if (b && b.ok) txt += '\n\n對「' + name + '」造成 ' + b.dmg + ' 傷害' + (BS.mode === 'demo' ? '（示範）' : '') + '，全班 Boss 剩 ' + bsPct() + '%' + (BS.st.boss_hp <= 0 ? '\n全班打倒 Boss 了！到傳送門領討伐獎勵' : '');
+    else if (b && b.err === 'login') txt += '\n\n登入多人版才能把傷害加進全班 Boss。';
+    else if (b && b.err === 'fast') txt += '\n\n距離上次出擊不到 20 秒，這次傷害沒有計入。';
+    else txt += '\n\n連線失敗，傷害沒有計入。';
+  }
+  openDlg('遊戲傳送門', txt, [{ t: '收下獎勵', go: true, fn: closePanels }]);
+}
+function gpTalk() {
+  const th = gpTheme(), nm = { halloween: '萬聖節', teacher: '教師節', dragon: '端午節', newyear: '農曆春節' }[th];
+  openDlg('遊戲傳送門', '傳送門連到同樂國小的另一個維度。' + (nm ? '\n現在是' + nm + '，節慶版的校園正需要幫忙！' : '\n想去哪裡冒險？'), [
+    { t: '橫向卷軸：教學區西樓大冒險', go: true, fn: () => gpOpen('side_scroller.html') },
+    { t: '垂直卷軸：保衛校園' + (nm ? '（' + nm + '）' : ''), go: true, fn: () => gpOpen('shooter.html', th ? '&theme=' + th : '') },
+    { t: '遊戲館選單', fn: () => gpOpen('index.html') },
+    ...(typeof bsLive === 'function' && bsLive() ? [{ t: '全班共同 Boss：' + BS.st.boss_name + ' ' + bsPct() + '%', go: true, fn: () => bsPanel() }] : []),
+    { t: '先不要', fn: closePanels }]);
+}
+function gtInteract(cand, ds) { const d = ds(GP.x, GP.z, 0); if (d < 3.6) cand(d, '進入遊戲傳送門', gpTalk); }
+function gtMini(g, mp) { const p = mp(GP.x, GP.z); g.fillStyle = '#7a6bff'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.arc(p[0], p[1], 6, 0, 7); g.fill(); g.stroke(); }
+function gtTick(dt) {
+  GP.t += dt; const t = GP.t;
+  if (GP.ring) { GP.ring.rotation.z = t * 0.6; GP.disc.material.opacity = 0.45 + Math.sin(t * 2) * 0.12; GP.disc.rotation.z = -t * 0.9; }
+  GP.runes.forEach((s, i) => { const a = t * 0.8 + i * Math.PI / 3; s.position.set(Math.cos(a) * 1.55, 1.95 + Math.sin(a) * 1.55, 0.05); });
+  const f = $('gmF'); if ($('gmp').hidden && f.getAttribute('src')) { f.removeAttribute('src'); }   // 關閉後停止遊戲
+}
+addEventListener('message', e => {
+  const f = $('gmF'); if (!f || e.source !== f.contentWindow) return; const d = e.data; if (!d || d.source !== 'tongle-games') return;
+  if (d.type === 'tongle:close') gpClose(); else if (d.type === 'tongle:result') GP.last = d;
+});
+$('gmX').onclick = gpClose;
+window.__gp = { GP, gpReward, gpOpen, gpClose, gpTalk };
+/* ===== 全班共同 Boss 與節慶開關（v38，第三階段）=====
+   後端有兩種：
+   - 'sb'  ：Supabase 資料表（supabase/setup_event.sql），全班即時共用；寫入都走伺服器函式。
+   - 'demo'：沒有設定或資料表還沒建立時，用這台裝置的 localStorage 模擬，方便先試玩（管理功能全開）。
+   傷害來源：垂直卷軸分數／10＋通關 300（單次上限 3000）；橫向卷軸通關 150＋每顆愛心 50。 */
+const FEST = { auto: ['依日期自動', '🗓️'], halloween: ['萬聖節', '🎃'], teacher: ['教師節', '📚'], dragon: ['端午節', '🐉'], newyear: ['農曆春節', '🧧'], christmas: ['聖誕節', '🎄'] };
+const FEST_BOSS = { auto: '校園大魔王', halloween: '南瓜魔王', teacher: '期末考魔王', dragon: '五毒蛇王', newyear: '年獸', christmas: '暴風雪魔王' };
+const FEST_ED = { halloween: 'halloween', newyear: 'lunar', christmas: 'christmas' };            // 節慶 → 小行星版本
+const FEST_ED_N = { halloween: '萬聖節', lunar: '農曆年', christmas: '聖誕節' };
+const FEST_THEME = { halloween: 'halloween', teacher: 'teacher', dragon: 'dragon', newyear: 'newyear' };   // 節慶 → 垂直卷軸主題
+const BS = { st: null, hits: [], admin: false, mode: 'none', note: '', uid: '', busy: false, ch: null, started: false };
+const bsPct = () => BS.st && BS.st.boss_max ? Math.max(0, Math.ceil(BS.st.boss_hp / BS.st.boss_max * 100)) : 0;
+const bsLive = () => !!(BS.st && BS.st.boss_hp > 0);
+const bsFest = () => (BS.st && FEST[BS.st.festival]) ? BS.st.festival : 'auto';
+// ---- 示範後端（localStorage）----
+function bsDemoLoad() {
+  let o = null; try { o = JSON.parse(localStorage.getItem('tongle_boss_demo') || 'null'); } catch (e) { }
+  if (!o || !o.st) o = { st: { festival: 'auto', boss_name: FEST_BOSS.auto, boss_max: 20000, boss_hp: 20000, round: 1, defeated_at: null, last_hitter: null }, hits: [] };
+  return o;
+}
+const bsDemoSave = o => { try { localStorage.setItem('tongle_boss_demo', JSON.stringify(o)); } catch (e) { } };
+function bsDemoApply(o, uid, nick, dmg) {
+  const st = o.st; if (st.boss_hp <= 0 || dmg <= 0) return 0; const v = Math.min(dmg, st.boss_hp);
+  let h = o.hits.find(x => x.uid === uid); if (!h) { h = { uid, nick, dmg: 0 }; o.hits.push(h); } h.dmg += v; h.nick = nick;
+  o.hits.sort((a, b) => b.dmg - a.dmg); st.boss_hp -= v; if (st.boss_hp <= 0) { st.defeated_at = new Date().toISOString(); st.last_hitter = nick; } return v;
+}
+function bsUseDemo(note) { const o = bsDemoLoad(); BS.mode = 'demo'; BS.note = note; BS.st = o.st; BS.hits = o.hits; BS.uid = 'me'; BS.admin = true; }
+// ---- 讀取與訂閱 ----
+async function bsRefresh() {
+  if (BS.busy) return; BS.busy = true;
+  try {
+    const cfg = sbCfg();
+    if (!cfg || window.claude) { bsUseDemo('示範模式：這裡沒有連到全班伺服器，資料只存在這台裝置'); return; }
+    await sbLoad(); if (!SB.client) SB.client = supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } });
+    const c = SB.client, r = await c.from('tongle_event').select('*').eq('id', 'main').maybeSingle();
+    if (r.error || !r.data) throw r.error || new Error('no event row');
+    BS.mode = 'sb'; BS.note = ''; BS.st = r.data;
+    const h = await c.from('tongle_hits').select('uid,nick,dmg').eq('round', r.data.round).order('dmg', { ascending: false }).limit(50); BS.hits = h.data || [];
+    const s = await c.auth.getSession(); BS.uid = s.data && s.data.session ? s.data.session.user.id : '';
+    BS.admin = false; if (BS.uid) { const a = await c.rpc('tongle_is_admin'); BS.admin = a.data === true; }
+    if (!BS.ch) { try { BS.ch = c.channel('tongle-event').on('postgres_changes', { event: '*', schema: 'public', table: 'tongle_event' }, () => bsRefresh()).subscribe(); } catch (e) { } }
+  } catch (e) { console.warn('boss', e); bsUseDemo('示範模式：全班資料表還沒建立（請執行 supabase/setup_event.sql）'); }
+  finally { BS.busy = false; bsAfter(); }
+}
+// ---- 出擊與管理 ----
+async function bsHit(dmg) {
+  if (!bsLive()) return null;
+  if (BS.mode === 'demo') { const o = bsDemoLoad(); const v = bsDemoApply(o, 'me', MP.nick || '我', dmg); bsDemoSave(o); BS.st = o.st; BS.hits = o.hits; bsAfter(); return { ok: true, dmg: v }; }
+  if (!BS.uid) return { err: 'login' };
+  const r = await SB.client.rpc('tongle_boss_hit', { p_dmg: dmg, p_nick: MP.nick || '旅人' });
+  if (r.error) return { err: /too fast/.test(r.error.message) ? 'fast' : 'fail' };
+  await bsRefresh(); return { ok: true, dmg };
+}
+async function bsAdmin(kind, fest, name, max) {
+  if (BS.mode === 'demo') { const o = bsDemoLoad(), st = o.st; st.festival = fest;
+    if (kind === 'new') { st.boss_name = name; st.boss_max = max; st.boss_hp = max; st.round++; st.defeated_at = null; st.last_hitter = null; o.hits = []; } bsDemoSave(o); await bsRefresh(); return true; }
+  const r = kind === 'new' ? await SB.client.rpc('tongle_boss_new', { p_festival: fest, p_name: name, p_max: max }) : await SB.client.rpc('tongle_festival_set', { p_festival: fest });
+  if (r.error) { toast('操作失敗：' + (/admin/.test(r.error.message) ? '這個帳號不是管理者' : '連線錯誤'), 3500); return false; }
+  await bsRefresh(); return true;
+}
+// ---- 畫面：HUD 小標、節慶提示 ----
+function bsAfter() {
+  const e = $('hBoss'); if (e) { e.hidden = !bsLive(); if (bsLive()) e.textContent = FEST[bsFest()][1] + ' ' + BS.st.boss_name + ' ' + bsPct() + '%'; }
+  if (!$('bsp').hidden) bsPanel(true);
+  bsOffer();
+}
+function bsOffer() {
+  if (!STARTED || anyPanel() || !BS.st || !G.gp) return; const f = bsFest(), seen = G.gp.festSeen; if (f === seen) return; G.gp.festSeen = f; saveGame();
+  if (seen === undefined && f === 'auto') return; if (f === 'auto') { toast('節慶活動結束了，回到依日期自動', 3000); return; }
+  const ed = FEST_ED[f];
+  if (!ed || G.edition === ed) { toast('老師開啟了「' + FEST[f][0] + '」活動！傳送門的 Boss 出現了', 4000); return; }
+  openDlg('同樂小行星廣播', '老師開啟了「' + FEST[f][0] + '」活動！\n要切換成「' + FEST_ED_N[ed] + '限定版」嗎？（之後可在上方「版本」切換）', [{ t: '切換', go: true, fn: () => { closePanels(); hwApply(ed); } }, { t: '先不要', fn: closePanels }]);
+}
+// ---- 面板 ----
+const bsMine = () => { const h = BS.hits.find(x => x.uid === BS.uid); return h ? h.dmg : 0; };
+function bsClaimKey() { return (BS.mode === 'demo' ? 'd' : 's') + BS.st.round; }
+function bsClaim() {
+  const st = BS.st; if (!st || st.boss_hp > 0 || bsMine() <= 0) return; const c = G.gp.claimed = G.gp.claimed || {}, k = bsClaimKey(); if (c[k]) return; c[k] = 1;
+  const top = BS.hits[0] && BS.hits[0].uid === BS.uid, coins = 300 + (top ? 200 : 0); addCoins(coins); if (ITEMS.lamp) addItem('lamp', 1); saveGame();
+  openDlg('討伐獎勵', '全班一起打倒了「' + st.boss_name + '」！\n同樂幣 +' + coins + (ITEMS.lamp ? '、路燈 ×1' : '') + (top ? '\n你是本輪傷害最高的人，額外 +200 幣！' : ''), [{ t: '太棒了', go: true, fn: closePanels }]);
+}
+function bsPanel(keep) {
+  if (!keep) { openPanel('bsp'); bsRefresh(); }
+  if (!BS.st) { $('bspList').innerHTML = '<p class="sm">讀取中…</p>'; return; }
+  const L = $('bspList'), st = BS.st, f = bsFest(), live = st.boss_hp > 0, claimed = (G.gp.claimed || {})[bsClaimKey()]; L.innerHTML = '';
+  const add = (tag, html, cls) => { const d = document.createElement(tag); if (cls) d.className = cls; d.innerHTML = html; L.appendChild(d); return d; };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  if (BS.note) add('p', esc(BS.note), 'sm');
+  add('p', '<b>' + FEST[f][1] + ' ' + esc(st.boss_name) + '</b>　第 ' + st.round + ' 輪　目前節慶：' + FEST[f][0], 'sm');
+  add('div', '<i style="width:' + bsPct() + '%"></i>', 'bsbar'); add('p', live ? 'Boss 血量 ' + st.boss_hp + ' / ' + st.boss_max + '（' + bsPct() + '%）' : '已被全班打倒！最後一擊：' + esc(st.last_hitter || '？'), 'sm');
+  add('p', '我的傷害：' + bsMine() + (BS.uid ? '' : '　（登入多人版才能把傷害加進全班）'), 'sm');
+  const row = document.createElement('div'); row.className = 'bsrow'; L.appendChild(row);
+  if (live) row.appendChild(mkBtn('直接出擊（垂直卷軸）', () => gpOpen('shooter.html', FEST_THEME[f] ? '&theme=' + FEST_THEME[f] : ''), true));
+  if (!live && bsMine() > 0 && !claimed) row.appendChild(mkBtn('領取討伐獎勵', bsClaim, true));
+  if (!live && claimed) add('p', '這一輪的獎勵已領取。', 'sm');
+  if (BS.mode === 'sb' && !BS.uid) row.appendChild(mkBtn('登入多人版', () => { closePanels(); mpMode('multi', true); }, false));
+  add('p', '排行榜', 'sm'); const g = add('div', '', 'bslist');
+  if (!BS.hits.length) g.textContent = '還沒有人出擊，當第一個！';
+  BS.hits.slice(0, 8).forEach((h, i) => { const r = document.createElement('div'); r.textContent = (i + 1) + '. ' + h.nick + (h.uid === BS.uid ? '（我）' : '') + '　' + h.dmg; g.appendChild(r); });
+  if (BS.admin) {
+    add('p', '<b>管理（老師）</b>' + (BS.mode === 'demo' ? '　示範模式：任何人都能試用' : ''), 'sm');
+    const bx = add('div', '', 'bsadm'), sel = document.createElement('select'); sel.id = 'bsFest'; Object.keys(FEST).forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = FEST[k][1] + ' ' + FEST[k][0]; if (k === f) o.selected = true; sel.appendChild(o); });
+    const hp = document.createElement('select'); hp.id = 'bsHp'; [10000, 20000, 50000, 100000].forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = 'Boss 血量 ' + v; if (v === 20000) o.selected = true; hp.appendChild(o); });
+    bx.appendChild(sel); bx.appendChild(hp);
+    const r2 = document.createElement('div'); r2.className = 'bsrow'; bx.appendChild(r2);
+    r2.appendChild(mkBtn('只切換節慶', () => bsAdmin('fest', sel.value), false));
+    r2.appendChild(mkBtn('開新的 Boss', () => bsAdmin('new', sel.value, FEST_BOSS[sel.value], +hp.value).then(ok => ok && toast('新的 Boss 出現了！', 2500)), true));
+    if (BS.mode === 'demo') r2.appendChild(mkBtn('模擬 5 位同學出擊', () => { const o = bsDemoLoad(); ['小安', '阿哲', '小美', '阿樂', '小宇'].forEach((n, i) => bsDemoApply(o, 'sim' + i, n, 600 + ((Math.random() * 1800) | 0))); bsDemoSave(o); bsRefresh(); }, false));
+  }
+}
+$('bspX').onclick = closePanels; $('hBoss').onclick = () => { if (STARTED && !GAME.block) bsPanel(); };
+// 開始遊戲後讀取一次，之後每 30 秒更新
+{ const iv = setInterval(() => { if (!STARTED) return; clearInterval(iv); bsRefresh(); setInterval(() => { if (!document.hidden) bsRefresh(); }, 30000); }, 500); }
+window.__boss = { BS, bsRefresh, bsHit, bsPanel, bsDemoLoad, bsAdmin, bsClaim };
 </script></html>
