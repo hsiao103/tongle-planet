@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>同樂小將遊戲館</title>
+<meta name="description" content="同樂國小校園小遊戲：橫向卷軸探索與垂直卷軸節慶彈幕戰。">
+<style>
+  :root {
+    --bg: #0f1530;
+    --bg2: #171f45;
+    --card: #1b2550;
+    --line: #34417a;
+    --text: #f4f6ff;
+    --muted: #aab6e6;
+    --gold: #ffd166;
+    --blue: #4dabf7;
+    --orange: #ff8a1f;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 500px at 50% -10%, #2a3a8a55, transparent 70%),
+      radial-gradient(1px 1px at 12% 18%, #fff8, transparent 60%),
+      radial-gradient(1px 1px at 78% 12%, #fff8, transparent 60%),
+      radial-gradient(1.5px 1.5px at 34% 62%, #fff6, transparent 60%),
+      radial-gradient(1px 1px at 88% 70%, #fff7, transparent 60%),
+      radial-gradient(1px 1px at 55% 30%, #fff6, transparent 60%),
+      linear-gradient(180deg, var(--bg), #0b1024);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 36px 16px 48px; }
+
+  header { text-align: center; margin-bottom: 30px; }
+  header .kicker { color: var(--muted); font-size: 14px; letter-spacing: .2em; }
+  header h1 { margin: 6px 0 4px; font-size: clamp(34px, 7vw, 56px); color: var(--gold); text-shadow: 0 4px 0 #2b1f08, 0 0 28px #ffd16644; letter-spacing: .06em; }
+  header p { margin: 0; color: var(--muted); font-size: clamp(15px, 2.6vw, 18px); }
+
+  .grid { display: grid; gap: 22px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+  .card {
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, var(--card), #151d42);
+    border: 2px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--blue); box-shadow: 0 14px 36px #0007; }
+  .card.v:hover { border-color: var(--orange); }
+
+  .shot { position: relative; aspect-ratio: 16 / 10; background: #0b1024; overflow: hidden; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot .badge {
+    position: absolute; left: 12px; bottom: 12px; padding: 4px 12px; border-radius: 999px;
+    background: #000a; border: 1px solid #fff4; font-size: 13px; font-weight: 700;
+  }
+  .body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .body h2 { margin: 0; font-size: 24px; }
+  .body h2 small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
+  .body p { margin: 0; color: #d6dcf7; font-size: 15.5px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13px; padding: 3px 11px; border-radius: 999px; background: #28336b; color: #dfe6ff; border: 1px solid #3d4b8f; }
+
+  dl.how { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; color: var(--muted); }
+  dl.how dt { color: #e7ecff; font-weight: 700; }
+  dl.how dd { margin: 0; }
+
+  .fest { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  @media (min-width: 420px) and (max-width: 759px), (min-width: 980px) { .fest { grid-template-columns: repeat(4, 1fr); } }
+  .fest a {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px;
+    border-radius: 12px; background: #222d63; border: 1.5px solid #3d4b8f; color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .fest a span { font-size: 26px; line-height: 1.1; }
+  .fest a:hover, .fest a:focus-visible { background: #2d3a7d; border-color: var(--gold); transform: translateY(-2px); }
+  .best { font-size: 13px; color: var(--gold); min-height: 1.4em; }
+
+  .go {
+    margin-top: auto; display: block; text-align: center; text-decoration: none; color: #fff; font-weight: 800; font-size: 20px;
+    padding: 14px 18px; border-radius: 14px; border: 3px solid #fff; text-shadow: 0 2px 0 #0004;
+    transition: filter .15s, transform .15s;
+  }
+  .go:hover, .go:focus-visible { filter: brightness(1.12); transform: translateY(-2px); }
+  .go.h { background: #2f81d8; }
+  .go.v { background: var(--orange); }
+  a:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .tips { margin-top: 30px; padding: 16px 20px; border-radius: var(--radius); background: #141b3d; border: 1px dashed var(--line); color: var(--muted); font-size: 14.5px; }
+  .tips b { color: #e7ecff; }
+  .tips ul { margin: 6px 0 0; padding-left: 20px; }
+  footer { text-align: center; margin-top: 26px; color: #7e8bc4; font-size: 13px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="kicker">TONGLE ELEMENTARY SCHOOL</div>
+    <h1>同樂小將遊戲館</h1>
+    <p>選一個遊戲，開始守護我們的校園！</p>
+  </header>
+
+  <section class="grid" aria-label="遊戲選擇">
+
+    <!-- 橫向卷軸 -->
+    <article class="card h">
+      <div class="shot">
+        <img src="preview_side.jpg" alt="橫向卷軸遊戲畫面：主角在教學樓二樓，旁邊有南瓜造型的校園妖怪" loading="lazy">
+        <span class="badge">↔ 橫向卷軸</span>
+      </div>
+      <div class="body">
+        <h2><small>校園探索</small>教學區西樓大冒險</h2>
+        <p>在三層樓之間跑跳、上下樓梯，集滿 6 顆星星，躲開巡邏的校園妖怪，最後到 3 樓向老師報告！</p>
+        <div class="chips"><span class="chip">單人</span><span class="chip">約 3 分鐘</span><span class="chip">適合初次體驗</span></div>
+        <dl class="how">
+          <dt>電腦</dt><dd>← → 走動　↑ ↓ 上下樓　空白鍵 互動　H 提示</dd>
+          <dt>手機</dt><dd>左側搖桿移動，右側「互動」「提示」鍵（建議橫放）</dd>
+        </dl>
+        <a class="go h" href="side_scroller.html">開始探索 ▶</a>
+      </div>
+    </article>
+
+    <!-- 垂直卷軸 -->
+    <article class="card v">
+      <div class="shot">
+        <img src="preview_shooter.jpg" alt="垂直卷軸射擊遊戲畫面：主角騎著掃帚發射糖果，對抗巨大的南瓜魔王" loading="lazy">
+        <span class="badge">↕ 垂直卷軸</span>
+      </div>
+      <div class="body">
+        <h2><small>節慶彈幕戰</small>同樂小將・保衛校園</h2>
+        <p>配合節慶的射擊遊戲：三個關卡加一場 Boss 戰，撿道具提升火力，還有大招可以清除彈幕。</p>
+        <div class="chips"><span class="chip">單人</span><span class="chip">約 5 分鐘</span><span class="chip">4 種節慶</span><span class="chip">記錄最高分</span></div>
+        <div class="fest" role="group" aria-label="直接選擇節慶">
+          <a href="shooter.html?theme=halloween"><span>🎃</span>萬聖節</a>
+          <a href="shooter.html?theme=teacher"><span>📚</span>教師節</a>
+          <a href="shooter.html?theme=dragon"><span>🐉</span>端午節</a>
+          <a href="shooter.html?theme=newyear"><span>🧧</span>農曆春節</a>
+        </div>
+        <div class="best" id="best" aria-live="polite"></div>
+        <dl class="how">
+          <dt>電腦</dt><dd>方向鍵／WASD 移動　空白鍵 大招（自動連射）</dd>
+          <dt>手機</dt><dd>左側搖桿移動，右側「大招」鍵（建議直立）</dd>
+        </dl>
+        <a class="go v" href="shooter.html">依日期自動選節慶 ▶</a>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="tips" aria-label="小提醒">
+    <b>小提醒</b>
+    <ul>
+      <li>第一次開啟需要連上網路，之後瀏覽器會記住，載入會更快。</li>
+      <li>遊戲中點上方的「⌂ 遊戲選單」可以隨時回到這一頁。</li>
+      <li>電腦與手機（含平板）都能玩，手機請把音量與螢幕鎖定先設定好。</li>
+    </ul>
+  </section>
+
+  <footer>同樂國小 ・ 校園小遊戲</footer>
+</main>
+
+<script>
+  // 顯示節慶彈幕戰的個人最高分（只存在這台裝置的瀏覽器裡）
+  (function () {
+    try {
+      var b = JSON.parse(localStorage.getItem('tongle_shooter_best') || '{}');
+      var names = { halloween: '🎃', teacher: '📚', dragon: '🐉', newyear: '🧧' };
+      var parts = [];
+      Object.keys(names).forEach(function (k) { if (b[k]) parts.push(names[k] + ' ' + b[k]); });
+      if (parts.length) document.getElementById('best').textContent = '你的最高分　' + parts.join('　');
+    } catch (e) {}
+  })();
+</script>
+<script>
+  // 從同樂小行星傳送門進來時：把 from/embed 參數帶給各遊戲，並顯示「回小行星」
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('from') !== 'planet') return;
+      var ex = 'from=planet' + (q.get('embed') === '1' ? '&embed=1' : '');
+      document.querySelectorAll('a.go, .fest a').forEach(function (a) {
+        a.href = a.getAttribute('href') + (a.getAttribute('href').indexOf('?') < 0 ? '?' : '&') + ex;
+      });
+      var h = document.querySelector('header p'); if (h) h.textContent = '同樂小行星傳送門已開啟——選一個遊戲，守護我們的校園！';
+      var b = document.createElement('a'); b.href = '../index.html'; b.textContent = '🪐 回小行星';
+      b.style.cssText = 'position:fixed;top:8px;left:8px;z-index:10;padding:6px 14px;border-radius:999px;background:#000a;color:#fff;border:1px solid #fff5;text-decoration:none;font-size:14px;font-weight:700';
+      b.addEventListener('click', function (e) { if (q.get('embed') === '1') { e.preventDefault(); window.parent.postMessage({ source: 'tongle-games', type: 'tongle:close' }, /^https?:/.test(location.protocol) ? location.origin : '*'); } });
+      document.body.appendChild(b);
+    } catch (e) {}
+  })();
+</script>
+</body>
+</html>

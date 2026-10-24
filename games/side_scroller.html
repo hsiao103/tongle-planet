@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>同樂捲軸冒險・西樓探索</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #101820; overflow: hidden; touch-action: none; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+  #game { width: 100vw; height: 100vh; }
+  #pad { position: fixed; left: 0; right: 0; bottom: 0; display: none; justify-content: space-between; align-items: flex-end; padding: 10px 18px calc(18px + env(safe-area-inset-bottom)); pointer-events: none; }
+  /* 避免長按選取文字／跳出選單／點擊高亮，造成按鍵卡住 */
+  #pad, #pad * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+
+  /* 左側：虛擬搖桿（縮小版） */
+  #joy { position: relative; width: 112px; height: 112px; box-sizing: border-box; border-radius: 50%; border: 4px solid #777a7f;
+         background: radial-gradient(circle at 50% 45%, #3b3e43 0%, #1b1c1f 70%, #0d0d0f 100%);
+         pointer-events: auto; touch-action: none; opacity: .93; }
+  #joy svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #joy .tri { position: absolute; width: 0; height: 0; border-style: solid; pointer-events: none; }
+  #joy .up    { left: 50%; top: 8px;  transform: translateX(-50%); border-width: 0 6px 10px 6px; border-color: transparent transparent #fff transparent; }
+  #joy .down  { left: 50%; bottom: 8px; transform: translateX(-50%); border-width: 10px 6px 0 6px; border-color: #fff transparent transparent transparent; }
+  #joy .left  { top: 50%; left: 8px;  transform: translateY(-50%); border-width: 6px 10px 6px 0; border-color: transparent #fff transparent transparent; }
+  #joy .right { top: 50%; right: 8px; transform: translateY(-50%); border-width: 6px 0 6px 10px; border-color: transparent transparent transparent #fff; }
+  #joy .up.on    { border-bottom-color: #2e9bdc; }
+  #joy .down.on  { border-top-color: #2e9bdc; }
+  #joy .left.on  { border-right-color: #2e9bdc; }
+  #joy .right.on { border-left-color: #2e9bdc; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; box-sizing: border-box;
+          border: 2px solid #6c6e72; background: radial-gradient(circle at 45% 40%, #5d6066, #1b1c1f 75%); pointer-events: none; }
+
+  /* 右側：「提示」緊貼在「互動」左上方 */
+  #pad .acts { position: relative; width: 140px; height: 124px; pointer-events: auto; }
+  #pad .acts button { position: absolute; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(255,255,255,.18); color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; }
+  #pad .acts [data-k="act"]  { right: 0; bottom: 0; width: 80px; height: 80px; font-size: 20px; }
+  #pad .acts [data-k="hint"] { right: 82px; bottom: 64px; width: 56px; height: 56px; font-size: 17px; }
+  #pad .acts button:active { background: rgba(255,255,255,.4); }
+  @media (pointer: coarse) { #pad { display: flex; } }
+
+  #home { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 20; padding: 3px 12px; border-radius: 999px;
+          background: rgba(0,0,0,.45); color: rgba(255,255,255,.8); font-size: 13px; text-decoration: none; border: 1px solid rgba(255,255,255,.25);
+          -webkit-tap-highlight-color: transparent; }
+  #home:hover, #home:active { background: rgba(0,0,0,.7); color: #fff; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+</head>
+<body>
+<a id="home" href="index.html" title="回到遊戲選單">⌂ 遊戲選單</a>
+<script>
+/* 小行星整合：?from=planet 表示從同樂小行星傳送門進來；embed=1 表示放在小行星的視窗裡 */
+var PLANET = (function () {
+  var q; try { q = new URLSearchParams(location.search); } catch (e) { q = { get: function () { return null; } }; }
+  return { on: q.get('from') === 'planet', embed: q.get('embed') === '1' };
+})();
+function planetPost(type, data) {
+  try {
+    if (window.parent && window.parent !== window) {
+      var m = { source: 'tongle-games', type: type }; for (var k in (data || {})) m[k] = data[k];
+      window.parent.postMessage(m, /^https?:/.test(location.protocol) ? location.origin : '*');
+    }
+  } catch (e) {}
+}
+(function () {
+  var a = document.getElementById('home'); if (!a || !PLANET.on) return;
+  a.textContent = '🪐 回小行星'; a.title = '回到同樂小行星';
+  a.href = '../index.html';
+  if (PLANET.embed) a.style.display = 'none';   // 外層小行星視窗已有「回小行星」按鈕
+  a.addEventListener('click', function (ev) { if (PLANET.embed) { ev.preventDefault(); planetPost('tongle:close'); } });
+  document.addEventListener('keydown', function (ev) { if (PLANET.embed && ev.key === 'Escape') planetPost('tongle:close'); });
+})();
+</script>
+<div id="game"></div>
+<div id="pad">
+  <div id="joy">
+    <svg viewBox="0 0 104 104" aria-hidden="true">
+      <g stroke="#2e9bdc" stroke-width="3" stroke-linecap="round">
+        <line x1="20" y1="20" x2="32" y2="32"/><line x1="84" y1="20" x2="72" y2="32"/>
+        <line x1="20" y1="84" x2="32" y2="72"/><line x1="84" y1="84" x2="72" y2="72"/>
+      </g>
+    </svg>
+    <i class="tri up"></i><i class="tri down"></i><i class="tri left"></i><i class="tri right"></i>
+    <div id="knob"></div>
+  </div>
+  <div class="acts">
+    <button data-k="hint">提示</button>
+    <button data-k="act">互動</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const W = 960, H = 540, WORLD = 2400;
+  // 地板腳底 y：index 0 = 1F, 1 = 2F, 2 = 3F
+  const FLOOR_Y = [480, 330, 180];
+  const FLOOR_H = 150;
+  const FLOOR_NAMES = ['1F', '2F', '3F'];
+  // 樓梯：以 x 為中心，連接 low 與 low+1，斜向橫跨 100px
+  const STAIRS = [
+    { x: 450,  low: 0 },
+    { x: 1500, low: 0 },
+    { x: 900,  low: 1 },
+    { x: 1950, low: 1 }
+  ];
+  const STAIR_HALF = 50;
+  const SPEED = 230;
+
+  // 星星：[樓層, x]，每層兩顆，都在妖怪巡邏範圍內
+  const STAR_POS = [[0, 1050], [0, 2100], [1, 1250], [1, 2200], [2, 700], [2, 1500]];
+  const TOTAL = STAR_POS.length;
+
+  // 校園妖怪巡邏設定
+  const GHOSTS = [
+    { floor: 1, min: 1000, max: 1750, speed: 90 },
+    { floor: 0, min: 600,  max: 1300, speed: 70 },
+    { floor: 2, min: 1100, max: 1900, speed: 110 }
+  ];
+
+  // NPC 設定（final = 最終任務對象）
+  const NPCS = [
+    { floor: 0, x: 300,  name: '警衛伯伯', tex: 'npc_guard',
+      lines: ['上下樓梯要靠右走、不奔跑喔！', '每層樓都藏了兩顆星星，小心巡邏的妖怪～'] },
+    { floor: 1, x: 1620, name: '草原班同學', tex: 'npc_student',
+      lines: ['我看到妖怪在走廊來回巡邏，抓準空檔再通過！', '老師在 3F 最右邊等你，星星要先集滿喔。'] },
+    { floor: 2, x: 2250, name: '老師', tex: 'npc_teacher', final: true, lines: [] }
+  ];
+
+  // 角色配色
+  const OL = 0x1d2433; // 角色深色描邊
+  const PAL = {
+    kid:     { shirt: 0x3a86ff, shirtDark: 0x2c6bd6, pants: 0x2b3a67, pantsBack: 0x222e52, hair: 0x5a3825, skin: 0xffd6a5, pack: 0xe85d5d },
+    guard:   { shirt: 0x2f7f86, shirtDark: 0x246268, pants: 0x233b4d, pantsBack: 0x1b2e3d, hair: 0xb9bcc2, skin: 0xf3c9a0, pack: 0x2b2f36 },
+    student: { shirt: 0xff8fab, shirtDark: 0xe0708e, pants: 0x6b5b95, pantsBack: 0x54477a, hair: 0x3b2a20, skin: 0xffd6a5, pack: 0xffd166 },
+    teacher: { shirt: 0x8338ec, shirtDark: 0x6a2bc0, pants: 0x33415c, pantsBack: 0x28344a, hair: 0x2b2b2b, skin: 0xffd6a5, pack: 0x8d6e63 }
+  };
+
+  // ───────── 輸入：按鈕與搖桿 ─────────
+  // ax = 類比水平量（-1~1），搖桿推越遠走越快；left/right/up/down 為數位判定
+  const pad = { left: false, right: false, up: false, down: false, act: false, hint: false, ax: 0 };
+  const btnPid = {};      // 每顆按鈕目前按著它的手指
+  let joyReset = function () {};
+
+  // 任何放開、取消、失焦、切到背景，都一律歸零，避免卡鍵
+  function releaseAll() {
+    Object.keys(btnPid).forEach(function (k) { btnPid[k] = null; pad[k] = false; });
+    joyReset();
+  }
+  window.addEventListener('blur', releaseAll);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) releaseAll(); });
+  window.addEventListener('pagehide', releaseAll);
+  document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  document.querySelectorAll('#pad .acts button').forEach(function (b) {
+    const k = b.dataset.k;
+    btnPid[k] = null;
+    b.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      btnPid[k] = e.pointerId; pad[k] = true;
+    });
+  });
+  const upOrCancel = function (e) {
+    Object.keys(btnPid).forEach(function (k) {
+      if (btnPid[k] === e.pointerId) { btnPid[k] = null; pad[k] = false; }
+    });
+  };
+  window.addEventListener('pointerup', upOrCancel);
+  window.addEventListener('pointercancel', upOrCancel);
+  // 觸控備援：所有手指都離開螢幕就全部歸零
+  const touchEnd = function (e) { if (e.touches && e.touches.length === 0) releaseAll(); };
+  window.addEventListener('touchend', touchEnd);
+  window.addEventListener('touchcancel', touchEnd);
+
+  (function () {
+    const joy = document.getElementById('joy');
+    const knob = document.getElementById('knob');
+    const tri = {
+      up: joy.querySelector('.up'), down: joy.querySelector('.down'),
+      left: joy.querySelector('.left'), right: joy.querySelector('.right')
+    };
+    const R = 32;          // 搖桿可移動半徑
+    const DEAD = 8;        // 水平死區
+    const H_ON = 10, H_OFF = 7;      // 水平 啟動/放開 門檻（遲滯，避免抖動）
+    const V_ON = 14, V_OFF = 10;     // 垂直 啟動/放開 門檻
+    let pid = null;
+
+    function paint() {
+      tri.left.classList.toggle('on', pad.left);
+      tri.right.classList.toggle('on', pad.right);
+      tri.up.classList.toggle('on', pad.up);
+      tri.down.classList.toggle('on', pad.down);
+    }
+    joyReset = function () {
+      pid = null;
+      knob.style.transform = 'translate(0px,0px)';
+      pad.left = pad.right = pad.up = pad.down = false; pad.ax = 0;
+      paint();
+    };
+    function move(e) {
+      const rc = joy.getBoundingClientRect();
+      let dx = e.clientX - (rc.left + rc.width / 2);
+      let dy = e.clientY - (rc.top + rc.height / 2);
+      const len = Math.hypot(dx, dy);
+      if (len > R) { dx = dx / len * R; dy = dy / len * R; }
+      knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+
+      // 水平：類比（推越遠越快），與垂直互不排斥，可斜推
+      const adx = Math.abs(dx), ady = Math.abs(dy);
+      const hOn = adx > (pad.left || pad.right ? H_OFF : H_ON);
+      pad.left = hOn && dx < 0;
+      pad.right = hOn && dx > 0;
+      if (hOn) {
+        const t = Math.min(1, Math.max(0, (adx - DEAD) / (R - DEAD)));
+        pad.ax = Math.sign(dx) * (0.4 + 0.6 * t);
+      } else { pad.ax = 0; }
+
+      // 垂直：斜推時只要偏上/下夠明顯就算，同時保留水平移動
+      const vOn = ady > (pad.up || pad.down ? V_OFF : V_ON) && ady >= adx * 0.55;
+      pad.up = vOn && dy < 0;
+      pad.down = vOn && dy > 0;
+      paint();
+    }
+    joy.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      pid = e.pointerId;                 // 若上一根手指的事件遺失，直接由新手指接手
+      try { joy.setPointerCapture(pid); } catch (err) {}
+      move(e);
+    });
+    // 事件掛在 window：就算手指滑出搖桿範圍或沒有 pointer capture，也一定收得到放開
+    window.addEventListener('pointermove', function (e) { if (e.pointerId === pid) { e.preventDefault(); move(e); } }, { passive: false });
+    const end = function (e) { if (e.pointerId === pid) joyReset(); };
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    joy.addEventListener('lostpointercapture', end);
+  })();
+
+  function fmtTime(sec) {
+    const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // ───────── 角色繪製：人物（40×62，腳底在最下方）─────────
+  // ph = 走路相位；still = 靜止姿勢
+  function drawKid(g, ph, pal, still) {
+    const sw = still ? 0 : Math.sin(ph) * 6;
+    const cs = still ? 0 : Math.cos(ph);
+
+    const limb = function (x0, y0, x1, y1, w, col) {
+      g.lineStyle(w + 3, OL, 1); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokePath();
+      g.lineStyle(w, col, 1);    g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokePath();
+    };
+    const dot = function (x, y, r, col) {
+      g.fillStyle(col, 1); g.fillCircle(x, y, r);
+      g.lineStyle(2, OL, 1); g.strokeCircle(x, y, r);
+    };
+    const shoe = function (x, y) {
+      g.fillStyle(0xf4f4f4, 1); g.fillEllipse(x + 2, y, 12, 6);
+      g.lineStyle(2, OL, 1);    g.strokeEllipse(x + 2, y, 12, 6);
+      g.fillStyle(0xe85d5d, 1); g.fillRect(x + 4, y - 1, 3, 2);
+    };
+
+    // 後腿
+    const liftB = Math.max(0, -cs) * 3;
+    limb(18, 40, 18 - sw, 56 - liftB, 6, pal.pantsBack);
+    shoe(18 - sw, 57 - liftB);
+    // 後手
+    limb(14, 28, 14 + sw * 0.9, 39, 5, pal.shirtDark);
+    dot(14 + sw * 0.9, 40.5, 3, pal.skin);
+
+    // 背包
+    g.fillStyle(pal.pack, 1); g.fillRoundedRect(7, 26, 9, 14, 3);
+    g.lineStyle(2, OL, 1);    g.strokeRoundedRect(7, 26, 9, 14, 3);
+
+    // 身體
+    g.fillStyle(pal.shirt, 1); g.fillRoundedRect(12, 24, 16, 19, 5);
+    g.fillStyle(0xffffff, 0.22); g.fillRect(14, 27, 3, 11);
+    g.fillStyle(pal.pants, 1); g.fillRoundedRect(12.5, 38, 15, 5, { tl: 0, tr: 0, bl: 4, br: 4 });
+    g.fillStyle(0xffd166, 1); g.fillCircle(24, 31, 2);
+    g.lineStyle(2, OL, 1); g.strokeRoundedRect(12, 24, 16, 19, 5);
+
+    // 前腿
+    const liftF = Math.max(0, cs) * 3;
+    limb(23, 40, 23 + sw, 56 - liftF, 6, pal.pants);
+    shoe(23 + sw, 57 - liftF);
+
+    // 頭
+    g.fillStyle(pal.skin, 1); g.fillCircle(20, 15, 11);
+    g.fillStyle(pal.hair, 1);
+    g.beginPath(); g.slice(20, 15, 11.5, Math.PI, Math.PI * 2, false); g.fillPath();
+    g.fillTriangle(9.5, 15, 18, 6.5, 19, 17);           // 瀏海
+    g.fillTriangle(30.5, 15, 24, 6.5, 22, 15);
+    g.lineStyle(2, OL, 1); g.strokeCircle(20, 15, 11);
+    g.fillStyle(OL, 1); g.fillCircle(16, 17, 1.8); g.fillCircle(25, 17, 1.8);
+    g.fillStyle(0xffffff, 0.9); g.fillCircle(16.6, 16.3, 0.6); g.fillCircle(25.6, 16.3, 0.6);
+    g.fillStyle(0xff9aa2, 0.65); g.fillCircle(13, 21, 2); g.fillCircle(28, 21, 2);
+    g.lineStyle(1.5, OL, 1); g.beginPath(); g.arc(20.5, 20.5, 2.2, 0.15, Math.PI - 0.15); g.strokePath();
+
+    // 前手
+    limb(26, 28, 26 - sw * 0.9, 39, 5, pal.shirt);
+    dot(26 - sw * 0.9, 40.5, 3, pal.skin);
+  }
+
+  // ───────── 角色繪製：校園妖怪（南瓜怪，60×74）─────────
+  function drawMonster(g, fr) {
+    const DK = 0x3b1606;   // 描邊
+    const PU = 0x6b3fa0;   // 紫色手腳
+    const fy = [fr ? 66 : 69, fr ? 69 : 66];
+    // 腳
+    [[20, fy[0]], [40, fy[1]]].forEach(function (p) {
+      g.fillStyle(0x5b3a8c, 1); g.fillEllipse(p[0], p[1], 16, 8);
+      g.lineStyle(2, DK, 1);    g.strokeEllipse(p[0], p[1], 16, 8);
+    });
+    // 南瓜身體（多瓣）
+    g.fillStyle(0xf26b0f, 1); g.fillEllipse(17, 41, 26, 44); g.fillEllipse(43, 41, 26, 44);
+    g.fillStyle(0xff8a1f, 1); g.fillEllipse(24, 41, 26, 46); g.fillEllipse(36, 41, 26, 46);
+    g.fillStyle(0xff9d33, 1); g.fillEllipse(30, 41, 24, 47);
+    g.lineStyle(2, DK, 0.5);
+    g.strokeEllipse(24, 41, 26, 46); g.strokeEllipse(36, 41, 26, 46); g.strokeEllipse(30, 41, 24, 47);
+    g.lineStyle(2.5, DK, 1);
+    g.strokeEllipse(17, 41, 26, 44); g.strokeEllipse(43, 41, 26, 44);
+    // 高光
+    g.lineStyle(3, 0xffd09a, 0.8); g.beginPath(); g.arc(19, 33, 9, Math.PI * 1.1, Math.PI * 1.5); g.strokePath();
+    // 蒂頭與葉子
+    g.fillStyle(0x4c7a34, 1); g.fillRoundedRect(27, 9, 7, 12, 2);
+    g.lineStyle(2, DK, 1);    g.strokeRoundedRect(27, 9, 7, 12, 2);
+    g.fillStyle(0x6fae45, 1); g.fillEllipse(41, 14, 13, 6);
+    g.strokeEllipse(41, 14, 13, 6);
+    // 眼睛（兇狠斜眼）
+    g.fillStyle(0x2b0f3a, 1);
+    g.fillTriangle(13, 31, 28, 38, 14, 44);
+    g.fillTriangle(47, 31, 32, 38, 46, 44);
+    g.fillStyle(0xffe066, 1);
+    g.fillTriangle(16, 34, 25, 38.5, 16, 41);
+    g.fillTriangle(44, 34, 35, 38.5, 44, 41);
+    g.fillStyle(0xff3b30, 1); g.fillCircle(21, 38.4, 1.7); g.fillCircle(39, 38.4, 1.7);
+    // 眉毛
+    g.lineStyle(3, DK, 1);
+    g.beginPath(); g.moveTo(11, 29); g.lineTo(28, 36); g.strokePath();
+    g.beginPath(); g.moveTo(49, 29); g.lineTo(32, 36); g.strokePath();
+    // 鋸齒大嘴 + 尖牙
+    g.fillStyle(0x2b0f3a, 1);
+    g.fillPoints([
+      { x: 14, y: 52 }, { x: 19, y: 58 }, { x: 24, y: 52 }, { x: 30, y: 59 }, { x: 36, y: 52 },
+      { x: 41, y: 58 }, { x: 46, y: 52 }, { x: 44, y: 63 }, { x: 16, y: 63 }
+    ], true);
+    g.fillStyle(0xffffff, 1);
+    g.fillTriangle(17.5, 52.5, 23, 52.5, 20, 57.5);
+    g.fillTriangle(37, 52.5, 42.5, 52.5, 40, 57.5);
+    // 手臂與爪子（兩幀擺動）
+    const ay = [fr ? 50 : 54, fr ? 54 : 50];
+    const arm = function (x0, y0, x1, y1, dir) {
+      g.lineStyle(9, DK, 1); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokePath();
+      g.lineStyle(6, PU, 1); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokePath();
+      g.fillStyle(0xffffff, 1);
+      g.fillTriangle(x1 - 3, y1, x1 + 3, y1, x1 + dir * 2, y1 + 5);
+      g.fillTriangle(x1 + dir * 3, y1 - 2, x1 + dir * 3, y1 + 3, x1 + dir * 7, y1 + 3);
+    };
+    arm(8, 44, 6, ay[0], -1);
+    arm(52, 44, 54, ay[1], 1);
+  }
+
+  // ───────── 場景 ─────────
+  // 注意：Phaser 的物件式場景只會複製 create/update 等生命週期函式，
+  // 自訂方法（makeTextures、say…）會遺失，所以改用 class 並掛上所有方法。
+  const methods = {
+
+    create: function (data) {
+      const s = this;
+      s.floor = 0;
+      s.climbing = false;
+      s.walking = false;
+      s.hearts = 3;
+      s.stars = 0;
+      s.won = false;
+      s.started = false;
+      s.elapsed = 0;
+      s.lastSec = -1;
+      s.invincibleUntil = 0;
+      s.prevPad = { up: false, down: false, act: false, hint: false };
+      s.climbCooldown = 0;
+      s.npcLineIdx = {};
+
+      s.makeTextures();
+      s.drawBuilding();
+      s.drawWindowsAndDoors();
+      s.drawStairs();
+
+      // 星星
+      s.starObjs = [];
+      STAR_POS.forEach(function (d) {
+        const f = d[0], x = d[1];
+        const o = s.add.image(x, FLOOR_Y[f] - 45, 'star').setDepth(5);
+        o.floorIdx = f; o.got = false;
+        s.tweens.add({ targets: o, y: o.y - 10, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.inOut' });
+        s.starObjs.push(o);
+      });
+
+      // NPC
+      s.npcObjs = [];
+      NPCS.forEach(function (n) {
+        const img = s.add.image(n.x, FLOOR_Y[n.floor], n.tex).setOrigin(0.5, 1).setDepth(5);
+        s.tweens.add({ targets: img, scaleY: 1.025, yoyo: true, repeat: -1, duration: 900, ease: 'Sine.inOut' });
+        s.add.ellipse(n.x, FLOOR_Y[n.floor] + 1, 26, 7, 0x000000, 0.16).setDepth(4);
+        s.add.text(n.x, FLOOR_Y[n.floor] - 80, n.name, { fontSize: '16px', color: '#fff', backgroundColor: '#00000088', padding: { x: 4, y: 2 } }).setOrigin(0.5).setDepth(6);
+        s.add.text(n.x, FLOOR_Y[n.floor] - 104, '💬', { fontSize: '16px' }).setOrigin(0.5).setDepth(6);
+        s.npcObjs.push({ cfg: n, img: img });
+      });
+
+      // 校園妖怪
+      s.anims.exists('ghost_walk') || s.anims.create({ key: 'ghost_walk', frames: [{ key: 'ghost_0' }, { key: 'ghost_1' }], frameRate: 4, repeat: -1 });
+      s.ghosts = GHOSTS.map(function (g, i) {
+        const x = g.min + (g.max - g.min) * (i * 0.35 % 1);
+        const img = s.add.sprite(x, FLOOR_Y[g.floor], 'ghost_0').setOrigin(0.5, 1).setScale(0.9).setDepth(5);
+        img.play('ghost_walk');
+        s.tweens.add({ targets: img, scaleY: 0.94, yoyo: true, repeat: -1, duration: 450 + i * 90, ease: 'Sine.inOut' });
+        const shadow = s.add.ellipse(x, FLOOR_Y[g.floor] + 1, 40, 9, 0x000000, 0.2).setDepth(4);
+        const label = s.add.text(x, FLOOR_Y[g.floor] - 82, '校園妖怪', { fontSize: '14px', color: '#ffd166', backgroundColor: '#00000088', padding: { x: 4, y: 2 } }).setOrigin(0.5).setDepth(6);
+        return { cfg: g, img: img, shadow: shadow, label: label, dir: 1 };
+      });
+
+      // 玩家
+      s.anims.exists('kid_walk') || s.anims.create({ key: 'kid_walk', frames: [{ key: 'kid_0' }, { key: 'kid_1' }, { key: 'kid_2' }, { key: 'kid_3' }], frameRate: 10, repeat: -1 });
+      s.px = 120;
+      s.shadow = s.add.ellipse(s.px, FLOOR_Y[0] + 1, 28, 8, 0x000000, 0.2).setDepth(9);
+      s.player = s.add.sprite(s.px, FLOOR_Y[0], 'kid_idle').setOrigin(0.5, 1).setDepth(10);
+
+      // 鏡頭
+      s.cameras.main.setBounds(0, 0, WORLD, H);
+      s.cameras.main.startFollow(s.player, true, 0.12, 0.12);
+
+      // HUD
+      s.hud = s.add.text(14, 12, '', { fontSize: '22px', color: '#ffffff', backgroundColor: '#00000099', padding: { x: 8, y: 4 } }).setScrollFactor(0).setDepth(100);
+      s.quest = s.add.text(14, 50, '', { fontSize: '17px', color: '#ffe8a3', backgroundColor: '#00000099', padding: { x: 8, y: 4 } }).setScrollFactor(0).setDepth(100);
+      s.msg = s.add.text(W / 2, H - 120, '', { fontSize: '22px', color: '#ffffff', backgroundColor: '#000000cc', padding: { x: 14, y: 8 }, align: 'center', wordWrap: { width: 700 } }).setOrigin(0.5).setScrollFactor(0).setDepth(100).setVisible(false);
+      s.floorLabel = s.add.text(W - 14, 12, '', { fontSize: '26px', color: '#ffffff', backgroundColor: '#00000099', padding: { x: 10, y: 4 } }).setOrigin(1, 0).setScrollFactor(0).setDepth(100);
+
+      // 鍵盤
+      s.keys = s.input.keyboard.addKeys({
+        left: 'LEFT', right: 'RIGHT', up: 'UP', down: 'DOWN',
+        a: 'A', d: 'D', w: 'W', s: 'S', space: 'SPACE', e: 'E', h: 'H'
+      });
+
+      // 開始畫面（重玩時略過）
+      s.intro = [];
+      if (data && data.skipIntro) {
+        s.started = true;
+      } else {
+        const shade = s.add.rectangle(0, 0, W, H, 0x000000, 0.65).setOrigin(0).setScrollFactor(0).setDepth(200);
+        const title = s.add.text(W / 2, H / 2 - 60, '同樂捲軸冒險', { fontSize: '52px', color: '#ffd166', fontStyle: 'bold' }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+        const sub = s.add.text(W / 2, H / 2 + 10, (PLANET.on ? '小行星傳送門把你送到同樂國小！\n' : '') + '教學區西樓探索\n集滿 ' + TOTAL + ' 顆星星，到 3F 找老師！\n小心巡邏的校園妖怪', { fontSize: '24px', color: '#ffffff', align: 'center', lineSpacing: 8 }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+        const go = s.add.text(W / 2, H / 2 + 120, '點一下畫面或按任意鍵開始', { fontSize: '22px', color: '#aee3ff' }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+        s.tweens.add({ targets: go, alpha: 0.3, yoyo: true, repeat: -1, duration: 700 });
+        s.intro = [shade, title, sub, go];
+        s.input.once('pointerdown', function () { s.beginPlay(); });
+      }
+
+      s.refreshHud();
+      if (s.started) s.say('再挑戰一次！', 1500);
+    },
+
+    beginPlay: function () {
+      const s = this;
+      if (s.started) return;
+      s.started = true;
+      s.intro.forEach(function (o) { o.destroy(); });
+      s.intro = [];
+      s.say('用搖桿走動，在樓梯口把搖桿往上推上樓、往下推下樓。收集 ' + TOTAL + ' 顆星星！', 4000);
+    },
+
+    makeTextures: function () {
+      if (this.textures.exists('kid_idle')) return;
+      const g = this.make.graphics({ x: 0, y: 0, add: false });
+
+      // 主角：待機 + 4 幀走路
+      drawKid(g, 0, PAL.kid, true); g.generateTexture('kid_idle', 40, 62); g.clear();
+      for (let i = 0; i < 4; i++) {
+        drawKid(g, i * Math.PI / 2 + Math.PI / 4, PAL.kid, false);
+        g.generateTexture('kid_' + i, 40, 62); g.clear();
+      }
+      // NPC（靜止）
+      drawKid(g, 0, PAL.guard, true);   g.generateTexture('npc_guard', 40, 62);   g.clear();
+      drawKid(g, 0, PAL.student, true); g.generateTexture('npc_student', 40, 62); g.clear();
+      drawKid(g, 0, PAL.teacher, true); g.generateTexture('npc_teacher', 40, 62); g.clear();
+      // 妖怪：兩幀
+      drawMonster(g, 0); g.generateTexture('ghost_0', 60, 74); g.clear();
+      drawMonster(g, 1); g.generateTexture('ghost_1', 60, 74); g.clear();
+
+      // 星星
+      g.fillStyle(0xffd60a, 1);
+      const pts = []; const cx = 16, cy = 16;
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? 14 : 6; const a = -Math.PI / 2 + i * Math.PI / 5;
+        pts.push(new Phaser.Math.Vector2(cx + r * Math.cos(a), cy + r * Math.sin(a)));
+      }
+      g.fillPoints(pts, true);
+      g.lineStyle(2, 0xc99700, 1); g.strokePoints(pts, true);
+      g.generateTexture('star', 32, 32); g.clear();
+
+      // 窗後路人剪影（白色，使用時上單一色調）
+      g.fillStyle(0xffffff, 1);
+      g.fillCircle(14, 9, 7);
+      g.fillRoundedRect(2, 18, 24, 20, { tl: 10, tr: 10, bl: 0, br: 0 });
+      g.generateTexture('bust', 28, 38); g.clear();
+
+      // 牆面小磁磚（每層一色，磁磚縫很淡）
+      const tile = function (key, base, grout) {
+        g.fillStyle(base, 1); g.fillRect(0, 0, 22, 22);
+        g.fillStyle(0xffffff, 0.12); g.fillRect(1, 1, 20, 9);
+        g.lineStyle(1, grout, 0.4); g.strokeRect(0.5, 0.5, 21, 21);
+        g.generateTexture(key, 22, 22); g.clear();
+      };
+      tile('tile0', 0xf6e7c1, 0xd9c797);
+      tile('tile1', 0xe8f1d4, 0xc3d3a4);
+      tile('tile2', 0xdbe9f5, 0xb2c9de);
+      g.destroy();
+    },
+
+    drawBuilding: function () {
+      const s = this;
+      const bg = s.add.graphics().setDepth(0.05);
+      for (let f = 0; f < 3; f++) {
+        s.add.tileSprite(0, FLOOR_Y[f] - FLOOR_H, WORLD, FLOOR_H, 'tile' + f).setOrigin(0, 0).setDepth(0);
+        // 踢腳線（淡）
+        bg.fillStyle(0xffffff, 0.35);
+        bg.fillRect(0, FLOOR_Y[f] - 10, WORLD, 10);
+        // 地板
+        bg.fillStyle(0x7a6652, 1);
+        bg.fillRect(0, FLOOR_Y[f], WORLD, 12);
+        bg.fillStyle(0xffffff, 0.12);
+        bg.fillRect(0, FLOOR_Y[f], WORLD, 3);
+      }
+      // 屋頂與地面
+      bg.fillStyle(0x5a6e78, 1);
+      bg.fillRect(0, FLOOR_Y[2] - FLOOR_H - 20, WORLD, 20);
+      bg.fillStyle(0x3b8f4a, 1);
+      bg.fillRect(0, FLOOR_Y[0] + 12, WORLD, H - FLOOR_Y[0] - 12);
+
+      // 區域標示（3F 的標示避開左上角 HUD）
+      const label = function (f, x, t) {
+        s.add.text(x, FLOOR_Y[f] - FLOOR_H + 14, t, { fontSize: '20px', color: '#37474f', backgroundColor: '#ffffffaa', padding: { x: 6, y: 2 } }).setDepth(1);
+      };
+      label(0, 30, '1F 川堂');
+      label(0, 1200, '1F 梅花廣場出口');
+      label(1, 30, '2F 教室走廊');
+      label(1, 1400, '2F 草原班');
+      label(2, 420, '3F 圖書室');
+      label(2, 1900, '3F 校史室');
+      s.add.text(420, FLOOR_Y[2] - FLOOR_H - 18, '教學區西樓', { fontSize: '16px', color: '#ffffff' }).setDepth(1);
+    },
+
+    drawWindowsAndDoors: function () {
+      const s = this;
+      const bgG = s.add.graphics().setDepth(0.1);   // 窗內底色
+      const frG = s.add.graphics().setDepth(0.3);   // 玻璃反光、窗框、門
+      const ww = 90, wh = 55;
+      for (let f = 0; f < 3; f++) {
+        const wy = FLOOR_Y[f] - 120;
+        let i = 0;
+        for (let x = 160; x < WORLD; x += 260, i++) {
+          // 窗內：淡藍底 + 遠景色塊
+          bgG.fillStyle(0xd6eefa, 1); bgG.fillRect(x, wy, ww, wh);
+          bgG.fillStyle(0xc2e2f3, 1); bgG.fillRect(x, wy + wh * 0.62, ww, wh * 0.38);
+
+          // 窗後路人（單色剪影，來回走動）
+          if (((i * 3 + f * 5) % 5) < 3) {
+            const p = s.add.image(x + 18, wy + wh, 'bust').setOrigin(0.5, 1).setDepth(0.2).setTint(0x93b8cf).setScale(1.15);
+            s.tweens.add({ targets: p, x: x + ww - 18, duration: 3500 + ((i * 937 + f * 411) % 3000), yoyo: true, repeat: -1, ease: 'Sine.inOut', delay: (i * 300) % 1500 });
+            s.tweens.add({ targets: p, y: p.y - 2, duration: 420, yoyo: true, repeat: -1 });
+          }
+
+          // 玻璃反光
+          frG.fillStyle(0xffffff, 0.22);
+          frG.fillTriangle(x + 10, wy + wh, x + 30, wy, x + 42, wy);
+          frG.fillTriangle(x + 10, wy + wh, x + 42, wy, x + 22, wy + wh);
+          // 淡色窗框與窗格
+          frG.lineStyle(1, 0xb8cbd6, 0.6); frG.strokeRect(x - 2, wy - 2, ww + 4, wh + 4);
+          frG.lineStyle(3, 0xffffff, 0.95); frG.strokeRect(x, wy, ww, wh);
+          frG.lineStyle(2, 0xffffff, 0.9);
+          frG.beginPath(); frG.moveTo(x + ww / 2, wy); frG.lineTo(x + ww / 2, wy + wh); frG.strokePath();
+          frG.beginPath(); frG.moveTo(x, wy + wh / 2); frG.lineTo(x + ww, wy + wh / 2); frG.strokePath();
+          // 窗台
+          frG.fillStyle(0xffffff, 0.9); frG.fillRect(x - 4, wy + wh + 1, ww + 8, 4);
+        }
+        // 門：淺木色 + 淡線條
+        for (let x = 330; x < WORLD; x += 520) {
+          const dy = FLOOR_Y[f] - 86;
+          frG.fillStyle(0xe6cfa8, 1); frG.fillRect(x, dy, 46, 86);
+          frG.fillStyle(0xd6eefa, 1); frG.fillRect(x + 9, dy + 10, 28, 24);          // 門上小窗
+          frG.lineStyle(1.5, 0xffffff, 0.9); frG.strokeRect(x + 9, dy + 10, 28, 24);
+          frG.fillStyle(0xdcc29a, 1); frG.fillRect(x + 7, dy + 42, 32, 36);          // 下方門板
+          frG.lineStyle(1, 0xf8ecd2, 0.9); frG.strokeRect(x + 7, dy + 42, 32, 36);
+          frG.lineStyle(2, 0xf8ecd2, 0.95); frG.strokeRect(x, dy, 46, 86);           // 淡色門框
+          frG.fillStyle(0xf2cf66, 1); frG.fillCircle(x + 38, dy + 46, 2.5);          // 門把
+        }
+      }
+    },
+
+    drawStairs: function () {
+      const s = this;
+      const g = s.add.graphics().setDepth(2);
+      STAIRS.forEach(function (st) {
+        const y0 = FLOOR_Y[st.low], y1 = FLOOR_Y[st.low + 1];
+        const n = 8, w = (STAIR_HALF * 2) / n;
+        for (let i = 0; i < n; i++) {
+          const sx = st.x - STAIR_HALF + i * w;
+          const top = y0 - (i + 1) * (FLOOR_H / n);
+          g.fillStyle(i % 2 ? 0xb08968 : 0xc9a27a, 1);
+          g.fillRect(sx, top, w + 1, y0 - top);
+        }
+        g.lineStyle(4, 0x7b5e50, 1);
+        g.lineBetween(st.x - STAIR_HALF, y0 - 40, st.x + STAIR_HALF, y1 - 40);
+        // 提示箭頭
+        s.add.text(st.x - STAIR_HALF, y0 - 56, '▲', { fontSize: '22px', color: '#d62828' }).setOrigin(0.5).setDepth(3);
+        s.add.text(st.x + STAIR_HALF, y1 - 56, '▼', { fontSize: '22px', color: '#1d4ed8' }).setOrigin(0.5).setDepth(3);
+      });
+    },
+
+    say: function (text, ms) {
+      const s = this;
+      s.msg.setText(text).setVisible(true);
+      if (s.msgTimer) s.msgTimer.remove(false);
+      s.msgTimer = s.time.delayedCall(ms || 2500, function () { s.msg.setVisible(false); });
+    },
+
+    refreshHud: function () {
+      let h = '';
+      for (let i = 0; i < 3; i++) h += i < this.hearts ? '❤️' : '🖤';
+      this.hud.setText(h + '  ⭐ ' + this.stars + '/' + TOTAL + '  ⏱ ' + fmtTime(this.elapsed));
+      this.floorLabel.setText(FLOOR_NAMES[this.floor]);
+      let q;
+      if (this.won) q = '任務完成！按「互動」或空白鍵重玩';
+      else if (this.stars < TOTAL) q = '任務：收集 ' + TOTAL + ' 顆星星（每層兩顆）';
+      else q = '任務：到 3F 最右邊找老師報告';
+      this.quest.setText(q);
+    },
+
+    startClimb: function (st, goingUp) {
+      const s = this;
+      s.climbing = true;
+      const lowX = st.x - STAIR_HALF, highX = st.x + STAIR_HALF;
+      const y0 = FLOOR_Y[st.low], y1 = FLOOR_Y[st.low + 1];
+      const from = goingUp ? { x: lowX, y: y0 } : { x: highX, y: y1 };
+      const to = goingUp ? { x: highX, y: y1 } : { x: lowX, y: y0 };
+      s.player.setFlipX(to.x < from.x);
+      const prog = { t: 0 };
+      s.tweens.add({
+        targets: prog, t: 1, duration: 650, ease: 'Sine.inOut',
+        onUpdate: function () {
+          s.px = from.x + (to.x - from.x) * prog.t;
+          s.player.setPosition(s.px, from.y + (to.y - from.y) * prog.t);
+          s.shadow.setPosition(s.px, s.player.y + 1);
+        },
+        onComplete: function () {
+          s.floor = goingUp ? st.low + 1 : st.low;
+          s.climbing = false;
+          s.climbCooldown = s.time.now + 300;   // 剛上下樓後稍等一下，避免來回彈跳
+          s.invincibleUntil = s.time.now + 700; // 上下樓後短暫無敵，避免剛到就被撞
+          s.refreshHud();
+        }
+      });
+    },
+
+    hurt: function (time, g) {
+      const s = this;
+      s.hearts--;
+      s.invincibleUntil = time + 1500;
+      s.px += (s.px < g.img.x ? -1 : 1) * 110;
+      s.px = Phaser.Math.Clamp(s.px, 40, WORLD - 40);
+      s.cameras.main.shake(180, 0.006);
+      if (s.hearts <= 0) {
+        s.say('被妖怪抓到了！回到一樓重新開始（星星保留）', 2500);
+        s.hearts = 3; s.floor = 0; s.px = 120;
+        s.player.y = FLOOR_Y[0];
+      } else {
+        s.say('小心！碰到校園妖怪了', 1200);
+      }
+      s.refreshHud();
+    },
+
+    win: function () {
+      const s = this;
+      s.won = true;
+      const stars = '⭐'.repeat(s.hearts);
+      s.add.rectangle(0, 0, W, H, 0x000000, 0.6).setOrigin(0).setScrollFactor(0).setDepth(200);
+      s.add.text(W / 2, H / 2, '🎉 任務完成！\n\n用時 ' + fmtTime(s.elapsed) + '\n剩餘愛心 ' + s.hearts + '/3\n評價 ' + stars + '\n\n按「互動」或空白鍵再玩一次' + (PLANET.on ? '\n（左上角可回小行星）' : ''),
+        { fontSize: '30px', color: '#ffffff', align: 'center', lineSpacing: 6 }).setOrigin(0.5).setScrollFactor(0).setDepth(201);
+      s.msg.setVisible(false);
+      s.refreshHud();
+      planetPost('tongle:result', { game: 'side', win: true, stars: s.hearts, time: Math.round(s.elapsed) });
+    },
+
+    update: function (time, delta) {
+      const s = this;
+      const dt = delta / 1000;
+      const k = s.keys;
+      const left = k.left.isDown || k.a.isDown || pad.left;
+      const right = k.right.isDown || k.d.isDown || pad.right;
+      const upNow = k.up.isDown || k.w.isDown || pad.up;
+      const downNow = k.down.isDown || k.s.isDown || pad.down;
+      const actNow = k.space.isDown || k.e.isDown || pad.act;
+      const hintNow = k.h.isDown || pad.hint;
+      const upPress = upNow && !s.prevPad.up;
+      const downPress = downNow && !s.prevPad.down;
+      const actPress = actNow && !s.prevPad.act;
+      const hintPress = hintNow && !s.prevPad.hint;
+      s.prevPad.up = upNow; s.prevPad.down = downNow; s.prevPad.act = actNow; s.prevPad.hint = hintNow;
+
+      // 開始畫面：任何輸入就開始
+      if (!s.started) {
+        if (left || right || upNow || downNow || actNow || hintNow) s.beginPlay();
+        return;
+      }
+
+      // 遊戲結束後等待重玩
+      if (s.won) {
+        if (actPress) s.scene.restart({ skipIntro: true });
+        return;
+      }
+
+      // 計時
+      s.elapsed += dt;
+      const sec = Math.floor(s.elapsed);
+      if (sec !== s.lastSec) { s.lastSec = sec; s.refreshHud(); }
+
+      // 妖怪巡邏
+      s.ghosts.forEach(function (g) {
+        g.img.x += g.dir * g.cfg.speed * dt;
+        if (g.img.x > g.cfg.max) g.dir = -1;
+        if (g.img.x < g.cfg.min) g.dir = 1;
+        g.img.setFlipX(g.dir < 0);
+        g.label.x = g.img.x;
+        g.shadow.x = g.img.x;
+      });
+
+      if (hintPress) {
+        s.say(s.stars < TOTAL
+          ? '提示：還差 ' + (TOTAL - s.stars) + ' 顆星星。紅色▲旁往上推上樓、藍色▼旁往下推下樓，星星附近常有妖怪巡邏'
+          : '提示：星星集滿了，到 3F 最右邊找老師，按「互動」', 3500);
+      }
+
+      let moving = s.climbing;
+      if (!s.climbing) {
+        // 左右移動：鍵盤為全速；搖桿為類比（推越遠越快）
+        const kb = ((k.right.isDown || k.d.isDown) ? 1 : 0) - ((k.left.isDown || k.a.isDown) ? 1 : 0);
+        const dir = kb !== 0 ? kb : pad.ax;
+        if (dir !== 0) {
+          s.px = Phaser.Math.Clamp(s.px + dir * SPEED * dt, 40, WORLD - 40);
+          s.player.setFlipX(dir < 0);
+          moving = true;
+        }
+        s.player.setPosition(s.px, FLOOR_Y[s.floor]);
+        s.shadow.setPosition(s.px, FLOOR_Y[s.floor] + 1);
+
+        // 上下樓梯：只要持續推著，一走到樓梯口就會自動上下樓（不必放開再推）
+        if ((upNow || downNow) && time > s.climbCooldown) {
+          let used = false;
+          for (let i = 0; i < STAIRS.length && !used; i++) {
+            const st = STAIRS[i];
+            if (upNow && st.low === s.floor && Math.abs(s.px - (st.x - STAIR_HALF)) < 40) {
+              s.startClimb(st, true); used = true;
+            } else if (downNow && st.low + 1 === s.floor && Math.abs(s.px - (st.x + STAIR_HALF)) < 40) {
+              s.startClimb(st, false); used = true;
+            }
+          }
+          // 只有「重新推」的那一下才提醒，持續推著走過去不打擾
+          if (!used && (upPress || downPress)) s.say('這裡沒有樓梯，走到紅色▲（上樓）或藍色▼（下樓）旁邊', 1800);
+        }
+
+        // 收集星星
+        s.starObjs.forEach(function (o) {
+          if (!o.got && o.floorIdx === s.floor && Math.abs(o.x - s.px) < 34) {
+            o.got = true; o.setVisible(false); s.stars++;
+            s.say('找到星星 ' + s.stars + '/' + TOTAL, 1200);
+            s.refreshHud();
+          }
+        });
+
+        // 與 NPC 互動
+        if (actPress) {
+          s.npcObjs.forEach(function (n) {
+            if (s.floor !== n.cfg.floor || Math.abs(n.img.x - s.px) > 70) return;
+            if (n.cfg.final) {
+              if (s.stars >= TOTAL) { s.win(); }
+              else { s.say('老師：還差 ' + (TOTAL - s.stars) + ' 顆星星，繼續找找看～', 2200); }
+            } else {
+              const i = (s.npcLineIdx[n.cfg.name] || 0) % n.cfg.lines.length;
+              s.npcLineIdx[n.cfg.name] = i + 1;
+              s.say(n.cfg.name + '：' + n.cfg.lines[i], 3000);
+            }
+          });
+        }
+
+        // 碰到妖怪
+        if (time > s.invincibleUntil) {
+          for (let i = 0; i < s.ghosts.length; i++) {
+            const g = s.ghosts[i];
+            if (g.cfg.floor === s.floor && Math.abs(g.img.x - s.px) < 30) { s.hurt(time, g); break; }
+          }
+        }
+      }
+
+      // 走路動畫
+      if (moving !== s.walking) {
+        s.walking = moving;
+        if (moving) s.player.anims.play('kid_walk', true);
+        else { s.player.anims.stop(); s.player.setTexture('kid_idle'); }
+      }
+
+      // 無敵時閃爍
+      s.player.setAlpha(time < s.invincibleUntil ? (Math.floor(time / 90) % 2 ? 0.4 : 1) : 1);
+    }
+  };
+
+  class MainScene extends Phaser.Scene {
+    constructor() { super('main'); }
+  }
+  Object.assign(MainScene.prototype, methods);
+
+  window.__game = new Phaser.Game({
+    type: Phaser.AUTO,
+    width: W,
+    height: H,
+    parent: 'game',
+    backgroundColor: '#101820',
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+    scene: MainScene
+  });
+})();
+</script>
+</body>
+</html>
