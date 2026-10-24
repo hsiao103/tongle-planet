@@ -4,6 +4,7 @@ function lblBuild() {
   const add = (txt, x, z, h, cls, key) => { const e = document.createElement('div'); e.className = 'lb ' + (cls || ''); e.textContent = txt; LBL.el.appendChild(e); LBL.items.push({ e, x, z, h, key, flat: true }); };
   NPLACES.filter(p => !p.room).forEach(p => add(p.name.replace(/（.*）/, ''), p.x, p.z, 4, 'pl'));
   add('同樂小舖', SHOP.x, SHOP.z, 4.5, 'pl');
+  if (typeof GP !== 'undefined') add('遊戲傳送門', GP.x, GP.z, 4.6, 'pl');
   NPCS.forEach(n => { if (n.pname) { const e = document.createElement('div'); e.className = 'lb np'; e.textContent = n.pname; LBL.el.appendChild(e); LBL.items.push({ e, npc: n, h: 0, dyn: true }); } });
   const me = document.createElement('div'); me.className = 'lb me'; me.textContent = '▼ 你在這裡'; LBL.el.appendChild(me); LBL.items.push({ e: me, me: true, h: 0, dyn: true });
   LBL.ready = true;

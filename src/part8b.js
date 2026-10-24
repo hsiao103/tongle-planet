@@ -210,6 +210,7 @@ function findInteract() {
   BUGS.forEach(b => { if (!b.g || !b.g.visible) return; const d = Math.hypot(b.x - PL.x, b.z - PL.z); if (d < 2.0 && Math.abs(b.y - PL.y) < 2.8) cand(d, '用網子抓' + ITEMS[b.type].n, () => { if (b.type !== 'stag' && Math.random() < 0.25) { toast('哎呀，被牠逃走了！'); b.h += 3; return; } addItem(b.type); toast('抓到 ' + ITEMS[b.type].n + '！'); scene.remove(b.g); b.g = null; saveGame(); }); });
   PLACED.forEach(p => { const d = Math.hypot(p.rec.x - PL.x, p.rec.z - PL.z); if (d < (PROP_R[p.rec.id] || 0.5) + 1.7) cand(d + 0.2, '收回' + ITEMS[p.rec.id].n, () => { addItem(p.rec.id); placedRemove(p); toast('收回 ' + ITEMS[p.rec.id].n); saveGame(); }); });
   if (nearShore()) cand(FISH.st === 'idle' ? 6 : 0.1, FISH.st === 'idle' ? '在這裡釣魚' : FISH.st === 'wait' ? '等待魚上鉤…（現在拉會嚇跑）' : '拉竿！', fishPress);
+  if (typeof gtInteract === 'function') gtInteract(cand, ds);
   if (typeof hwInteract === 'function') hwInteract(cand, ds);
   return best;
 }
@@ -231,7 +232,7 @@ const TM = ['auto', 'day', 'night'], TMN = { auto: '時間：自動', day: '時�
 function setTimeMode(m) { GT.mode = m; G.timeMode = m; $('bTime').textContent = TMN[m]; $('bTime').classList.toggle('on', m !== 'auto'); saveGame(); }
 $('bTime').onclick = () => setTimeMode(TM[(TM.indexOf(GT.mode) + 1) % 3]);
 function gameMini(g, mp) {
-  if (typeof hwMini === 'function') hwMini(g, mp); if (typeof mpMini === 'function') mpMini(g, mp);
+  if (typeof gtMini === 'function') gtMini(g, mp); if (typeof hwMini === 'function') hwMini(g, mp); if (typeof mpMini === 'function') mpMini(g, mp);
   const s = mp(SHOP.x, SHOP.z); g.fillStyle = '#f2b01e'; g.strokeStyle = '#fff'; g.lineWidth = 2; g.fillRect(s[0] - 6, s[1] - 6, 12, 12); g.strokeRect(s[0] - 6, s[1] - 6, 12, 12);
   g.fillStyle = '#2b7cff'; NPCS.forEach(n => { const p = mp(n.x, n.z); g.beginPath(); g.arc(p[0], p[1], 3.2, 0, 7); g.fill(); });
 }
@@ -239,7 +240,7 @@ function gameMini(g, mp) {
 // ---- 每幀 ----
 let hudT = 0, shopAnim = 0;
 function gameTick(dt) {
-  placeTick(); fishTick(dt); bugTick(dt); styleTick(dt); flyTick(dt); lblTick(); if (typeof hwTick === 'function') hwTick(dt); if (typeof mpTick === 'function') mpTick(dt);
+  placeTick(); fishTick(dt); bugTick(dt); styleTick(dt); flyTick(dt); lblTick(); if (typeof gtTick === 'function') gtTick(dt); if (typeof hwTick === 'function') hwTick(dt); if (typeof mpTick === 'function') mpTick(dt);
   PROP_GLOW.color.set(GT.night ? 0xffe9a0 : 0xcfc7a0);
   if (CLERK) { CLERK.mixer.update(dt); CLERK.node.scale.setScalar(charScale()); }
   hudT -= dt; if (hudT <= 0) {

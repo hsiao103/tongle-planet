@@ -35,13 +35,13 @@ const ITEMS = {
   rose: { n: '玫瑰花叢', k: 'plant', buy: 160, c: '#d8404f', d: '紅色小花。' }
 };
 const KIND_ORDER = ['fruit', 'shell', 'bug', 'fish', 'furn', 'plant', 'hw'];
-const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, pos: null, t: 0 };
+const G = { coins: 0, inv: {}, placed: [], q: {}, resp: {}, timeMode: 'auto', edition: 'normal', hw: { done: {}, seen: 0 }, xm: { done: {}, best: 0 }, ln: { done: {}, best: 0 }, gp: { clear: {}, best: {}, day: '', n: 0 }, pos: null, t: 0 };
 let STARTED = false;
-function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.pos = null; }
-function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
+function newGame() { G.coins = 300; G.inv = { chair: 1, sapling: 1 }; G.placed = []; G.q = {}; G.resp = {}; G.timeMode = 'auto'; G.edition = 'normal'; G.hw = { done: {}, seen: 0 }; G.xm = { done: {}, best: 0 }; G.ln = { done: {}, best: 0 }; G.gp = { clear: {}, best: {}, day: '', n: 0 }; G.pos = null; }
+function loadSave() { try { const r = localStorage.getItem(SAVE_KEY); if (!r) return false; const o = JSON.parse(r); if (!o || o.v !== 1) return false; G.coins = o.coins | 0; G.inv = o.inv || {}; G.placed = o.placed || []; G.q = o.q || {}; G.resp = o.resp || {}; G.timeMode = o.timeMode || 'auto'; G.edition = o.edition || 'normal'; G.hw = o.hw || { done: {}, seen: 0 }; G.xm = o.xm || { done: {}, best: 0 }; G.ln = o.ln || { done: {}, best: 0 }; G.gp = o.gp || { clear: {}, best: {}, day: '', n: 0 }; G.pos = o.pos || null; return true; } catch (e) { return false; } }
 function saveGame() {
   if (!STARTED) return;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, coins: G.coins, inv: G.inv, placed: G.placed, q: G.q, resp: G.resp, timeMode: G.timeMode, edition: G.edition, hw: G.hw, xm: G.xm, ln: G.ln, gp: G.gp, pos: [+PL.x.toFixed(2), +PL.z.toFixed(2), +PL.yaw.toFixed(2)], at: Date.now() })); } catch (e) {}
 }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
 const have = id => G.inv[id] | 0;
@@ -56,7 +56,7 @@ function refreshHud() {
   $('hCoin').textContent = G.coins; ['shopCoin', 'bagCoin'].forEach(i => { const e = $(i); if (e) e.textContent = G.coins; });
   const h = GT.hour, hh = Math.floor(h), mm = Math.floor((h - hh) * 60); $('hClock').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + (GT.night ? '　夜晚' : '　白天');
 }
-const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng'];
+const PANELS = ['shop', 'bag', 'qst', 'dlg', 'hwp', 'edp', 'xmp', 'xmg', 'lnp', 'lng', 'gmp', 'bsp'];
 function anyPanel() { return PANELS.some(p => !$(p).hidden); }
 function syncBlock() { GAME.block = anyPanel() || !STARTED; document.body.classList.toggle('gamedlg', anyPanel()); }
 function openPanel(id) { PANELS.forEach(p => { if (p !== id) $(p).hidden = true; }); $(id).hidden = false; syncBlock(); }

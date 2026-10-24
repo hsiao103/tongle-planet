@@ -152,6 +152,12 @@ body.intro #joyL,body.intro #bRun,body.intro #bJump,body.intro #hint{display:non
 #prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:7;background:rgba(24,31,38,.82);color:#fff;padding:8px 18px;border-radius:999px;font-size:15px;font-weight:700;border:1px solid rgba(255,255,255,.25);pointer-events:auto;cursor:pointer}
 #prompt kbd{background:#ffd24a;color:#241b05;border-radius:5px;padding:1px 8px;margin-right:8px;font:700 13px var(--font-num)}
 button[hidden]{display:none!important}
+.bsbar{height:18px;border-radius:9px;background:#e6e0d0;overflow:hidden;margin:6px 0}.bsbar i{display:block;height:100%;background:linear-gradient(90deg,#e0402e,#f2b01e)}
+.bsrow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.bslist div{padding:2px 0}.bsadm select{margin:2px 6px 2px 0;padding:4px 8px;border-radius:8px}
+#gmp{position:fixed;inset:0;z-index:40;background:#0b1024;display:flex;flex-direction:column}#gmp[hidden]{display:none}
+#gmp .gmbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px calc(6px);padding-top:calc(6px + env(safe-area-inset-top,0px));background:#141b3d;color:#ffd166;font-size:15px}
+#gmp .gmbar button{background:#2f7d5a;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 14px;font:700 14px var(--font-num,sans-serif);cursor:pointer}
+#gmF{flex:1;width:100%;border:0;background:#0b1024}
 #toast{position:fixed;left:50%;top:calc(120px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;background:rgba(36,28,12,.9);color:#ffe9a8;padding:9px 18px;border-radius:12px;font-size:15px;font-weight:700;pointer-events:none;max-width:86vw;text-align:center}
 #dlg{z-index:11;left:50%;transform:translateX(-50%);bottom:calc(70px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100vw - 32px));box-sizing:border-box;padding:14px 18px;border-radius:16px;background:rgba(255,252,240,.95);color:#2a2418;border:2px solid #d9a850}
 #dlg .dn{font-weight:800;color:#c4601a;font-size:16px;margin-bottom:4px}
@@ -225,7 +231,7 @@ body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important
 <dl><dt>WASD</dt><dd>移動（Shift 跑步、空白鍵跳躍）</dd><dt>拖曳</dt><dd>轉動視角；滾輪拉近拉遠</dd><dt>E</dt><dd>互動：採集、對話、釣魚、撿起家具</dd><dt>B</dt><dd>背包，可擺放家具與植物</dd></dl>
 <p class="sv" id="iSave"></p>
 </div>
-<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hOnline" hidden>線上 1</span><span class="hc" id="hChat" hidden>聊天</span></div>
+<div id="hud" class="panel"><span class="hc"><i class="coin"></i><b id="hCoin">0</b></span><span class="hc" id="hClock">12:00</span><span class="hc" id="hBoss" hidden style="cursor:pointer"></span><span class="hc" id="hOnline" hidden>線上 1</span><span class="hc" id="hChat" hidden>聊天</span></div>
 <div id="olp" class="mpp" hidden></div>
 <div id="chp" class="mpp" hidden><div id="chLog"></div><form id="chF" autocomplete="off"><input id="chIn" type="text" maxlength="60" enterkeyhint="send" placeholder="說句話…（Enter 送出）"><button type="submit">送出</button></form><div class="mpn">請友善交談，不要分享姓名、電話或住址。</div></div>
 <div id="prompt" hidden></div>
@@ -240,6 +246,8 @@ body.gamedlg #joyL,body.gamedlg #bRun,body.gamedlg #bJump{display:none!important
 <div id="lng" class="panel big" hidden><div class="ph"><b>新春 · 搶紅包</b><button type="button" class="px" id="lngX">關閉</button></div><div style="text-align:center"><canvas id="lngC" width="320" height="400" style="width:auto;height:min(400px,52vh);max-width:100%;aspect-ratio:4/5;touch-action:none;border-radius:12px;display:block;margin:0 auto"></canvas><p class="sm" id="lngS"></p><button type="button" class="go" id="lngGo">開始</button></div></div>
 <div id="edp" class="panel big" hidden><div class="ph"><b>選擇版本</b><button type="button" class="px" id="edpX">關閉</button></div><div class="grid" id="edpList"></div></div>
 <div id="qst" class="panel big" hidden><div class="ph"><b>委託</b><button type="button" class="px" id="qstX">關閉</button></div><div id="qstList"></div></div>
+<div id="bsp" class="panel big" hidden><div class="ph"><b>全班共同 Boss</b><button type="button" class="px" id="bspX">關閉</button></div><div id="bspList"></div></div>
+<div id="gmp" hidden><div class="gmbar"><b>🪐 同樂遊戲館</b><button type="button" id="gmX">回小行星 (Esc)</button></div><iframe id="gmF" title="同樂遊戲" allow="fullscreen" referrerpolicy="same-origin"></iframe></div>
 <div id="place" class="panel" hidden><b id="placeN"></b><button type="button" id="pOk" class="pri">放下 (E)</button><button type="button" id="pRot">旋轉 (R)</button><button type="button" id="pNo">取消 (X)</button></div>
 <div id="joyL"><div class="knob"></div></div>
 <button id="bRun" type="button" aria-label="跑步（點一下開關）">跑</button>
