@@ -42,6 +42,8 @@ function blocked(x, z, y, noEdge) {
 }
 
 // ---- 球面相機：視線方向 fw 是玩家腳下的切平面向量，隨移動平行傳送 ----
+const FPV = { on: false, lock: false, d0: 7.5, e0: 0.42 };                     // 第一人稱（part21.js）：on 時俯仰可為負（抬頭看天）
+const camLo = () => FPV.on ? -1.45 : 0.02, camHi = () => FPV.on ? 1.45 : 1.5;
 const cam = { d: 7.5, curD: 7.5, elev: 0.42, fw: new T.Vector3(0, 0, -1), indoor: 0 };
 const _U = new T.Vector3(), _R = new T.Vector3(), _P = new T.Vector3(), _T = new T.Vector3(), _D = new T.Vector3(), _W = new T.Vector3(), _fa = [0, 0];
 function fwFromYaw() {
@@ -108,15 +110,16 @@ cv.addEventListener('pointermove', e => {
     const n = pinchState(), k = pinch.d / n.d;
     cam.d = Math.min(175, Math.max(2.5, cam.d * k));
     let da = n.ang - pinch.ang; da = Math.atan2(Math.sin(da), Math.cos(da)); fwRotate(-da);
-    cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + (n.my - pinch.my) * 0.004));
+    if (FPV.on) { pinch = n; return; } cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + (n.my - pinch.my) * 0.004));
     pinch = n; return;
   }
-  fwRotate(-dx * 0.0042); cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + dy * 0.004));
+  if (FPV.lock) return;                                                          // 指標鎖定時由 part21 的 mousemove 處理
+  fwRotate(-dx * 0.0042); cam.elev = Math.max(camLo(), Math.min(camHi(), cam.elev + dy * 0.004));
 });
 const dragEnd = e => { PTR.delete(e.pointerId); pinch = PTR.size === 2 ? pinchState() : null; };
 cv.addEventListener('pointerup', dragEnd); cv.addEventListener('pointercancel', dragEnd);
 ['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault()));   // iOS Safari：避免整頁被捏合縮放
-renderer.domElement.addEventListener('wheel', e => { e.preventDefault(); cam.d = Math.min(175, Math.max(2.5, cam.d * (1 + Math.sign(e.deltaY) * 0.1))); }, { passive: false });
+renderer.domElement.addEventListener('wheel', e => { e.preventDefault(); if (FPV.on) return; cam.d = Math.min(175, Math.max(2.5, cam.d * (1 + Math.sign(e.deltaY) * 0.1))); }, { passive: false });
 
 // 虛擬搖桿（手機）
 function stick(el, onMove) {
@@ -227,7 +230,7 @@ function frame(now) {
   if (AU) fwFromYaw();
   else {
     fwRotate(((keys.ArrowLeft ? 1 : 0) - (keys.ArrowRight ? 1 : 0)) * 1.8 * dt - joy.rx * 2.2 * dt);
-    cam.elev = Math.max(0.02, Math.min(1.5, cam.elev + joy.ry * 1.2 * dt));
+    cam.elev = Math.max(camLo(), Math.min(camHi(), cam.elev + joy.ry * 1.2 * dt));
   }
   const f = AU ? AU.f : f0, s = AU ? AU.s : s0;
   const sp = (AU ? AU.sp : keys.ShiftLeft || keys.ShiftRight || joy.run ? 6.5 : 3.4) * dt, len = Math.hypot(f, s) || 1;

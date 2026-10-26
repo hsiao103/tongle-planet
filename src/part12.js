@@ -118,10 +118,10 @@ function sbFlush() {
   if (!SB.ch || SB.timer) return; const c = window.TONGLE_SUPABASE || {}, ms = Math.max(100, Math.min(2000, c.sendMs | 0 || 250)), wait = Math.max(0, ms - (Date.now() - SB.sentAt));
   SB.timer = setTimeout(() => { SB.timer = 0; sbSend(); }, wait);
 }
-function sbBtn() { mpUI(); }
-function sbNum(v, lim) { return typeof v === 'number' && isFinite(v) && Math.abs(v) <= lim ? v : 0; }
 /* 紀錄（校方管理用）：聊天與進出各寫一筆到 Supabase 資料表；資料表未建立或寫入失敗時靜默略過，不影響遊戲 */
 function sbLog(table, row) { if (!SB.client || SB.logOff) return; try { SB.client.from(table).insert(row).then(r => { if (r && r.error) { if (!SB.logWarn) { SB.logWarn = 1; console.warn('log', table, r.error.message); } if (/does not exist|schema cache|relation/i.test(r.error.message || '')) SB.logOff = 1; } }, () => { }); } catch (e) { } }
+function sbBtn() { mpUI(); }
+function sbNum(v, lim) { return typeof v === 'number' && isFinite(v) && Math.abs(v) <= lim ? v : 0; }
 async function sbJoin() {
   SB.key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + String(Math.random()).slice(2); SB.mine = { nm: MP.nick, k: CH.kind === 'girl' ? 1 : 0 }; SB.remote.clear();
   const ch = SB.client.channel('tongle-planet', { config: { private: true, broadcast: { self: false }, presence: { key: SB.key } } });
@@ -140,6 +140,35 @@ async function sbStop() {
   const ch = SB.ch; if (ch) sbLog('mp_login_log', { nick: MP.nick, event: 'leave' }); SB.ch = null; clearInterval(SB.ka); MP.room = null; MP.on = false; SB.remote.clear(); clearTimeout(SB.timer); SB.timer = 0;
   if (ch) { try { await ch.unsubscribe(); } catch (e) { } } sbBtn();
 }
+
+/* ---- 登入確認視窗＋彈出式 Google 登入（遊戲畫面不重新載入；被瀏覽器擋住時才改用整頁登入，並記住位置）---- */
+const sbInApp = () => /Line\/|FBAN|FBAV|FB_IAB|Instagram|MicroMessenger|; wv\)|Messenger/i.test(navigator.userAgent || '');
+function sbModalClose() { const m = document.getElementById('sbModal'); if (m) m.remove(); clearInterval(SB.poll); SB.poll = 0; }
+function sbSaveResume() { try { localStorage.setItem('tongle_resume', JSON.stringify({ x: PL.x, y: PL.y, z: PL.z, yaw: PL.yaw, t: Date.now() })); } catch (e) { } }
+function sbLoginModal() {
+  if (document.getElementById('sbModal')) return; const ov = document.createElement('div'); ov.id = 'sbModal';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:60;background:rgba(10,16,14,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  const bx = document.createElement('div'); bx.style.cssText = 'background:#fff;color:#1d2a24;border-radius:16px;max-width:360px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.35);font:15px/1.6 system-ui,"Noto Sans TC",sans-serif';
+  const warn = sbInApp() ? '<p style="margin:8px 0;padding:8px 10px;background:#fff3cd;border-radius:8px;font-size:13px">你目前是在 App 內建瀏覽器中，Google 會拒絕登入。請改用 Chrome 或 Safari 開啟這個網址。</p>' : '';
+  bx.innerHTML = '<h3 style="margin:0 0 6px;font-size:18px">多人版需要登入</h3><p id="sbMsg" style="margin:0 0 8px">用 Google 帳號登入後，就能和同學一起玩。登入會在<strong>小視窗</strong>進行，遊戲不會重新載入、位置也不會跑掉。</p>' + warn
+    + '<p style="margin:0 0 12px;font-size:12px;color:#66756b">多人版的聊天與進出時間會保留 90 天供校方管理（詳見隱私權政策）。</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="sbGo" style="flex:1;padding:10px;border:0;border-radius:10px;background:#d9622b;color:#fff;font:inherit;cursor:pointer">用 Google 登入</button><button id="sbNo" style="flex:1;padding:10px;border:1px solid #cfd8cf;border-radius:10px;background:#fff;color:#1d2a24;font:inherit;cursor:pointer">先不要</button></div>';
+  ov.appendChild(bx); document.body.appendChild(ov);
+  const msg = (t) => { const e = document.getElementById('sbMsg'); if (e) e.textContent = t; };
+  document.getElementById('sbNo').onclick = () => { sbModalClose(); mpSaveMode('solo'); };
+  document.getElementById('sbGo').onclick = async () => {
+    const go = document.getElementById('sbGo'); go.disabled = true; go.textContent = '登入中…';
+    const w = window.open('', 'tongle_login', 'width=480,height=660,menubar=no,toolbar=no');                       // 必須在點擊當下同步開啟，才不會被瀏覽器擋
+    try {
+      if (!w) { sbSaveResume(); msg('瀏覽器擋住了小視窗，改用整頁登入（登入後會回到原本的位置）…'); await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); return; }
+      const r = await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: new URL('auth-popup.html', location.href).href, skipBrowserRedirect: true } });
+      if (!r.data || !r.data.url) throw new Error('no url'); w.location.href = r.data.url; msg('請在小視窗完成 Google 登入…');
+      clearInterval(SB.poll); SB.poll = setInterval(async () => {
+        try { const s = await SB.client.auth.getSession(); if (s.data && s.data.session) { clearInterval(SB.poll); SB.poll = 0; try { w.close(); } catch (e) { } sbModalClose(); await sbStart(false); return; } } catch (e) { }
+        if (w.closed) { clearInterval(SB.poll); SB.poll = 0; go.disabled = false; go.textContent = '再試一次'; msg('登入視窗已關閉，尚未完成登入。要再試一次嗎？'); }
+      }, 800);
+    } catch (e) { console.warn('login', e); try { if (w) w.close(); } catch (x) { } go.disabled = false; go.textContent = '再試一次'; msg('登入沒有成功，請再試一次，或改用 Chrome／Safari 開啟。'); }
+  };
+}
 async function sbStart(interactive) {
   if (SB.busy) return; const cfg = sbCfg(); if (!cfg) { toast('尚未設定多人連線（請編輯 config.js 貼上 Supabase 金鑰），先使用單人版', 5000); mpSaveMode('solo'); return; }
   SB.busy = true; if (interactive) toast('連線中…', 1800);
@@ -148,7 +177,7 @@ async function sbStart(interactive) {
     const r = await SB.client.auth.getSession();
     if (!r.data || !r.data.session) {
       if (!interactive) { toast('目前沒有登入，已先切回單人版；要玩多人請按右上角「模式：單人」，完成 Google 登入', 5500); mpSaveMode('solo'); return; }
-      await SB.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); return;
+      sbLoginModal(); return;
     }
     await sbJoin(); toast('已連線：和同學一起玩（聊天內容會保留供校方管理）', 4200);
   } catch (e) { console.warn('supabase', e); toast('多人連線失敗，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); }
@@ -158,6 +187,6 @@ mpUI();
 document.querySelectorAll('#iMode button').forEach(b => { b.onclick = () => { MP.fromIntro = b.dataset.m === 'multi'; mpSaveMode(b.dataset.m); }; });
 { const b = $('bOnline'); if (b) { b.hidden = false; b.onclick = () => { if (!STARTED) return; if (MP.mode === 'multi') { mpMode('solo'); toast('已切換為單人版', 1800); } else mpMode('multi', true); }; } }
 mpInit();
-{ const iv = setInterval(() => { if (!STARTED) return; clearInterval(iv); if (MP.mode === 'multi') mpMode('multi', MP.fromIntro); }, 400); }     // 開始遊戲後，依所選模式連線
+{ const iv = setInterval(() => { if (!STARTED) return; clearInterval(iv); try { const r = JSON.parse(localStorage.getItem('tongle_resume') || 'null'); localStorage.removeItem('tongle_resume'); if (r && Date.now() - r.t < 300000 && MP.mode === 'multi') { PL.yaw = r.yaw || 0; teleport(r.x, r.y, r.z); PL.yaw = r.yaw || 0; fwFromYaw(); } } catch (e) { } if (MP.mode === 'multi') mpMode('multi', MP.fromIntro); }, 400); }     // 開始遊戲後，依所選模式連線
 window.__mpMock && window.__mpMock();
 window.__mp = { MP, mpTick, SB, sbStart };

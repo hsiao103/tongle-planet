@@ -134,6 +134,7 @@ function hwTick(dt) {
   if (typeof stfTick === 'function') stfTick(dt);
   if (typeof seaTick === 'function') seaTick(dt);
   if (typeof pgTick === 'function') pgTick(dt);
+  if (typeof fpTick === 'function') fpTick(dt);
   if (typeof xmTick === 'function') xmTick(dt);
   if (typeof lnTick === 'function') lnTick(dt);
   HW.k += ((HW.on ? 1 : 0) - HW.k) * Math.min(1, dt * 1.6); if (!HW.on && HW.k < 0.01) HW.k = 0;
