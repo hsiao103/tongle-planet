@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>登入中｜同樂小行星</title>
+<style>body{font:16px/1.6 system-ui,"Noto Sans TC",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f4f6f2;color:#1d2a24;text-align:center;padding:16px}</style></head>
+<body><div><h2 id="t">登入中…</h2><p id="m">請稍候，完成後這個視窗會自動關閉。</p></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(async () => {
+  const cfg = window.TONGLE_SUPABASE, t = document.getElementById('t'), m = document.getElementById('m');
+  try {
+    const sb = supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, detectSessionInUrl: true, flowType: 'pkce' } });
+    for (let i = 0; i < 40; i++) { const { data } = await sb.auth.getSession(); if (data && data.session) { t.textContent = '登入成功！'; m.textContent = '這個視窗會自動關閉，回到遊戲即可。'; setTimeout(() => window.close(), 600); return; } await new Promise(r => setTimeout(r, 250)); }
+    t.textContent = '登入沒有完成'; m.textContent = '請關閉這個視窗，回到遊戲再試一次。';
+  } catch (e) { t.textContent = '登入發生問題'; m.textContent = String(e && e.message || e); }
+})();
+</script></body></html>
