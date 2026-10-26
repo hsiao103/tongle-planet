@@ -38,12 +38,15 @@ Supabase 專案：`cirypvdtlzmwpaicsmee`（網址 `https://cirypvdtlzmwpaicsmee.
 - 暱稱不使用 Google 顯示名稱（通常是真名），預設「旅人 + 兩位數字」，在「版本」選單內可自訂。
 - 目前只同步「看見彼此」；背包、錢幣、萬聖節進度仍存在各人瀏覽器。
 
+## 5. 對話與登入紀錄（v35）
+1. SQL Editor 再執行一次 `supabase/setup.sql`（後半段是 v35 新增；前面的 policy 若已存在會報「already exists」，可只貼「【v35 新增】」以下的部分）。
+2. 若要自動清除 90 天前的紀錄：Database → Extensions 啟用 `pg_cron`，取消註解檔尾那段 `cron.schedule` 後執行。
+3. 管理者信箱在 `is_tongle_admin()` 的清單（預設 管理者信箱@example.com；要多人就用逗號加）。
+4. 開啟 `https://hsiao103.github.io/tongle-planet/admin.html`，用管理者 Google 帳號登入，即可看「對話紀錄」「登入／進出」，可搜尋、依日期篩選、匯出 CSV、刪除對話。
+5. Redirect URLs 若原本是 `…/tongle-planet/**` 已涵蓋 admin.html，不用另外加。
+- 玩家端只能寫入自己的紀錄，讀不到任何人的紀錄；資料表尚未建立時，遊戲照常運作、只是不留紀錄。
 
-## 5. 多人版紀錄（v35）
-程式會把進出多人版寫入 `mp_login_log`（欄位 nick、event）、把聊天寫入 `mp_chat_log`（欄位 nick、msg）；資料表不存在時靜默略過。
-建表 SQL 與查詢用的 `admin.html` 目前不在儲存庫內（請補回原檔），README 的 v35 段落有說明用途。
-
-## 6. 全班共同 Boss 與節慶開關（v38）
-1. SQL Editor 貼上並執行 `supabase/setup_event.sql`。
-2. 最後一步手動執行：`insert into tongle_admin (email) values ('老師的 Google 信箱');`（不要把信箱寫進公開儲存庫）。
-3. 老師登入多人版後，在傳送門的「全班共同 Boss」面板最下方會出現管理區。
+## 6. 彈出式登入（v37）
+- 需要把 `auth-popup.html` 一併放在遊戲網址同一層（與 `index.html` 同資料夾）。
+- Redirect URLs 已設成 `https://hsiao103.github.io/tongle-planet/**` 就涵蓋 `auth-popup.html`，不必另外加。
+- 瀏覽器若擋住彈窗，會退回整頁登入。
