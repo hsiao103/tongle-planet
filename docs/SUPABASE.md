@@ -41,7 +41,7 @@ Supabase 專案：`cirypvdtlzmwpaicsmee`（網址 `https://cirypvdtlzmwpaicsmee.
 ## 5. 對話與登入紀錄（v35）
 1. SQL Editor 再執行一次 `supabase/setup.sql`（後半段是 v35 新增；前面的 policy 若已存在會報「already exists」，可只貼「【v35 新增】」以下的部分）。
 2. 若要自動清除 90 天前的紀錄：Database → Extensions 啟用 `pg_cron`，取消註解檔尾那段 `cron.schedule` 後執行。
-3. 管理者信箱在 `is_tongle_admin()` 的清單（預設 管理者信箱@example.com；要多人就用逗號加）。
+3. 管理者信箱在 `is_tongle_admin()` 的清單（請在資料庫中填入你自己的管理者信箱；要多人就用逗號加）。
 4. 開啟 `https://hsiao103.github.io/tongle-planet/admin.html`，用管理者 Google 帳號登入，即可看「對話紀錄」「登入／進出」，可搜尋、依日期篩選、匯出 CSV、刪除對話。
 5. Redirect URLs 若原本是 `…/tongle-planet/**` 已涵蓋 admin.html，不用另外加。
 - 玩家端只能寫入自己的紀錄，讀不到任何人的紀錄；資料表尚未建立時，遊戲照常運作、只是不留紀錄。
