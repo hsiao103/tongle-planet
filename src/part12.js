@@ -123,16 +123,16 @@ function sbLog(table, row) { if (!SB.client || SB.logOff) return; try { SB.clien
 function sbBtn() { mpUI(); }
 function sbNum(v, lim) { return typeof v === 'number' && isFinite(v) && Math.abs(v) <= lim ? v : 0; }
 async function sbJoin() {
-  SB.key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + String(Math.random()).slice(2); SB.mine = { nm: MP.nick, k: CH.kind === 'girl' ? 1 : 0 }; SB.remote.clear();
+  SB.key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'u' + String(Math.random()).slice(2); SB.mine = { nm: chNick(MP.nick), k: CH.kind === 'girl' ? 1 : 0 }; SB.remote.clear();
   const ch = SB.client.channel('tongle-planet', { config: { private: true, broadcast: { self: false }, presence: { key: SB.key } } });
   ch.on('broadcast', { event: 'p' }, msg => { const p = msg && msg.payload; if (!p || typeof p.id !== 'string' || p.id === SB.key || p.id.length > 64) return;
-    SB.remote.set(p.id, { t: Date.now(), p: { x: sbNum(p.x, 400), y: sbNum(p.y, 60), z: sbNum(p.z, 400), f: sbNum(p.f, 20), s: sbNum(p.s, 30), a: p.a === 1 ? 1 : 0, k: p.k === 1 ? 1 : 0, nm: mpClean(p.nm) } }); });
+    SB.remote.set(p.id, { t: Date.now(), p: { x: sbNum(p.x, 400), y: sbNum(p.y, 60), z: sbNum(p.z, 400), f: sbNum(p.f, 20), s: sbNum(p.s, 30), a: p.a === 1 ? 1 : 0, k: p.k === 1 ? 1 : 0, nm: chNick(p.nm) } }); });
   ch.on('broadcast', { event: 'c' }, msg => { try { if (window.mpChatIn) mpChatIn(msg && msg.payload); } catch (e) { } });
   ch.on('presence', { event: 'leave' }, e => { (e.leftPresences || []).forEach(() => { }); if (e.key) SB.remote.delete(e.key); });
   ch.on('presence', { event: 'join' }, e => { if (e.key && e.key !== SB.key) sbFlush(); });                 // 有人加入：馬上讓對方看到自己
   ch.on('presence', { event: 'sync' }, () => { try { const st = ch.presenceState(); [...SB.remote.keys()].forEach(k => { if (!(k in st)) SB.remote.delete(k); }); } catch (e) { } });
   await new Promise((ok, no) => { ch.subscribe(async (status, err) => {
-    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: MP.nick }); } catch (e) { } if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; sbLog('mp_login_log', { nick: MP.nick, event: 'join' }); clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
+    if (status === 'SUBSCRIBED') { SB.ch = ch; try { await ch.track({ nm: chNick(MP.nick) }); } catch (e) { } chsLoad(); if (!MP.assets) MP.assets = { boy: await loadGLB('boy'), girl: await loadGLB('girl') }; MP.room = sbRoom; MP.on = true; sbLog('mp_login_log', { nick: MP.nick, event: 'join' }); clearInterval(SB.ka); SB.ka = setInterval(sbSend, 2000); sbBtn(); ok(); }
     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { if (!SB.ch) no(err || new Error(status)); else { toast('多人連線中斷，已切回單人版', 3500); sbStop(); mpSaveMode('solo'); } }
   }); });
 }
