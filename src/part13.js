@@ -55,6 +55,7 @@ function chRenderLog() {
   for (const m of CHAT.log) {
     const row = document.createElement('div'); row.className = 'chm' + (m.me ? ' me' : '') + (m.sys ? ' sys' : ''); const n = document.createElement('b'); n.textContent = m.nm + '：'; const t = document.createElement('span'); t.textContent = m.text + (m.edited ? '（管理者已修改）' : ''); row.appendChild(n); row.appendChild(t);
     if (!m.me && !m.sys) { const x = document.createElement('a'); x.textContent = '靜音'; x.onclick = () => { CHAT.mute.add(m.id); CHAT.log = CHAT.log.filter(q => q.id !== m.id); chRenderLog(); toast('已靜音「' + m.nm + '」，本次連線不再顯示他的訊息', 2600); }; row.appendChild(x); }
+    if (CHS.admin && CHS.adminOn && !m.sys && m.text.includes('＊')) { const w = document.createElement('span'); w.textContent = ' ⚠已遮蔽'; w.style.cssText = 'color:#c0392b;font-size:12px'; row.appendChild(w); }
     if (CHS.admin && CHS.adminOn && m.mid && !m.sys) chAdminBtns(row, m);
     el.appendChild(row);
   }

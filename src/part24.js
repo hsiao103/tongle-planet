@@ -47,8 +47,8 @@ const chNick = s => chMask(mpClean(s)) || '旅人';
 async function chsLoad() {
   if (!SB.client || !SB.ch) return;
   try { const r = await SB.client.from('mp_badwords').select('word').limit(2000); if (r && r.data) CHS.cloud = r.data.map(x => x.word); } catch (e) { }
-  try { const r = await SB.client.rpc('is_tongle_admin'); CHS.admin = !!(r && r.data === true); const b = document.getElementById('chAdm'); if (b) b.hidden = !CHS.admin; } catch (e) { }
-  try { const s = await SB.client.auth.getSession(), uid = s && s.data && s.data.session && s.data.session.user.id; if (uid) { const r = await SB.client.from('mp_mutes').select('user_id').eq('user_id', uid); CHS.muted = !!(r && r.data && r.data.length); } } catch (e) { }
+  try { const r = await SB.client.rpc('is_tongle_admin'); CHS.admin = !!(r && r.data === true); ['chAdm', 'chWd'].forEach(i => { const b = document.getElementById(i); if (b) b.hidden = !CHS.admin; }); } catch (e) { }
+  try { const s = await SB.client.auth.getSession(), us = s && s.data && s.data.session && s.data.session.user, uid = us && us.id, em = us && us.email; if (uid) { const f = /^[^\s,"()]+$/.test(em || '') ? 'user_id.eq.' + uid + ',email.eq.' + (em || '').toLowerCase() : 'user_id.eq.' + uid; const r = await SB.client.from('mp_mutes').select('user_id').or(f); CHS.muted = !!(r && r.data && r.data.length); } } catch (e) { }
 }
 /* ---- 聊天介面：放大、短句、守則 ---- */
 (function chUiInit() {
@@ -62,7 +62,8 @@ async function chsLoad() {
   const bQ = document.createElement('button'); bQ.type = 'button'; bQ.textContent = '😊 短句';
   const bR = document.createElement('button'); bR.type = 'button'; bR.textContent = '聊天守則'; bR.onclick = () => { if (typeof chAddSys === 'function') chAddSys('聊天守則：請友善交談；不說髒話、不嘲笑別人；不分享姓名、電話、住址；看到不舒服的內容可以「靜音」，也請告訴老師。聊天內容會保留 90 天供校方管理。'); };
   const bA = document.createElement('button'); bA.type = 'button'; bA.id = 'chAdm'; bA.hidden = true; bA.textContent = '🛠 管理'; bA.onclick = () => { CHS.adminOn = !CHS.adminOn; bA.style.background = CHS.adminOn ? '#ffd9a0' : ''; chRenderLog(); toast(CHS.adminOn ? '管理模式開啟：每則留言旁可刪除、修改、禁言' : '管理模式關閉', 2400); };
-  tools.append(bBig, bQ, bR, bA); p.insertBefore(tools, p.firstChild);
+  const bW = document.createElement('button'); bW.type = 'button'; bW.id = 'chWd'; bW.hidden = true; bW.textContent = '📝 禁用語'; bW.onclick = () => chWordsToggle();
+  tools.append(bBig, bQ, bR, bA, bW); p.insertBefore(tools, p.firstChild);
   const qk = document.createElement('div'); qk.id = 'chQuick'; qk.hidden = true;
   ['大家好！', '一起玩～', '謝謝！', '好棒喔！', '等等我', '加油！', '哈哈哈', '我在這裡', '再見囉'].forEach(s => { const b = document.createElement('button'); b.type = 'button'; b.textContent = s; b.onclick = () => { if (chSend(s)) qk.hidden = true; }; qk.appendChild(b); });
   bQ.onclick = () => { qk.hidden = !qk.hidden; }; const f = document.getElementById('chF'); p.insertBefore(qk, f);
@@ -95,4 +96,33 @@ function chModApply(a) {
 async function chModIn(payload) {                       // 收到別人廣播的管理指令：向資料庫核對這筆指令是否真的存在（只有管理者的函式寫得進去）
   const k = payload && payload.k; if (k == null || !SB.client || !/^\d{1,12}$/.test(String(k))) return;
   try { const r = await SB.client.from('mp_mod_actions').select('action,mid,text').eq('id', k).limit(1); const a = r && r.data && r.data[0]; if (a) chModApply(a); } catch (e) { }
+}
+
+/* ---- 管理者：禁用語面板（新增／刪除／檢測是否會被辨識）---- */
+function chHits(t) {                                   // 回傳文字中命中的禁用語（略過「不誤遮」詞）
+  t = String(t || ''); const N = chNorm(t).s, ok = []; if (!N) return [];
+  CH_OKW.forEach(w => { const wn = chNorm(w).s; let p = 0, k; while (wn && (k = N.indexOf(wn, p)) >= 0) { for (let j = k; j < k + wn.length; j++) ok[j] = true; p = k + wn.length; } });
+  const out = []; chBadList().forEach(w => { const wn = chNorm(w).s; if (!wn || out.includes(w)) return; let p = 0, k; while ((k = N.indexOf(wn, p)) >= 0) { let skip = false; for (let j = k; j < k + wn.length; j++) if (ok[j]) skip = true; if (!skip) { out.push(w); break; } p = k + wn.length; } });
+  return out;
+}
+function chWordsToggle() {
+  const p = document.getElementById('chp'); if (!p || !CHS.admin) return; let b = document.getElementById('chWords');
+  if (b) { b.remove(); return; }
+  b = document.createElement('div'); b.id = 'chWords'; b.style.cssText = 'border:1px solid #c9a560;border-radius:10px;background:#fffaf0;padding:8px;margin:6px 0;font-size:13px;max-height:230px;overflow:auto';
+  const mkIn = (ph) => { const i = document.createElement('input'); i.placeholder = ph; i.maxLength = 20; i.style.cssText = 'flex:1;min-width:0;padding:4px 6px;border:1px solid #d9c9a0;border-radius:6px;font-size:13px'; return i; };
+  const mkBtn = (t, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = t; x.style.cssText = 'padding:4px 10px;border:1px solid #c9a560;border-radius:6px;background:#fff8e8;cursor:pointer;font-size:13px'; x.onclick = fn; return x; };
+  const row = () => { const d = document.createElement('div'); d.style.cssText = 'display:flex;gap:6px;margin:4px 0'; return d; };
+  const res = document.createElement('div'); res.style.cssText = 'margin:2px 0 6px;color:#5a4320;word-break:break-all';
+  const ck = mkIn('輸入一句話，檢測會不會被辨識為不雅'); ck.maxLength = 80;
+  const doCk = () => { const t = ck.value; if (!t.trim()) { res.textContent = ''; return; } const h = chHits(t); res.textContent = h.length ? '辨識到 ' + h.length + ' 個：' + h.join('、') + '　→　' + chMask(t) : '沒有辨識到禁用語（若其實不雅，可在下方新增）'; res.style.color = h.length ? '#c0392b' : '#2e7d32'; };
+  const r1 = row(); r1.append(ck, mkBtn('檢測', doCk)); ck.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') doCk(); };
+  const nw = mkIn('新增禁用語（最多 20 字）'); nw.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') add.click(); };
+  const list = document.createElement('div'); list.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-top:4px';
+  const draw = () => { list.textContent = ''; const c = document.createElement('div'); c.style.cssText = 'width:100%;color:#8a6a2a'; c.textContent = '內建 ' + CH_BADW.length + ' 個（不可刪）；雲端新增 ' + CHS.cloud.length + ' 個（點 × 刪除）：'; list.appendChild(c);
+    CHS.cloud.forEach(w => { const t = document.createElement('span'); t.style.cssText = 'background:#fde6d8;border-radius:999px;padding:2px 8px'; t.textContent = w + ' '; const x = document.createElement('a'); x.textContent = '×'; x.style.cssText = 'cursor:pointer;color:#c0392b;font-weight:bold'; x.onclick = async () => { if (!confirm('刪除禁用語「' + w + '」？')) return; try { const r = await SB.client.from('mp_badwords').delete().eq('word', w); if (r && r.error) { toast('刪除失敗：' + r.error.message, 3000); return; } CHS.cloud = CHS.cloud.filter(q => q !== w); draw(); chRenderLog(); toast('已刪除「' + w + '」', 1800); } catch (e) { toast('刪除失敗', 2000); } }; t.appendChild(x); list.appendChild(t); }); };
+  const add = mkBtn('新增', async () => { const w = nw.value.trim().slice(0, 20); if (!w) return; if (CHS.cloud.includes(w)) { toast('已經有這個詞了', 1600); return; }
+    try { const r = await SB.client.from('mp_badwords').upsert({ word: w, added_by: 'ingame' }); if (r && r.error) { toast('新增失敗：' + r.error.message, 3000); return; } CHS.cloud.push(w); nw.value = ''; draw(); chRenderLog(); toast('已新增「' + w + '」，其他玩家 5 分鐘內更新', 2600); } catch (e) { toast('新增失敗', 2000); } });
+  const r2 = row(); r2.append(nw, add);
+  const tip = document.createElement('div'); tip.style.cssText = 'color:#8a6a2a;margin-top:4px'; tip.textContent = '提示：開啟「🛠 管理」後，被遮蔽過的留言會標示「⚠已遮蔽」；其他玩家約 5 分鐘內同步新增／刪除。';
+  b.append(r1, res, r2, list, tip); draw(); p.insertBefore(b, document.getElementById('chLog'));
 }
