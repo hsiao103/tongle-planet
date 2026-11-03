@@ -41,7 +41,7 @@ Supabase 專案：`cirypvdtlzmwpaicsmee`（網址 `https://cirypvdtlzmwpaicsmee.
 ## 5. 對話與登入紀錄（v35）
 1. SQL Editor 再執行一次 `supabase/setup.sql`（後半段是 v35 新增；前面的 policy 若已存在會報「already exists」，可只貼「【v35 新增】」以下的部分）。
 2. 若要自動清除 90 天前的紀錄：Database → Extensions 啟用 `pg_cron`，取消註解檔尾那段 `cron.schedule` 後執行。
-3. 管理者信箱在 `is_tongle_admin()` 的清單（請在資料庫中填入你自己的管理者信箱；要多人就用逗號加）。
+3. 管理者信箱在 `is_tongle_admin()` 的清單（預設 hsiao103@gmail.com；要多人就用逗號加）。
 4. 開啟 `https://hsiao103.github.io/tongle-planet/admin.html`，用管理者 Google 帳號登入，即可看「對話紀錄」「登入／進出」，可搜尋、依日期篩選、匯出 CSV、刪除對話。
 5. Redirect URLs 若原本是 `…/tongle-planet/**` 已涵蓋 admin.html，不用另外加。
 - 玩家端只能寫入自己的紀錄，讀不到任何人的紀錄；資料表尚未建立時，遊戲照常運作、只是不留紀錄。
@@ -50,3 +50,9 @@ Supabase 專案：`cirypvdtlzmwpaicsmee`（網址 `https://cirypvdtlzmwpaicsmee.
 - 需要把 `auth-popup.html` 一併放在遊戲網址同一層（與 `index.html` 同資料夾）。
 - Redirect URLs 已設成 `https://hsiao103.github.io/tongle-planet/**` 就涵蓋 `auth-popup.html`，不必另外加。
 - 瀏覽器若擋住彈窗，會退回整頁登入。
+
+## 7. 聊天室管理（v40）
+1. SQL Editor 執行 `supabase/setup.sql` 最後「【v40 新增】」段落（需先有 v35 段落）：建立 `mp_mutes`（禁言）、`mp_badwords`（雲端禁用語），並更新聊天寫入規則（被禁言者寫不進去）。
+2. 管理頁 `admin.html`：對話列「禁言」鈕、「禁言名單」「禁用語」分頁。
+3. 想自動清除 90 天前的紀錄：Database → Extensions 啟用 `pg_cron` 後重新執行該段。
+4. 限制：聊天訊息走 Realtime 廣播，伺服器無法攔截；禁言與禁用語由遊戲端執行（一般玩家無法繞過），被禁言者的紀錄寫入也會被資料庫拒絕。
