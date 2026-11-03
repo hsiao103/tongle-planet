@@ -26,7 +26,8 @@
     'tmd', 'wtf', 'wdnmd', 'nmsl', 'cnm', 'cnmb', 'mdzz', 'fuck', 'fuk', 'fck', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'slut', 'bastard', 'stfu', 'gtfo', 'nigger', 'nigga', 'retard'
   ];
   const CH_OKW = ['三小時', '三小朋友', '三小隻', '三小組', '四小時', '兩小時', '幾小時', '半小時', '全家死機', '色狼蛛', '防範色狼', '孕婦', '婦女', '主婦', '家庭主婦', '婦幼', '國小三', '小3個', '小3隻', '小3顆', '小3條', '小3公', '小3倍', '小3分', '小3元', '小3塊', '國小3', '小3年', '小3班', '小3生', '小3學', '小3的同', '小3的學', '小3的導', '小3的老', '小3的教', '小3導', '小3上', '小3下', '小3課', '小3小朋友', '升小3', '讀小3', '念小3', '上小3', '3小時', '三小時', '3小朋友', '三小朋友', '3小隻', '三小隻', '3小組', '三小組', '3小節', '三小節', '3小段', '三小段', '3小袋', '三小袋', '3小包', '三小包', '3小瓶', '三小瓶', '3小顆', '三小顆', '3小塊', '三小塊', '3小匙', '三小匙', '3小杯', '三小杯', '3小碗', '三小碗', '3小份', '三小份', '3小條', '三小條', '3小張', '三小張', '3小盒', '三小盒', '小三年', '小三班', '小三生', '小三學', '小三的同', '小三的學', '小三的導', '小三的老', '小三的教', '小三導', '小三上', '小三下', '小三課', '小三小朋友', '升小三', '讀小三', '念小三', '上小三', '靠北邊', '靠北京', '靠北方', '林北路', '林北區', '你老師好', '你老師說', '你老師教', '你老師有', '你老師是', '幹老師節', '幹部老師', '性侵害防治', '性騷擾防治', '性平', '脫褲子放屁', '摸摸你的頭', '摸你的頭', '開房間門', '開房門', '強吻不', 'heixiuxx', '打死不', '殺光怪', '殺光敵', '殺光所有怪', '滾開關', '滾蛋吧小', 'essex', 'middlesex', 'unisex', 'sussex', 'wessex', '上床鋪', '上床睡', '上床單', '八婆山', '八婆婆'];   // 含上述字詞但屬正常用語者，不遮蔽
-const CHS = { cloud: [], muted: false, hist: {}, t: 0, big: false };
+const CHS = { cloud: [], muted: false, hist: {}, t: 0, big: false, admin: false, adminOn: false };
+const chMid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
 const chBadList = () => CH_BADW.concat(CHS.cloud, (window.TONGLE_SUPABASE && window.TONGLE_SUPABASE.chatBannedWords) || []).map(x => String(x || '').trim()).filter(x => x.length > 0);
 const CH_SEP = /[\s.\-_*·。，,、~!！?？|\/\\'"`^+=:;：；()（）\[\]【】<>＜＞]/;
 function chNorm(str) { const ns = [], idx = []; for (let i = 0; i < str.length; i++) { for (const c of str[i].normalize('NFKC').toLowerCase()) { if (CH_SEP.test(c)) continue; ns.push(c); idx.push(i); } } return { s: ns.join(''), idx }; }
@@ -46,6 +47,7 @@ const chNick = s => chMask(mpClean(s)) || '旅人';
 async function chsLoad() {
   if (!SB.client || !SB.ch) return;
   try { const r = await SB.client.from('mp_badwords').select('word').limit(2000); if (r && r.data) CHS.cloud = r.data.map(x => x.word); } catch (e) { }
+  try { const r = await SB.client.rpc('is_tongle_admin'); CHS.admin = !!(r && r.data === true); const b = document.getElementById('chAdm'); if (b) b.hidden = !CHS.admin; } catch (e) { }
   try { const s = await SB.client.auth.getSession(), uid = s && s.data && s.data.session && s.data.session.user.id; if (uid) { const r = await SB.client.from('mp_mutes').select('user_id').eq('user_id', uid); CHS.muted = !!(r && r.data && r.data.length); } } catch (e) { }
 }
 /* ---- 聊天介面：放大、短句、守則 ---- */
@@ -59,10 +61,38 @@ async function chsLoad() {
   const bBig = document.createElement('button'); bBig.type = 'button'; bBig.textContent = '⤢ 放大'; bBig.onclick = () => { CHS.big = !CHS.big; p.classList.toggle('chbig', CHS.big); bBig.textContent = CHS.big ? '⤡ 縮小' : '⤢ 放大'; const l = document.getElementById('chLog'); if (l) l.scrollTop = l.scrollHeight; };
   const bQ = document.createElement('button'); bQ.type = 'button'; bQ.textContent = '😊 短句';
   const bR = document.createElement('button'); bR.type = 'button'; bR.textContent = '聊天守則'; bR.onclick = () => { if (typeof chAddSys === 'function') chAddSys('聊天守則：請友善交談；不說髒話、不嘲笑別人；不分享姓名、電話、住址；看到不舒服的內容可以「靜音」，也請告訴老師。聊天內容會保留 90 天供校方管理。'); };
-  tools.append(bBig, bQ, bR); p.insertBefore(tools, p.firstChild);
+  const bA = document.createElement('button'); bA.type = 'button'; bA.id = 'chAdm'; bA.hidden = true; bA.textContent = '🛠 管理'; bA.onclick = () => { CHS.adminOn = !CHS.adminOn; bA.style.background = CHS.adminOn ? '#ffd9a0' : ''; chRenderLog(); toast(CHS.adminOn ? '管理模式開啟：每則留言旁可刪除、修改、禁言' : '管理模式關閉', 2400); };
+  tools.append(bBig, bQ, bR, bA); p.insertBefore(tools, p.firstChild);
   const qk = document.createElement('div'); qk.id = 'chQuick'; qk.hidden = true;
   ['大家好！', '一起玩～', '謝謝！', '好棒喔！', '等等我', '加油！', '哈哈哈', '我在這裡', '再見囉'].forEach(s => { const b = document.createElement('button'); b.type = 'button'; b.textContent = s; b.onclick = () => { if (chSend(s)) qk.hidden = true; }; qk.appendChild(b); });
   bQ.onclick = () => { qk.hidden = !qk.hidden; }; const f = document.getElementById('chF'); p.insertBefore(qk, f);
   setInterval(() => { if (typeof SB !== 'undefined' && SB.ch) chsLoad(); }, 300000);
 })();
 function chAddSys(text) { CHAT.log.push({ id: '', nm: '系統', text, me: false, sys: true, t: Date.now() }); if (CHAT.log.length > 50) CHAT.log.shift(); chRenderLog(); }
+
+/* ---- 管理者：在遊戲內刪除／修改留言、禁言（經資料庫函式驗證身分；其他玩家收到廣播後會向資料庫核對，偽造的指令無效）---- */
+function chAdminBtns(row, m) {
+  const mk = (t, fn, cls) => { const x = document.createElement('a'); x.textContent = t; x.style.cssText = 'margin-left:8px;color:' + (cls || '#c0392b'); x.onclick = fn; row.appendChild(x); };
+  mk('刪除', () => chModDo('mp_mod_delete', { p_mid: m.mid }, m, '已刪除這則留言'));
+  mk('修改', () => { const v = prompt('把這則留言改成（留空＝用＊遮掉）：', ''); if (v === null) return; chModDo('mp_mod_edit', { p_mid: m.mid, p_text: (v.trim() || '＊'.repeat(Math.min(6, Array.from(m.text).length))).slice(0, 80) }, m, '已修改這則留言'); }, '#1f6fd1');
+  mk('禁言', () => { if (confirm('確定禁言「' + m.nm + '」？他之後不能發言。')) chModDo('mp_mod_mute', { p_mid: m.mid }, m, '已禁言「' + m.nm + '」'); }, '#8a4b00');
+}
+async function chModDo(fn, args, m, okMsg) {
+  try {
+    const r = await SB.client.rpc(fn, args);
+    if (r.error) { toast('操作失敗：' + r.error.message, 3600); return; }
+    const k = r.data; if (k != null && SB.ch) { try { SB.ch.send({ type: 'broadcast', event: 'mod', payload: { k } }); } catch (e) { } }
+    chModApply({ action: fn.replace('mp_mod_', ''), mid: args.p_mid, text: args.p_text }); toast(okMsg, 2000);
+  } catch (e) { toast('操作失敗', 2400); }
+}
+function chModApply(a) {
+  if (!a || typeof a.mid !== 'string') return;
+  if (a.action === 'delete') { CHAT.log = CHAT.log.filter(x => x.mid !== a.mid); const i = CHAT.bub.findIndex(b => b.mid === a.mid); if (i >= 0) chKill(CHAT.bub[i], i); }
+  else if (a.action === 'edit') { CHAT.log.forEach(x => { if (x.mid === a.mid) { x.text = String(a.text || '').slice(0, 80); x.edited = true; } }); }
+  else if (a.action === 'mute') { if (CHAT.mine.has(a.mid)) { CHS.muted = true; toast('你被管理者禁言了，不能再發言', 3200); } }
+  chRenderLog();
+}
+async function chModIn(payload) {                       // 收到別人廣播的管理指令：向資料庫核對這筆指令是否真的存在（只有管理者的函式寫得進去）
+  const k = payload && payload.k; if (k == null || !SB.client || !/^\d{1,12}$/.test(String(k))) return;
+  try { const r = await SB.client.from('mp_mod_actions').select('action,mid,text').eq('id', k).limit(1); const a = r && r.data && r.data[0]; if (a) chModApply(a); } catch (e) { }
+}

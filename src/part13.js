@@ -1,7 +1,7 @@
 /* ---- 多人：線上名單＋聊天（全頻道、頭上氣泡、基本過濾、可靜音）----
    聊天走 Supabase Broadcast 的 'c' 事件；Claude 內的預覽（room）只提供名單，不提供聊天。
    過濾：控制字元、連結、長數字（電話）、重複字、常見辱罵字；每 1.5 秒最多送一句；每人可靜音（只在本次連線有效）。 */
-const CHAT = { log: [], mute: new Set(), lastSend: 0, lastIn: new Map(), unread: 0, bub: [], open: null, accT: 0 };
+const CHAT = { mine: new Set(), log: [], mute: new Set(), lastSend: 0, lastIn: new Map(), unread: 0, bub: [], open: null, accT: 0 };
 const CH_BAD = ['幹你', '幹您', '靠北', '靠腰', '他媽的', '他媽', '媽的', '白癡', '白痴', '智障', '去死', '王八蛋', '操你', '機掰', '雞掰', '北七', '三小', '死肥', '低能', '賤人', '婊'];
 function chFilter(s) {
   s = String(s == null ? '' : s).replace(MP_BAD, '').replace(/\s+/g, ' ').trim();
@@ -21,21 +21,21 @@ function chBubble(text) {
   const tex = new T.CanvasTexture(cv); tex.encoding = T.sRGBEncoding; const s = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
   const k = 0.0062; s.scale.set(W * k, H * k, 1); s.frustumCulled = false; s.renderOrder = 20; s.userData.bubble = true; s.userData.sh = H * k; scene.add(s); dynAdd(s); return s;
 }
-function chShow(id, text) {
+function chShow(id, text, mid) {
   const old = CHAT.bub.findIndex(b => b.id === id); if (old >= 0) chKill(CHAT.bub[old], old);
-  const s = chBubble(text); CHAT.bub.push({ id, s, t: 0, life: Math.min(9, 4.5 + text.length * 0.06) });
+  const s = chBubble(text); CHAT.bub.push({ id, mid: mid || '', s, t: 0, life: Math.min(9, 4.5 + text.length * 0.06) });
 }
 function chKill(b, i) { scene.remove(b.s); b.s.material.map.dispose(); b.s.material.dispose(); CHAT.bub.splice(i, 1); }
-function chAdd(id, nm, text, me) {
-  CHAT.log.push({ id, nm, text, me, t: Date.now() }); if (CHAT.log.length > 50) CHAT.log.shift();
+function chAdd(id, nm, text, me, mid) {
+  CHAT.log.push({ id, nm, text, me, mid: mid || '', t: Date.now() }); if (CHAT.log.length > 50) CHAT.log.shift();
   if (CHAT.open !== 'chat' && !me) { CHAT.unread++; chBadge(); }
-  chRenderLog(); chShow(me ? '' : id, text);
+  chRenderLog(); chShow(me ? '' : id, text, mid);
 }
 function mpChatIn(p) {
   if (!p || typeof p.id !== 'string' || typeof p.t !== 'string' || p.id === SB.key || CHAT.mute.has(p.id)) return;
   const now = performance.now(), last = CHAT.lastIn.get(p.id) || 0; if (now - last < 800) return; CHAT.lastIn.set(p.id, now);
   const text = chChain(p.id, chFilter(p.t)); if (!text) return; const r = MP.rem.get(p.id), nm = chNick(p.nm) || (r && r.nm) || '旅人';
-  chAdd(p.id, nm, text, false);
+  chAdd(p.id, nm, text, false, typeof p.m === 'string' ? p.m.slice(0, 24) : '');
 }
 function chSend(raw) {
   if (!chCanChat()) { toast('聊天只能在 GitHub 網頁版的多人模式使用', 2600); return false; }
@@ -44,16 +44,18 @@ function chSend(raw) {
   if (text.includes('＊') && !String(raw).includes('＊')) { toast('這句話含有不適合的字詞，請換個說法', 2600); return false; }
   const ch2 = chChain('me', text); if (ch2 !== text) { toast('這句話含有不適合的字詞，請換個說法', 2600); return false; }
   if (now - CHAT.lastSend < 1500) { toast('說慢一點喔，等一下再送', 1500); return false; } CHAT.lastSend = now;
-  try { SB.ch.send({ type: 'broadcast', event: 'c', payload: { id: SB.key, nm: MP.nick, t: text } }); } catch (e) { return false; }
-  sbLog('mp_chat_log', { nick: MP.nick, msg: text }); chAdd('', MP.nick, text, true); return true;
+  const mid = chMid(); CHAT.mine.add(mid);
+  try { SB.ch.send({ type: 'broadcast', event: 'c', payload: { id: SB.key, nm: MP.nick, t: text, m: mid } }); } catch (e) { return false; }
+  sbLog('mp_chat_log', { nick: MP.nick, msg: text, mid }); chAdd('', MP.nick, text, true, mid); return true;
 }
 function chBadge() { const b = $('hChat'); if (b) b.textContent = CHAT.unread ? '聊天 ●' + (CHAT.unread > 9 ? '9+' : CHAT.unread) : '聊天'; }
 function chRenderLog() {
   const el = $('chLog'); if (!el) return; el.textContent = '';
   if (!CHAT.log.length) { const e = document.createElement('div'); e.className = 'mpe'; e.textContent = '還沒有人說話，打個招呼吧！'; el.appendChild(e); return; }
   for (const m of CHAT.log) {
-    const row = document.createElement('div'); row.className = 'chm' + (m.me ? ' me' : '') + (m.sys ? ' sys' : ''); const n = document.createElement('b'); n.textContent = m.nm + '：'; const t = document.createElement('span'); t.textContent = m.text; row.appendChild(n); row.appendChild(t);
+    const row = document.createElement('div'); row.className = 'chm' + (m.me ? ' me' : '') + (m.sys ? ' sys' : ''); const n = document.createElement('b'); n.textContent = m.nm + '：'; const t = document.createElement('span'); t.textContent = m.text + (m.edited ? '（管理者已修改）' : ''); row.appendChild(n); row.appendChild(t);
     if (!m.me && !m.sys) { const x = document.createElement('a'); x.textContent = '靜音'; x.onclick = () => { CHAT.mute.add(m.id); CHAT.log = CHAT.log.filter(q => q.id !== m.id); chRenderLog(); toast('已靜音「' + m.nm + '」，本次連線不再顯示他的訊息', 2600); }; row.appendChild(x); }
+    if (CHS.admin && CHS.adminOn && m.mid && !m.sys) chAdminBtns(row, m);
     el.appendChild(row);
   }
   el.scrollTop = el.scrollHeight;
