@@ -39,7 +39,7 @@ const M = {
   roofB: mat(0x7f9fb8, { side: T.DoubleSide }), glass: mat(0x2c4a63, { transparent: true, opacity: 0.8 }),
   rail: mat(0xf8f8f4), floor: mat(0xd9d4c6), ground: mat(0x7fa05e), grass2: mat(0x8fb26a), track: mat(0xc2582f),
   asphalt: mat(0x3b3f43), concrete: mat(0xbdbdb6), orange: mat(0xe0702c), yellow: mat(0xf0c23a),
-  board: mat(0x2d5a46), desk: mat(0xb88c5a), white: mat(0xffffff), trunk: mat(0x6b4f33), leaf: mat(0x3c7a3a),
+  board: mat(0x2d5a46), desk: mat(0xb88c5a), chair: mat(0x3f7fbf), white: mat(0xffffff), trunk: mat(0x6b4f33), leaf: mat(0x3c7a3a),
   leaf2: mat(0x4f9444), blue: mat(0x2f6bb3), red: mat(0xc83c35), steel: mat(0x7e8b93), dark: mat(0x23272b)
 };
 function canvasTex(w, h, draw) {
