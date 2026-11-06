@@ -236,6 +236,7 @@ function buildFarField() {
     const az = rnd2() * Math.PI * 2, d = 112 + Math.pow(rnd2(), 0.8) * 108;                 // 校外 112～220 公尺
     const x = PC.x + Math.cos(az) * d, z = PC.z + Math.sin(az) * d;
     if (TREES.some(t => Math.hypot(t[0] - x, t[1] - z) < 9)) continue;
+    if (nearRoadXZ(x, z, 3.5)) continue;                                              // 不種在街道上
     if (Math.abs(x - 0) < 12 && z > -10 && z < 120) continue;                         // 校門前的路徑留空
     TREES.push([x, z]); const s = 0.8 + rnd2() * 0.8, yaw = rnd2() * 6.28;
     frameQuat(x, z, q); q2.setFromAxisAngle(_ey, yaw); q.multiply(q2); sph(x, 0, z, p); sc.set(s, s, s); m.compose(p, q, sc);

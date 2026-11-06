@@ -1094,7 +1094,10 @@ houseRow(1, 16, 230); houseRow(-1, 16, 230);
 for (let x = 62; x < 140; x += 14) house(x, -26 + rnd() * 8, 10, 12, 2 + Math.floor(rnd() * 2));
 
 // 樹
+// 是否落在道路（含路肩 m 公尺）上：樹木一律不種在街道上
+function nearRoadXZ(x, z, m) { return ROADS.some(r => { for (let i = 0; i < r.pts.length - 1; i++) { const a = r.pts[i], b = r.pts[i + 1], dx = b[0] - a[0], dz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz))); if (Math.hypot(x - a[0] - t * dx, z - a[1] - t * dz) < r.w / 2 + m) return true; } return false; }); }
 function tree(x, z, s) {
+  if (nearRoadXZ(x, z, 2.5)) return;
   if (ROADBLK.some(b => x > b[0] && x < b[2] && z > b[1] && z < b[3])) return;
   box(x - 0.15 * s, z - 0.15 * s, x + 0.15 * s, z + 0.15 * s, 0, 2.6 * s, M.trunk, { wall: true, noShadow: true });
   const f = new T.Mesh(new T.SphereGeometry(1.7 * s, 10, 8), rnd() > 0.5 ? M.leaf : M.leaf2); f.position.set(x, 3.6 * s, z); f.castShadow = true; scene.add(f);
