@@ -4692,7 +4692,7 @@ function bld(o) {
         halves.forEach(h => wcRoom(h[0], h[1], h[2], h[3], y0, y1, CORR + 0.2, Dr - 0.3, dh));
       }
       else if (isHall) R(a + 2, Dr - 2.6, b - 2, Dr - 0.3, y0, y0 + 0.9, M.concrete, { noShadow: true });      // 禮堂：只有舞台，不設課桌椅
-      else if ((o.names && o.names[k] && o.names[k][i]) === '教師休息室・辦公區') {   // 教師休息室（辦公區）：六張教師桌、文件櫃、影印機、公佈白板
+      else if (['教師休息室・辦公區', '行政辦公室'].indexOf(o.names && o.names[k] && o.names[k][i]) >= 0) {   // 教師休息室（辦公區）：六張教師桌、文件櫃、影印機、公佈白板
         const dk = mat(0xc9a06b), dkL = mat(0x8a6a44), cab = mat(0x9aa4ad), cabD = mat(0x6d7780), pc = mat(0x23303c), wb = mat(0xf4f6f8), potM = mat(0xb8663a), plM = mat(0x3c7a3a), cp = mat(0xcfd6dc), cc = [0xd9534f, 0x5b8dd9, 0xf0b840, 0x58a868, 0x9b6bd0];
         const vN = CORR + 0.3, vF = Dr - 0.3, par = CTX ? CTX.group : scene, mt = new T.Matrix4(), chairs = [];
         const yw = Math.atan2(-(P(0, -1)[0] - P(0, 0)[0]), -(P(0, -1)[1] - P(0, 0)[1]));
@@ -4710,7 +4710,7 @@ function bld(o) {
         R(dm - 0.45, vN + 0.1, dm + 0.45, vN + 0.8, y0 + 0.08, y0 + 1.0, cp, W); R(dm - 0.4, vN + 0.15, dm + 0.4, vN + 0.75, y0 + 1.0, y0 + 1.06, pc, { noShadow: true }); R(dm + 0.7, vN + 0.15, dm + 1.2, vN + 0.65, y0 + 0.08, y0 + 0.6, cabD, W);
         const cI = new T.InstancedMesh(CHAIRG, mat(0x3a4a5c), chairs.length); chairs.forEach((q, n) => { const p = P(q[0], q[1]); mt.makeRotationY(yw); mt.setPosition(p[0], y0 + 0.08, p[1]); cI.setMatrixAt(n, mt); }); cI.frustumCulled = false; par.add(cI);
       }
-      else if ((o.names && o.names[k] && o.names[k][i]) === '教師休息室・交誼區') {   // 教師休息室（交誼區）：沙發組、茶水區、午休躺椅、小圓桌
+      else if (['教師休息室・交誼區', '交誼室'].indexOf(o.names && o.names[k] && o.names[k][i]) >= 0) {   // 教師休息室（交誼區）：沙發組、茶水區、午休躺椅、小圓桌
         const sofa = mat(0x6a8a7a), sofaD = mat(0x56705f), rug = mat(0xd8c7a8), tb = mat(0x8a5a35), wh = mat(0xf2f4f5), cnt = mat(0xb08a5a), cntT = mat(0x4a4a50), blu = mat(0x59b6d8), blk = mat(0x23303c), red = mat(0xd9534f), plM = mat(0x3c7a3a), potM = mat(0xb8663a), rec = mat(0xa86b4a), pillow = [mat(0xf0c040), mat(0xe0645a)];
         const vN = CORR + 0.3, vF = Dr - 0.3, par = CTX ? CTX.group : scene, mt = new T.Matrix4(), chairs = [];
         const yawOf = (bu, bv) => { const p0 = P(0, 0), p1 = P(bu, bv); return Math.atan2(-(p1[0] - p0[0]), -(p1[1] - p0[1])); };
@@ -5135,7 +5135,7 @@ const legDoor = [{ end: 1, v0: 0, v1: 1.8, floors: [0, 1, 2] }];
   wl(X0 + 1.0, Z0 + 0.8, X0 + 1.5, Z1 - 0.8, y0, y0 + 0.5, M.concrete, { noShadow: true });           // 管道井示意
   label('4F 管道維修間', -27.65, y1 + 0.7, -27.5, 1.6, '#e8f0f6', '#1f3b57'); }
 LIFTR.push([__s, scene.children.length, __w, WALLS.length]); __s = scene.children.length; __w = WALLS.length;
-bld({ id: 'B', twoDoors: true, short: '教學區西樓', name: '教學區西樓（圖書館、忠班教室）', names: { 0: ['教學設備及檔案室', '1忠'], 1: ['5忠', '3忠'], 2: ['圖書館', '圖書館'] }, x0: 7.2, z0: -32.5, x1: 19.9, z1: -12.4, floors: 3, open: 'E', stair: 'none', towerU: 0, openEnd0: true, rooms: { n: 2, u0: 2.4, w: 8.85 }, roof: 'solar', gableU0: 6.5, gableU1: 19.6, gablePanels: [{ u0: 7.4, u1: 18.7 }], mini: '#3a6fb0', endDoors: legDoor, backDoors: [{ u0: 0.15, u1: 2.25, floors: [0, 1, 2], full: true }] });
+bld({ id: 'B', twoDoors: true, short: '教學區西樓', name: '教學區西樓（圖書館、忠班教室）', names: { 0: ['教學設備及檔案室', '1忠'], 1: ['5忠', '3忠'], 2: ['圖書館'] }, x0: 7.2, z0: -32.5, x1: 19.9, z1: -12.4, floors: 3, open: 'E', stair: 'none', towerU: 0, openEnd0: true, rooms: { n: 2, u0: 2.4, w: 8.85 }, boundsK: { 2: [2.4, 20.1] }, roof: 'solar', gableU0: 6.5, gableU1: 19.6, gablePanels: [{ u0: 7.4, u1: 18.7 }], mini: '#3a6fb0', endDoors: legDoor, backDoors: [{ u0: 0.15, u1: 2.25, floors: [0, 1, 2], full: true }] });
 // B 棟西北角突出的樓梯塔（依現場照片：磁磚牆、直立玻璃窗帶、頂部玻璃小閣；一樓挑空入口）
 { const X0 = -2.5, X1 = 2.5, Z0 = -38.6, ZB = -32.5, ZS = -34.2, WT2 = 0.25, FA = X0 + 3.5, FB = X0 + 1.5, ZF = -37.4;
   const GL = { wall: true, noShadow: true }, WL = { wall: true };
@@ -5747,6 +5747,7 @@ function planetBakeInstanced(o) {
     o.getMatrixAt(i, m); W.multiplyMatrices(o.matrixWorld, m); W.decompose(p, q, s);
     frameQuat(p.x, p.z, fq); q.premultiply(fq); sph(p.x, p.y, p.z, p2); m.compose(p2, q, s); im.setMatrixAt(i, m);
   }
+  if (o.instanceColor) im.instanceColor = new T.InstancedBufferAttribute(o.instanceColor.array.slice(), 3);   // 保留逐實例顏色（書本）
   im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; return im;
 }
 // 合併：同材質、同投影設定、同區塊的烘焙幾何合成一個網格（大幅減少繪製呼叫）
