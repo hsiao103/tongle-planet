@@ -5083,7 +5083,7 @@ const dW = (x, z) => toWorld(TFD, x, z);        // D 棟局部座標 → 世界�
 // 依「115 學年度校園空間配置第 4 版」：A 棟（含穿堂）、圖書館翼(B 西翼)、中段、親子/課輔翼(C 東翼)、D 棟房名
 const LIFT = 0.35, LIFTR = [];                // A、B、BC、C 棟與通廊整體墊高（地坪抬高 35 cm）
 let __s = scene.children.length, __w = WALLS.length;
-bld({ id: 'A', short: '行政大樓', name: '行政大樓', names: { 0: ['廁所', '行政辦公室', '交誼室'], 1: ['廁所', '校史室', '校長室'], 2: ['廁所', '禮堂'] }, x0: -30.5, z0: -32.5, x1: -6, z1: -16.2, floors: 3, open: 'N', stair: 'none', bounds: [0, 5.7, 15.1, 24.5], boundsK: { 2: [0, 5.7, 24.5] }, railGaps: [{ u0: 3.6, u1: 8.6, floors: [1] }], roof: 'gable', roofU0: 5.7, shrink: { u0: 0, u1: 5.7, v: 10, floors: [1, 2] }, tower: false, mini: '#2f7d63',
+bld({ id: 'A', twoDoors: true, short: '行政大樓', name: '行政大樓', names: { 0: ['廁所', '行政辦公室', '交誼室'], 1: ['廁所', '校史室', '校長室'], 2: ['廁所', '禮堂'] }, x0: -30.5, z0: -32.5, x1: -6, z1: -16.2, floors: 3, open: 'N', stair: 'none', bounds: [0, 5.7, 15.1, 24.5], boundsK: { 2: [0, 5.7, 24.5] }, railGaps: [{ u0: 3.6, u1: 8.6, floors: [1] }], roof: 'gable', roofU0: 5.7, shrink: { u0: 0, u1: 5.7, v: 10, floors: [1, 2] }, tower: false, mini: '#2f7d63',
   endDoors: [{ end: 1, v0: 0.15, v1: 1.8, floors: [0, 1, 2], full: true }, { end: 0, v0: 0.15, v1: 1.8, floors: [0, 1, 2], full: true }] });
 // A 棟西翼（廚房）與西側連接走廊；A 棟北側走廊連往 D 棟南端樓梯
 bld({ id: 'AW', short: '廚房', name: '廚房', names: { 0: ['廚房'] }, x0: -51.1, z0: -22.5, x1: -33.3, z1: -16.2, floors: 1, open: 'S', stair: 'none', rooms: { n: 1, u0: 0.2, w: 17 }, hall: true, endDoors: [{ end: 1, v0: 2.2, v1: 3.9, floors: [0] }], roof: 'flat', parapet: 0, mini: '#c9a96a' });
@@ -5135,7 +5135,7 @@ const legDoor = [{ end: 1, v0: 0, v1: 1.8, floors: [0, 1, 2] }];
   wl(X0 + 1.0, Z0 + 0.8, X0 + 1.5, Z1 - 0.8, y0, y0 + 0.5, M.concrete, { noShadow: true });           // 管道井示意
   label('4F 管道維修間', -27.65, y1 + 0.7, -27.5, 1.6, '#e8f0f6', '#1f3b57'); }
 LIFTR.push([__s, scene.children.length, __w, WALLS.length]); __s = scene.children.length; __w = WALLS.length;
-bld({ id: 'B', short: '教學區西樓', name: '教學區西樓（圖書館、忠班教室）', names: { 0: ['教學設備及檔案室', '1忠'], 1: ['5忠', '3忠'], 2: ['圖書館', '圖書館'] }, x0: 7.2, z0: -32.5, x1: 19.9, z1: -12.4, floors: 3, open: 'E', stair: 'none', towerU: 0, openEnd0: true, rooms: { n: 2, u0: 2.4, w: 8.85 }, roof: 'solar', gableU0: 6.5, gableU1: 19.6, gablePanels: [{ u0: 7.4, u1: 18.7 }], mini: '#3a6fb0', endDoors: legDoor, backDoors: [{ u0: 0.15, u1: 2.25, floors: [0, 1, 2], full: true }] });
+bld({ id: 'B', twoDoors: true, short: '教學區西樓', name: '教學區西樓（圖書館、忠班教室）', names: { 0: ['教學設備及檔案室', '1忠'], 1: ['5忠', '3忠'], 2: ['圖書館', '圖書館'] }, x0: 7.2, z0: -32.5, x1: 19.9, z1: -12.4, floors: 3, open: 'E', stair: 'none', towerU: 0, openEnd0: true, rooms: { n: 2, u0: 2.4, w: 8.85 }, roof: 'solar', gableU0: 6.5, gableU1: 19.6, gablePanels: [{ u0: 7.4, u1: 18.7 }], mini: '#3a6fb0', endDoors: legDoor, backDoors: [{ u0: 0.15, u1: 2.25, floors: [0, 1, 2], full: true }] });
 // B 棟西北角突出的樓梯塔（依現場照片：磁磚牆、直立玻璃窗帶、頂部玻璃小閣；一樓挑空入口）
 { const X0 = -2.5, X1 = 2.5, Z0 = -38.6, ZB = -32.5, ZS = -34.2, WT2 = 0.25, FA = X0 + 3.5, FB = X0 + 1.5, ZF = -37.4;
   const GL = { wall: true, noShadow: true }, WL = { wall: true };
@@ -5206,16 +5206,16 @@ bld({ id: 'B', short: '教學區西樓', name: '教學區西樓（圖書館、�
   tag(n0, 4);
   FOOT.push({ id: 'B', x0: X0, z0: ZN, x1: X1, z1: ZS, c: '#3a6fb0', tf: null });
 }
-bld({ id: 'BC', short: '教學區南樓', name: '教學區南樓（專科教室）', names: { 0: ['健康中心', '活動教室', '資源班', '男廁', '女廁'], 1: ['英語教室', '愛的書庫', '多用途室', '男廁', '女廁'], 2: ['社會教室', '自然教室', '語言教室', '男廁', '女廁'] }, x0: 7.2, z0: -12.4, x1: 47, z1: 0, floors: 3, open: 'N', stair: 's', tower: false, bounds: [6.7, 15.6, 24.5, 33.4, 36.6, 39.8], gableU0: 7.7, gableU1: 32.2, gablePanels: [{ u0: 8.5, u1: 31.4, slope: 1 }, { u0: 8.5, u1: 31.4, slope: -1, light: true }], notches: [{ u0: 0, u1: 4.6, depth: 3 }, { u0: 4.6, u1: 6.7, depth: 12.4 - 2.4, roofDepth: 3 }, { u0: 33.4, u1: 39.8, depth: 2 }], roof: 'solar', mini: '#3a6fb0',
+bld({ id: 'BC', twoDoors: true, short: '教學區南樓', name: '教學區南樓（專科教室）', names: { 0: ['健康中心', '活動教室', '資源班', '男廁', '女廁'], 1: ['英語教室', '愛的書庫', '多用途室', '男廁', '女廁'], 2: ['社會教室', '自然教室', '語言教室', '男廁', '女廁'] }, x0: 7.2, z0: -12.4, x1: 47, z1: 0, floors: 3, open: 'N', stair: 's', tower: false, bounds: [6.7, 15.6, 24.5, 33.4, 36.6, 39.8], gableU0: 7.7, gableU1: 32.2, gablePanels: [{ u0: 8.5, u1: 31.4, slope: 1 }, { u0: 8.5, u1: 31.4, slope: -1, light: true }], notches: [{ u0: 0, u1: 4.6, depth: 3 }, { u0: 4.6, u1: 6.7, depth: 12.4 - 2.4, roofDepth: 3 }, { u0: 33.4, u1: 39.8, depth: 2 }], roof: 'solar', mini: '#3a6fb0',
   railGaps: [{ u0: 10.4, u1: 12.8, floors: [1, 2] }, { u0: 26.6, u1: 29, floors: [1, 2] }],
   endDoors: [{ end: 0, v0: 0.1, v1: 2.3, floors: [0, 1, 2] }, { end: 1, v0: 0.1, v1: 2.3, floors: [0, 1, 2] }],
   vBalc: { w: 2.4, d: 1.5, vc: 1.2, floors: [1, 2], ends: [0, 1] },
   });
-bld({ id: 'C', short: '教學區東樓', name: '教學區東樓（課輔、辦公室）', names: { 0: ['課輔教室', '2忠'], 1: ['4忠', '6忠'], 2: ['教師/校友會辦公室', '家長會/志工辦公室'] }, x0: 33.9, z0: -37.5, x1: 47, z1: -12.4, floors: 3, open: 'W', stair: 's', stairNS: true, openEnd0: 'upper', rooms: { n: 2, u0: 4.6, w: 10.2 }, roof: 'solar', gableU0: 8.4, gableU1: 24.6, gablePanels: [{ u0: 9.3, u1: 23.7 }], mini: '#3a6fb0', endDoors: legDoor });
+bld({ id: 'C', twoDoors: true, short: '教學區東樓', name: '教學區東樓（課輔、辦公室）', names: { 0: ['課輔教室', '2忠'], 1: ['4忠', '6忠'], 2: ['教師/校友會辦公室', '家長會/志工辦公室'] }, x0: 33.9, z0: -37.5, x1: 47, z1: -12.4, floors: 3, open: 'W', stair: 's', stairNS: true, openEnd0: 'upper', rooms: { n: 2, u0: 4.6, w: 10.2 }, roof: 'solar', gableU0: 8.4, gableU1: 24.6, gablePanels: [{ u0: 9.3, u1: 23.7 }], mini: '#3a6fb0', endDoors: legDoor });
 LIFTR.push([__s, scene.children.length, __w, WALLS.length]);
 const D1 = ['輔導諮商室', '電腦教室', '音樂教室', '音樂教室', '教導處儲藏室', '總務處儲藏室', '（空）', '（空）', '員山親子館', '員山親子館', '員山親子館', '廁所'];
 const D0 = ['電器室', '多功1', '多功2', '幼兒園辦公室', '彩虹班', '藍天班', '草原班', '體育器材室', '工具間', '幼兒活動室', '資源回收室', '廁所'];
-withTf(DPX, DPZ, DROT, () => bld({ id: 'D', short: '科任及幼兒園區', name: '科任及幼兒園區（長條教室）', names: { 0: D0.slice().reverse(), 1: D1.slice().reverse() }, x0: -5, z0: -102, x1: 5, z1: -7.529999999999999, floors: 2, open: 'E', stair: 'none', rooms: { n: 12, u0: 0, w: 94.47 / 12 }, roof: 'gable', roofFlushEnd: true, tower: false, mini: '#2f7d63', endDoors: [{ end: 1, v0: 0, v1: 2.4, floors: [0, 1], full: true }] }));
+withTf(DPX, DPZ, DROT, () => bld({ id: 'D', twoDoors: true, short: '科任及幼兒園區', name: '科任及幼兒園區（長條教室）', names: { 0: D0.slice().reverse(), 1: D1.slice().reverse() }, x0: -5, z0: -102, x1: 5, z1: -7.529999999999999, floors: 2, open: 'E', stair: 'none', rooms: { n: 12, u0: 0, w: 94.47 / 12 }, roof: 'gable', roofFlushEnd: true, tower: false, mini: '#2f7d63', endDoors: [{ end: 1, v0: 0, v1: 2.4, floors: [0, 1], full: true }] }));
 // D 棟南端樓梯間獨立成塊（與教室相隔 1.5 m），2F 以 1.5 m 空橋相連
 const __ds = scene.children.length, __dw = WALLS.length;
 withTf(DPX, DPZ, DROT, () => { bld({ id: 'DS', short: '科任樓梯間', name: '科任及幼兒園區樓梯間', names: {}, x0: -5, z0: -6.03, x1: 5, z1: -1.43, floors: 2, open: 'E', stair: 'e', stairLen: 3.3, stairWest: true, rooms: { n: 0, u0: 0, w: 0 }, tower: false, mini: '#2f7d63', endDoors: [{ end: 1, v0: 0, v1: 10, floors: [0, 1], full: true }, { end: 0, v0: 0, v1: 2.4, floors: [0, 1], full: true }] });
