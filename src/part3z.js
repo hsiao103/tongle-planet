@@ -122,6 +122,7 @@ function planetBakeInstanced(o) {
     o.getMatrixAt(i, m); W.multiplyMatrices(o.matrixWorld, m); W.decompose(p, q, s);
     frameQuat(p.x, p.z, fq); q.premultiply(fq); sph(p.x, p.y, p.z, p2); m.compose(p2, q, s); im.setMatrixAt(i, m);
   }
+  if (o.instanceColor) im.instanceColor = new T.InstancedBufferAttribute(o.instanceColor.array.slice(), 3);   // 保留逐實例顏色（書本）
   im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; return im;
 }
 // 合併：同材質、同投影設定、同區塊的烘焙幾何合成一個網格（大幅減少繪製呼叫）
